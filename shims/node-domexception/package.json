@@ -1,0 +1,11 @@
+{
+  "name": "node-domexception",
+  "version": "2.0.0",
+  "description": "Shim: re-exports Node's native DOMException (Node 18+)",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    }
+  }
+}

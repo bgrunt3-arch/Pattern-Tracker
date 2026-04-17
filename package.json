@@ -18,6 +18,9 @@
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
+  "overrides": {
+    "node-domexception": "file:./shims/node-domexception"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
