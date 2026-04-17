@@ -280,10 +280,6 @@ function buildContactPage(pageNum: number): string {
       </div>
       <div class="contact-body">
         <div class="contact-section">
-          <div class="contact-label">DESIGN</div>
-          <div class="contact-value serif">辻本</div>
-        </div>
-        <div class="contact-section">
           <div class="contact-label">BRAND</div>
           <div class="contact-value serif">COCOcase</div>
         </div>
