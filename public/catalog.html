@@ -329,23 +329,27 @@
     }
     .card-ext {
       position: absolute;
-      bottom: 3pt;
+      bottom: 4pt;
       right: 4pt;
-      font-size: 8pt;
-      color: rgba(255,255,255,0.85);
-      text-shadow: 0 0 3pt rgba(0,0,0,0.6);
-      line-height: 1;
+      font-size: 7pt;
+      color: #fff;
+      background: rgba(212,165,116,0.9);
+      border-radius: 2pt;
+      padding: 1pt 3pt;
+      line-height: 1.4;
       pointer-events: none;
+      letter-spacing: 0;
     }
     a.name-ref-link {
       color: #D4A574;
-      text-decoration: none;
+      text-decoration: underline;
+      text-decoration-color: rgba(212,165,116,0.45);
       font-size: 7pt;
       font-style: italic;
       flex-shrink: 0;
     }
     @media screen {
-      a.name-ref-link:hover { text-decoration: underline; }
+      a.name-ref-link:hover { text-decoration-color: #D4A574; }
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
