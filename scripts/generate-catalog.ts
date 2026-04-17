@@ -109,27 +109,23 @@ function buildThemePages(web = false): string {
     const p       = String(pageNum++).padStart(2, "0");
 
     const gridHTML = designs.map(d => {
-      const src     = patternSrc(d.id, d.name, web);
-      const img     = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
-      const hasLink = !!d.burgaUrl;
-      const extIcon = hasLink ? `<span class="card-ext">↗</span>` : "";
-      const inner   = `${img}<span class="card-id">${d.id}</span>${extIcon}`;
-      if (hasLink) {
-        return `<a class="card has-link" href="${d.burgaUrl}" target="_blank" rel="noopener" title="BURGA参考: ${d.burgaRef}">${inner}</a>`;
-      }
-      return `<div class="card">${inner}</div>`;
+      const src = patternSrc(d.id, d.name, web);
+      const img = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
+      return `<div class="card">${img}<span class="card-id">${d.id}</span></div>`;
     }).join("");
 
     const namesHTML = designs.map(d => {
+      const hasLink = !!d.burgaUrl;
+      const nameEl = hasLink
+        ? `<a class="name-label name-label-link" href="${d.burgaUrl}" target="_blank" rel="noopener">${d.name} <span class="name-ext">↗</span></a>`
+        : `<span class="name-label">${d.name}</span>`;
       const refPart = d.burgaRef !== "—"
-        ? (d.burgaUrl
-            ? `<a class="name-ref-link" href="${d.burgaUrl}" target="_blank" rel="noopener">ref: ${d.burgaRef}</a>`
-            : `<span class="name-ref">ref: ${d.burgaRef}</span>`)
+        ? `<span class="name-ref">ref: ${d.burgaRef}</span>`
         : "";
       return `
       <div class="name-row">
         <span class="name-id serif italic">${d.id}</span>
-        <span class="name-label">${d.name}</span>
+        ${nameEl}
         ${refPart}
       </div>`;
     }).join("");
@@ -542,7 +538,6 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       overflow: hidden;
       position: relative;
       display: block;
-      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     }
     .card img {
       width: 100%;
@@ -646,40 +641,23 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       font-style: italic;
     }
 
-    /* ─── BURGAリンク ─── */
+    /* ─── BURGAリンク（名前リスト） ─── */
+    a.name-label-link {
+      color: #2B2620;
+      text-decoration: none;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 8.5pt;
+    }
     @media screen {
-      .card { cursor: zoom-in; }
-      .card.has-link { cursor: pointer; }
-      .card.has-link:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 14px rgba(43,38,32,0.22);
-        border-color: #D4A574;
-        z-index: 1;
-      }
+      a.name-label-link:hover { color: #D4A574; }
     }
-    .card-ext {
-      position: absolute;
-      bottom: 4pt;
-      right: 4pt;
+    .name-ext {
       font-size: 7pt;
-      color: #fff;
-      background: rgba(212,165,116,0.9);
-      border-radius: 2pt;
-      padding: 1pt 3pt;
-      line-height: 1.4;
-      pointer-events: none;
-      letter-spacing: 0;
-    }
-    a.name-ref-link {
       color: #D4A574;
-      text-decoration: underline;
-      text-decoration-color: rgba(212,165,116,0.45);
-      font-size: 7pt;
-      font-style: italic;
-      flex-shrink: 0;
-    }
-    @media screen {
-      a.name-ref-link:hover { text-decoration-color: #D4A574; }
+      margin-left: 2pt;
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
@@ -865,11 +843,9 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       document.body.style.overflow = '';
     }
 
-    // カードにクリックハンドラを付与（BURGAリンクカードはライトボックス無効）
+    // カードにクリックハンドラを付与
     cards.forEach(function(img, i) {
-      var card = img.closest('.card');
-      if (card.classList.contains('has-link')) return; // リンクカードはブラウザデフォルト動作
-      card.addEventListener('click', function() { open(i); });
+      img.closest('.card').addEventListener('click', function() { open(i); });
     });
 
     // 閉じる
