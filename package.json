@@ -6,10 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "generate": "tsx scripts/generate-images.ts",
-    "generate:dry": "tsx scripts/generate-images.ts --dry-run",
-    "generate:floral": "tsx scripts/generate-images.ts --theme floral",
-    "generate:limit": "tsx scripts/generate-images.ts --limit 5 --skip-existing"
+    "gen:all": "tsx scripts/generate-images.ts",
+    "gen:floral": "tsx scripts/generate-images.ts --theme=floral",
+    "gen:marble": "tsx scripts/generate-images.ts --theme=marble",
+    "gen:animal": "tsx scripts/generate-images.ts --theme=animal",
+    "gen:food": "tsx scripts/generate-images.ts --theme=food",
+    "gen:botanical": "tsx scripts/generate-images.ts --theme=botanical",
+    "gen:geometric": "tsx scripts/generate-images.ts --theme=geometric",
+    "gen:abstract": "tsx scripts/generate-images.ts --theme=abstract",
+    "gen:vintage": "tsx scripts/generate-images.ts --theme=vintage",
+    "gen:celestial": "tsx scripts/generate-images.ts --theme=celestial",
+    "gen:coastal": "tsx scripts/generate-images.ts --theme=coastal",
+    "gen:range": "tsx scripts/generate-images.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",

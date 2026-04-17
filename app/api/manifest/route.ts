@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const manifestPath = path.join(process.cwd(), 'public', 'generated', 'manifest.json');
+  const manifestPath = path.join(process.cwd(), 'public', 'patterns', 'manifest.json');
   if (!fs.existsSync(manifestPath)) {
     return NextResponse.json({});
   }

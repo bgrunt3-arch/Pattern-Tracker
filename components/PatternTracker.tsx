@@ -98,9 +98,16 @@ export default function PatternTracker() {
   const getStatus  = useCallback((id: string): Status  => progress[id]?.status   ?? 'pending', [progress]);
   const getNotes   = useCallback((id: string): string   => progress[id]?.notes    ?? '', [progress]);
   const getImageUrl = useCallback((id: string): string | undefined => {
-    // manifest（バッチ生成）を優先し、なければ localStorage のURL
-    return manifest[id]?.url ?? progress[id]?.imageUrl;
+    // localStorage（UI生成）を優先し、なければ manifest（バッチ生成）
+    if (progress[id]?.imageUrl) return progress[id].imageUrl;
+    return manifest[id]?.url;
   }, [manifest, progress]);
+
+  // patterns/ から画像URLを構築（manifest未登録でもサムネ表示試行用）
+  const getPatternsUrl = useCallback((id: string, name: string): string => {
+    const slugName = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    return `/patterns/${id}_${slugName}.png`;
+  }, []);
 
   // ── 統計 ────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -431,15 +438,23 @@ export default function PatternTracker() {
                       position: 'relative',
                     }}
                   >
-                    {imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imageUrl} alt={d.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : isGenerating ? (
+                    {/* プレースホルダー（画像がない or 生成中に表示） */}
+                    {isGenerating ? (
                       <div className="spin" style={{ width: 18, height: 18, border: '2px solid #D4C5A9', borderTopColor: '#D4A574', borderRadius: '50%' }} />
                     ) : (
                       <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: '#D4A574', fontStyle: 'italic', lineHeight: 1 }}>
                         {d.id}
                       </div>
+                    )}
+                    {/* 画像（読み込み成功時に上書き表示、失敗時は非表示） */}
+                    {!isGenerating && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imageUrl ?? getPatternsUrl(d.id, d.name)}
+                        alt={d.name}
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
                     )}
                   </div>
 

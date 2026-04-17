@@ -6,204 +6,190 @@
  * APIキー取得: https://aistudio.google.com → 「Get API key」
  *
  * 使い方:
- *   npx tsx scripts/generate-images.ts [オプション]
+ *   npm run gen:all
+ *   npm run gen:floral
+ *   npm run gen:range -- --from=001 --to=010
  *
- * オプション:
- *   --theme  <theme>   テーマ絞り込み
- *                      (floral|marble|animal|food|botanical|geometric|abstract|vintage|celestial|coastal)
- *   --ids    <ids>     カンマ区切りのID絞り込み (例: 001,002,003)
- *   --from   <id>      このID以降を対象 (例: 030 → 030〜100)
- *   --to     <id>      このID以前を対象 (例: 050 → 001〜050)
- *   --limit  <n>       最大生成件数
- *   --skip-existing    public/generated/{id}.png が既に存在するIDをスキップ
- *   --dry-run          実際にはAPIを呼ばず、対象リストだけ表示
- *   --delay  <ms>      リクエスト間の待機時間（ミリ秒、デフォルト: 1000）
- *
- * 例:
- *   npx tsx scripts/generate-images.ts --dry-run
- *   npx tsx scripts/generate-images.ts --from 030           # 030〜100
- *   npx tsx scripts/generate-images.ts --from 030 --to 050  # 030〜050
- *   npx tsx scripts/generate-images.ts --theme floral --limit 3
- *   npx tsx scripts/generate-images.ts --ids 001,002,003
- *   npx tsx scripts/generate-images.ts --skip-existing
- *   npx tsx scripts/generate-images.ts --limit 10 --delay 2000
- *
- * 生成した画像は public/generated/{id}.png に保存されます。
- * git commit して vercel --prod でデプロイすれば本番環境でも表示されます。
+ * 生成した画像は public/patterns/{id}_{slug}.png に保存されます。
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import dotenv from "dotenv";
+import { GoogleGenAI } from "@google/genai";
+import * as fs from "fs";
+import * as path from "path";
+import { DESIGNS } from "../lib/designs";
 
-// ────────────────────────────────────────────────────────────────
 // .env.local を読み込む
-// ────────────────────────────────────────────────────────────────
-const envPath = path.join(process.cwd(), '.env.local');
-if (fs.existsSync(envPath)) {
-  fs.readFileSync(envPath, 'utf-8').split('\n').forEach(line => {
-    const [key, ...vals] = line.split('=');
-    if (key?.trim() && !key.trim().startsWith('#')) {
-      process.env[key.trim()] = vals.join('=').trim().replace(/^["']|["']$/g, '');
-    }
-  });
+dotenv.config({ path: path.join(process.cwd(), ".env.local") });
+
+// ===== 設定 =====
+const MODEL = "imagen-4.0-fast-generate-001"; // 安くて速い ($0.02/枚)
+const RATE_LIMIT_MS = 2000; // リクエスト間隔（無料枠なら30000=30秒が安全）
+const MAX_RETRIES = 2;
+const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
+const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
+
+// ===== プロンプトラッパー =====
+// 各プロンプトに自動で追加される指示。
+// 「スマホケース」や「3Dモックアップ」が生成されるのを防ぐ。
+// パターン画像（テキスタイル素材）だけを生成させる。
+const PROMPT_PREFIX =
+  "Flat 2D seamless textile pattern swatch, top-down overhead view, ";
+const PROMPT_SUFFIX =
+  ", pattern fills entire frame edge to edge, repeating tileable design, no phone, no phone case, no device, no mockup, no 3D object, no product, no border, no frame, no shadow, no text, no watermark, flat textile design only";
+
+function wrapPrompt(base: string): string {
+  // 元のプロンプトから "Seamless pattern of " や "tileable, no text" を取り除いて、
+  // 新しい前後指示で包み直す
+  const clean = base
+    .replace(/^Seamless pattern of /i, "")
+    .replace(/,?\s*tileable,?\s*no text\.?$/i, "")
+    .replace(/,?\s*tileable\.?$/i, "")
+    .replace(/,?\s*no text\.?$/i, "");
+  return `${PROMPT_PREFIX}${clean}${PROMPT_SUFFIX}`;
 }
 
-import { GoogleGenAI } from '@google/genai';
-import { DESIGNS } from '../lib/designs';
-import type { Theme } from '../lib/designs';
+// ===== 初期化 =====
+if (!process.env.GEMINI_API_KEY) {
+  console.error("❌ GEMINI_API_KEY が .env.local に設定されていません");
+  console.error("   取得方法: https://aistudio.google.com → 「Get API key」");
+  process.exit(1);
+}
 
-// ────────────────────────────────────────────────────────────────
-// CLI 引数パース
-// ────────────────────────────────────────────────────────────────
-const args = process.argv.slice(2);
-const getArg = (flag: string) => { const i = args.indexOf(flag); return i !== -1 ? args[i + 1] : undefined; };
-const hasFlag = (flag: string) => args.includes(flag);
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-const themeFilter  = getArg('--theme') as Theme | undefined;
-const idsFilter    = getArg('--ids')?.split(',').map(s => s.trim());
-const fromId       = getArg('--from');   // 例: "030"
-const toId         = getArg('--to');     // 例: "100"
-const limitStr     = getArg('--limit');
-const limit        = limitStr ? parseInt(limitStr, 10) : Infinity;
-const skipExisting = hasFlag('--skip-existing');
-const dryRun       = hasFlag('--dry-run');
-const delayMs      = parseInt(getArg('--delay') ?? '1000', 10);
-
-// ────────────────────────────────────────────────────────────────
-// 出力先
-// ────────────────────────────────────────────────────────────────
-const OUT_DIR       = path.join(process.cwd(), 'public', 'generated');
-const MANIFEST_PATH = path.join(OUT_DIR, 'manifest.json');
-
+// ===== マニフェスト =====
 type ManifestEntry = { url: string; generatedAt: string };
 type Manifest = Record<string, ManifestEntry>;
 
 function loadManifest(): Manifest {
   if (fs.existsSync(MANIFEST_PATH)) {
-    try { return JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf-8')); } catch { /* */ }
+    try {
+      return JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf-8"));
+    } catch { /* ignore */ }
   }
   return {};
 }
-function saveManifest(m: Manifest) {
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(m, null, 2), 'utf-8');
-}
-function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
-// ────────────────────────────────────────────────────────────────
-// メイン
-// ────────────────────────────────────────────────────────────────
-async function main() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey && !dryRun) {
-    console.error('');
-    console.error('❌  GEMINI_API_KEY が設定されていません。');
-    console.error('');
-    console.error('    取得方法: https://aistudio.google.com → 「Get API key」');
-    console.error('    Googleアカウントがあれば無料で取得できます。');
-    console.error('');
-    console.error('    設定方法:');
-    console.error('      .env.local に GEMINI_API_KEY=AIzaSy... を追記してください。');
-    process.exit(1);
+function saveManifest(m: Manifest) {
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(m, null, 2), "utf-8");
+}
+
+// ===== ヘルパー =====
+const slug = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+
+const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
+// ===== 単体生成 =====
+async function generateOne(
+  design: typeof DESIGNS[0],
+  manifest: Manifest,
+  attempt = 1
+): Promise<"ok" | "skip" | "fail"> {
+  const filename = `${design.id}_${slug(design.name)}.png`;
+  const filepath = path.join(OUTPUT_DIR, filename);
+
+  if (fs.existsSync(filepath)) {
+    console.log(`⏭️  ${design.id} ${design.name} (既存・スキップ)`);
+    return "skip";
   }
 
-  if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
+  try {
+    process.stdout.write(`🎨 ${design.id} ${design.name}... `);
+
+    const wrappedPrompt = wrapPrompt(design.prompt);
+
+    const response = await ai.models.generateImages({
+      model: MODEL,
+      prompt: wrappedPrompt,
+      config: {
+        numberOfImages: 1,
+        aspectRatio: "1:1",
+      },
+    });
+
+    const imgBytes = response.generatedImages?.[0]?.image?.imageBytes;
+    if (!imgBytes) throw new Error("画像データが返ってきませんでした");
+
+    fs.writeFileSync(filepath, Buffer.from(imgBytes, "base64"));
+
+    // マニフェスト更新
+    manifest[design.id] = {
+      url: `/patterns/${filename}`,
+      generatedAt: new Date().toISOString(),
+    };
+    saveManifest(manifest);
+
+    console.log(`✅`);
+    return "ok";
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.log(`❌ ${msg}`);
+    if (attempt < MAX_RETRIES) {
+      const wait = 5000 * attempt;
+      console.log(
+        `   ↳ ${wait / 1000}秒待機後にリトライ (${attempt + 1}/${MAX_RETRIES})`
+      );
+      await sleep(wait);
+      return generateOne(design, manifest, attempt + 1);
+    }
+    return "fail";
+  }
+}
+
+// ===== メイン =====
+async function main() {
+  const args = process.argv.slice(2);
+  const themeArg = args.find(a => a.startsWith("--theme="))?.split("=")[1];
+  const fromArg = args.find(a => a.startsWith("--from="))?.split("=")[1];
+  const toArg = args.find(a => a.startsWith("--to="))?.split("=")[1];
+
+  let list = [...DESIGNS];
+  if (themeArg) list = list.filter(d => d.theme === themeArg);
+  if (fromArg) list = list.filter(d => parseInt(d.id) >= parseInt(fromArg));
+  if (toArg) list = list.filter(d => parseInt(d.id) <= parseInt(toArg));
+
+  console.log(`\n🚀 ${list.length}枚を生成開始 (モデル: ${MODEL})\n`);
+  const startTime = Date.now();
 
   const manifest = loadManifest();
+  const results = { ok: 0, skip: 0, fail: 0, failed: [] as string[] };
 
-  // 対象デザイン絞り込み
-  let targets = DESIGNS.filter(d => {
-    if (themeFilter && d.theme !== themeFilter) return false;
-    if (idsFilter && !idsFilter.includes(d.id)) return false;
-    if (fromId && d.id < fromId) return false;
-    if (toId   && d.id > toId)   return false;
-    if (skipExisting && fs.existsSync(path.join(OUT_DIR, `${d.id}.png`))) return false;
-    return true;
-  });
-  if (isFinite(limit)) targets = targets.slice(0, limit);
+  for (let i = 0; i < list.length; i++) {
+    const design = list[i];
+    const result = await generateOne(design, manifest);
+    results[result]++;
+    if (result === "fail") results.failed.push(`${design.id} ${design.name}`);
 
-  const total = targets.length;
-
-  console.log('');
-  console.log(`🎨  COCOcase Imagen 4 Fast バッチ生成`);
-  console.log(`    モデル: imagen-4.0-fast-generate-001`);
-  console.log(`    対象:   ${total} 件`);
-  if (themeFilter)       console.log(`    テーマ: ${themeFilter}`);
-  if (idsFilter)         console.log(`    IDs:    ${idsFilter.join(', ')}`);
-  if (fromId || toId)    console.log(`    範囲:   ${fromId ?? '001'} 〜 ${toId ?? '100'}`);
-  if (skipExisting)      console.log(`    既存スキップ: ON`);
-  if (dryRun)       console.log(`    ⚠️  DRY RUN モード（APIは呼ばれません）`);
-  console.log('');
-
-  // Dry run モード: 一覧表示のみ
-  if (dryRun) {
-    targets.forEach((d, i) => {
-      console.log(`  ${String(i + 1).padStart(3)}. [${d.id}] ${d.theme.padEnd(12)} ${d.name}`);
-      console.log(`        ${d.prompt.slice(0, 80)}...`);
-    });
-    console.log('');
-    console.log('✅  Dry run 完了。--dry-run フラグを外すと実際に生成されます。');
-    return;
-  }
-
-  const ai = new GoogleGenAI({ apiKey: apiKey! });
-  let success = 0, failed = 0;
-
-  for (let i = 0; i < targets.length; i++) {
-    const d = targets[i];
-    process.stdout.write(`  ⏳ [${i + 1}/${total}] ${d.id} ${d.name} ... `);
-
-    const enhancedPrompt = `${d.prompt}, square seamless repeating pattern, suitable for phone case printing, high resolution, clean edges, 1:1 ratio`;
-
-    try {
-      const response = await ai.models.generateImages({
-        model: 'imagen-4.0-fast-generate-001',
-        prompt: enhancedPrompt,
-        config: {
-          numberOfImages: 1,
-          aspectRatio: '1:1',
-          outputMimeType: 'image/png',
-        },
-      });
-
-      const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
-      if (!imageBytes) throw new Error('imageBytes が返されませんでした');
-
-      // base64 → PNG ファイルとして保存
-      const pngPath = path.join(OUT_DIR, `${d.id}.png`);
-      fs.writeFileSync(pngPath, Buffer.from(imageBytes, 'base64'));
-
-      manifest[d.id] = {
-        url: `/generated/${d.id}.png`,
-        generatedAt: new Date().toISOString(),
-      };
-      saveManifest(manifest);
-
-      console.log(`✅  保存 → public/generated/${d.id}.png`);
-      success++;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.log(`❌  失敗: ${msg}`);
-      failed++;
+    // 次のリクエストまで待機（最後は不要、スキップ時は不要）
+    if (i < list.length - 1 && result !== "skip") {
+      await sleep(RATE_LIMIT_MS);
     }
-
-    if (i < targets.length - 1) await sleep(delayMs);
   }
 
-  console.log('');
-  console.log(`📊  完了 — 成功: ${success} 件 / 失敗: ${failed} 件`);
-  console.log(`    マニフェスト: ${MANIFEST_PATH}`);
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  console.log(`\n${"=".repeat(50)}`);
+  console.log(`✨ 完了 (${elapsed}秒)`);
+  console.log(`   ✅ 成功: ${results.ok}`);
+  console.log(`   ⏭️  スキップ: ${results.skip}`);
+  console.log(`   ❌ 失敗: ${results.fail}`);
+  if (results.failed.length > 0) {
+    console.log(`\n失敗した項目:`);
+    results.failed.forEach(f => console.log(`   - ${f}`));
+    console.log(
+      `\n💡 もう一度 npm run gen:all を実行すると失敗分だけ再試行します`
+    );
+  }
 
-  if (success > 0) {
-    console.log('');
-    console.log('💡  画像をVercelデプロイに含めるには:');
-    console.log('    git add public/generated/');
-    console.log('    git commit -m "Add Imagen 4 generated images"');
-    console.log('    npx vercel --prod');
+  if (results.ok > 0) {
+    console.log(`\n📁 保存先: ${OUTPUT_DIR}`);
+    console.log(`📋 マニフェスト: ${MANIFEST_PATH}`);
   }
 }
 
-main().catch(err => {
-  console.error('');
-  console.error('💥 予期せぬエラー:', err);
+main().catch(e => {
+  console.error("予期せぬエラー:", e);
   process.exit(1);
 });
