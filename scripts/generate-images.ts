@@ -23,7 +23,10 @@ import { DESIGNS } from "../lib/designs";
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 // ===== 設定 =====
-const MODEL = "imagen-4.0-fast-generate-001"; // 安くて速い ($0.02/枚)
+// IMAGE_MODEL 環境変数で切替可能。未設定なら Imagen 4 Fast をデフォルト使用。
+// imagen-* → ai.models.generateImages()
+// gemini-* → ai.models.generateContent() + responseModalities: ["IMAGE"]
+const MODEL = process.env.IMAGE_MODEL || "imagen-4.0-fast-generate-001";
 const RATE_LIMIT_MS = 2000; // リクエスト間隔（無料枠なら30000=30秒が安全）
 const MAX_RETRIES = 2;
 const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
@@ -82,6 +85,28 @@ const slug = (s: string) =>
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
+// ===== モデル別画像生成 =====
+async function generateImage(prompt: string): Promise<string> {
+  if (MODEL.startsWith("imagen")) {
+    // Imagen モデル: generateImages() を使用
+    const response = await ai.models.generateImages({
+      model: MODEL,
+      prompt,
+      config: { numberOfImages: 1, aspectRatio: "1:1" },
+    });
+    return response.generatedImages?.[0]?.image?.imageBytes ?? "";
+  } else {
+    // Gemini ネイティブ画像生成 (gemini-2.5-flash-image 等)
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: { responseModalities: ["IMAGE"] },
+    });
+    const parts = response.candidates?.[0]?.content?.parts ?? [];
+    return parts.find(p => p.inlineData)?.inlineData?.data ?? "";
+  }
+}
+
 // ===== 単体生成 =====
 async function generateOne(
   design: typeof DESIGNS[0],
@@ -100,17 +125,7 @@ async function generateOne(
     process.stdout.write(`🎨 ${design.id} ${design.name}... `);
 
     const wrappedPrompt = wrapPrompt(design.prompt);
-
-    const response = await ai.models.generateImages({
-      model: MODEL,
-      prompt: wrappedPrompt,
-      config: {
-        numberOfImages: 1,
-        aspectRatio: "1:1",
-      },
-    });
-
-    const imgBytes = response.generatedImages?.[0]?.image?.imageBytes;
+    const imgBytes = await generateImage(wrappedPrompt);
     if (!imgBytes) throw new Error("画像データが返ってきませんでした");
 
     fs.writeFileSync(filepath, Buffer.from(imgBytes, "base64"));
