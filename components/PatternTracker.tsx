@@ -16,15 +16,14 @@ const STORAGE_KEY = 'cococase-pattern-tracker-v1';
 interface Entry {
   status: Status;
   notes: string;
-  imageUrl?: string;       // DALL-E 3 で生成した画像URL（localStorage 保存）
+  imageUrl?: string;       // Imagen 4 Fast で生成した画像（base64 data URL、localStorage 保存）
   generatedAt?: string;    // 生成日時
-  revisedPrompt?: string;  // DALL-E 3 が修正したプロンプト
 }
 
 type ProgressMap = Record<string, Entry>;
 
-// バッチスクリプトが生成した manifest.json の型
-type Manifest = Record<string, { url: string; generatedAt: string; revisedPrompt?: string }>;
+// generate-images.ts が生成した manifest.json の型
+type Manifest = Record<string, { url: string; generatedAt: string }>;
 
 // ─────────────────────────────────────────────────────────────────
 // コンポーネント
@@ -122,7 +121,7 @@ export default function PatternTracker() {
     } catch { /* ignore */ }
   };
 
-  // ── AI 画像生成（DALL-E 3）────────────────────────────────────────
+  // ── AI 画像生成（Imagen 4 Fast）────────────────────────────────────
   const generateImage = async (id: string, prompt: string) => {
     setGeneratingId(id);
     setGenerateError(null);
@@ -138,7 +137,6 @@ export default function PatternTracker() {
       updateProgress(id, {
         imageUrl: data.imageUrl,
         generatedAt: data.generatedAt,
-        revisedPrompt: data.revisedPrompt,
         // ステータスが未着手なら自動で「生成済」に更新
         ...(getStatus(id) === 'pending' ? { status: 'generated' as Status } : {}),
       });
@@ -488,7 +486,7 @@ export default function PatternTracker() {
                     onClick={() => !isGenerating && generateImage(d.id, d.prompt)}
                     disabled={isGenerating}
                     className="btn sans"
-                    title={imageUrl ? '再生成（DALL-E 3）' : 'AI画像生成（DALL-E 3）'}
+                    title={imageUrl ? '再生成（Imagen 4 Fast）' : 'AI画像生成（Imagen 4 Fast）'}
                     style={{
                       background: imageUrl ? 'transparent' : '#D4A574',
                       color: imageUrl ? '#8B7355' : '#2B2620',
@@ -578,11 +576,6 @@ export default function PatternTracker() {
                           <Download size={10} /> DL
                         </button>
                       </div>
-                      {progress[d.id]?.revisedPrompt && (
-                        <div className="sans" style={{ fontSize: 10, color: '#8B7355', marginTop: 6, fontStyle: 'italic', lineHeight: 1.4 }}>
-                          DALL-E修正: {progress[d.id].revisedPrompt!.slice(0, 120)}…
-                        </div>
-                      )}
                     </div>
                   )}
 

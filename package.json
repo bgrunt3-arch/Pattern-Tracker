@@ -6,15 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "generate": "tsx scripts/batch-generate.ts",
-    "generate:dry": "tsx scripts/batch-generate.ts --dry-run",
-    "generate:floral": "tsx scripts/batch-generate.ts --theme floral",
-    "generate:limit": "tsx scripts/batch-generate.ts --limit 5 --skip-existing"
+    "generate": "tsx scripts/generate-images.ts",
+    "generate:dry": "tsx scripts/generate-images.ts --dry-run",
+    "generate:floral": "tsx scripts/generate-images.ts --theme floral",
+    "generate:limit": "tsx scripts/generate-images.ts --limit 5 --skip-existing"
   },
   "dependencies": {
+    "@google/genai": "^1.50.1",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
-    "openai": "^6.34.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
