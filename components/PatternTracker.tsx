@@ -1,68 +1,104 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Copy, Download, Check, Clock, Sparkles, FileText,
-  RotateCcw, ExternalLink, ChevronDown, ChevronUp, Search,
+  RotateCcw, ExternalLink, ChevronDown, ChevronUp,
+  Search, Wand2, ImageOff, AlertCircle, X,
 } from 'lucide-react';
 import { DESIGNS, THEMES, STATUSES, type Status } from '@/lib/designs';
 
 const STORAGE_KEY = 'cococase-pattern-tracker-v1';
 
+// ─────────────────────────────────────────────────────────────────
+// 型定義
+// ─────────────────────────────────────────────────────────────────
 interface Entry {
   status: Status;
   notes: string;
+  imageUrl?: string;       // DALL-E 3 で生成した画像URL（localStorage 保存）
+  generatedAt?: string;    // 生成日時
+  revisedPrompt?: string;  // DALL-E 3 が修正したプロンプト
 }
 
 type ProgressMap = Record<string, Entry>;
 
+// バッチスクリプトが生成した manifest.json の型
+type Manifest = Record<string, { url: string; generatedAt: string; revisedPrompt?: string }>;
+
+// ─────────────────────────────────────────────────────────────────
+// コンポーネント
+// ─────────────────────────────────────────────────────────────────
 export default function PatternTracker() {
   const [progress, setProgress] = useState<ProgressMap>({});
+  const [manifest, setManifest] = useState<Manifest>({});
   const [themeFilter, setThemeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
-  // Load from localStorage
+  // ── ロード ──────────────────────────────────────────────────────
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setProgress(JSON.parse(saved));
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
     setLoaded(true);
+
+    // バッチ生成 manifest を取得（存在しなければ空）
+    fetch('/api/manifest')
+      .then(r => r.ok ? r.json() : {})
+      .then((m: Manifest) => setManifest(m))
+      .catch(() => { /* manifest なし → スルー */ });
   }, []);
 
-  const updateProgress = (id: string, updates: Partial<Entry>) => {
-    const current = progress[id] ?? { status: 'pending' as Status, notes: '' };
-    const next: ProgressMap = { ...progress, [id]: { ...current, ...updates } };
+  // ── 永続化 ──────────────────────────────────────────────────────
+  const saveProgress = useCallback((next: ProgressMap) => {
     setProgress(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
+  }, []);
+
+  const updateProgress = useCallback((id: string, updates: Partial<Entry>) => {
+    setProgress(prev => {
+      const current = prev[id] ?? { status: 'pending' as Status, notes: '' };
+      const next: ProgressMap = { ...prev, [id]: { ...current, ...updates } };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const resetAll = () => {
-    setProgress({});
+    saveProgress({});
     localStorage.removeItem(STORAGE_KEY);
     setShowResetConfirm(false);
   };
 
-  const getStatus = (id: string): Status => progress[id]?.status ?? 'pending';
-  const getNotes = (id: string) => progress[id]?.notes ?? '';
+  // ── ゲッター ─────────────────────────────────────────────────────
+  const getStatus  = useCallback((id: string): Status  => progress[id]?.status   ?? 'pending', [progress]);
+  const getNotes   = useCallback((id: string): string   => progress[id]?.notes    ?? '', [progress]);
+  const getImageUrl = useCallback((id: string): string | undefined => {
+    // manifest（バッチ生成）を優先し、なければ localStorage のURL
+    return manifest[id]?.url ?? progress[id]?.imageUrl;
+  }, [manifest, progress]);
 
+  // ── 統計 ────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const s: Record<string, number> = { pending: 0, generated: 0, approved: 0, submitted: 0 };
     DESIGNS.forEach(d => { s[getStatus(d.id)]++; });
     return s;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress]);
+  }, [getStatus]);
 
-  const completedCount = stats.generated + stats.approved + stats.submitted;
+  const completedCount   = stats.generated + stats.approved + stats.submitted;
   const completionPercent = Math.round((completedCount / 100) * 100);
+  const generatedImages  = DESIGNS.filter(d => getImageUrl(d.id)).length;
 
+  // ── フィルタ ────────────────────────────────────────────────────
   const filtered = useMemo(() => DESIGNS.filter(d => {
     if (themeFilter !== 'all' && d.theme !== themeFilter) return false;
     if (statusFilter !== 'all' && getStatus(d.id) !== statusFilter) return false;
@@ -75,9 +111,9 @@ export default function PatternTracker() {
       ) return false;
     }
     return true;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [themeFilter, statusFilter, searchQuery, progress]);
+  }), [themeFilter, statusFilter, searchQuery, getStatus]);
 
+  // ── プロンプトコピー ──────────────────────────────────────────────
   const copyPrompt = async (id: string, prompt: string) => {
     try {
       await navigator.clipboard.writeText(prompt);
@@ -86,14 +122,48 @@ export default function PatternTracker() {
     } catch { /* ignore */ }
   };
 
+  // ── AI 画像生成（DALL-E 3）────────────────────────────────────────
+  const generateImage = async (id: string, prompt: string) => {
+    setGeneratingId(id);
+    setGenerateError(null);
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designId: id, prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+
+      updateProgress(id, {
+        imageUrl: data.imageUrl,
+        generatedAt: data.generatedAt,
+        revisedPrompt: data.revisedPrompt,
+        // ステータスが未着手なら自動で「生成済」に更新
+        ...(getStatus(id) === 'pending' ? { status: 'generated' as Status } : {}),
+      });
+      // 生成後は展開表示
+      setExpandedId(id);
+    } catch (err: unknown) {
+      setGenerateError(err instanceof Error ? err.message : '生成に失敗しました。');
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  // ── CSV 書き出し ──────────────────────────────────────────────────
   const exportCSV = () => {
-    const headers = ['ID', 'Theme', 'Name', 'BURGA Ref', 'BURGA URL', 'Status', 'Notes', 'Prompt'];
+    const headers = ['ID', 'Theme', 'Name', 'BURGA Ref', 'BURGA URL', 'Status', 'Has Image', 'Notes', 'Prompt'];
     const rows = DESIGNS.map(d => {
       const st = getStatus(d.id);
-      const nt = getNotes(d.id);
       const stLabel = STATUSES.find(s => s.id === st)?.jp ?? st;
-      return [d.id, d.theme, d.name, d.burgaRef, d.burgaUrl, stLabel, nt, d.prompt]
-        .map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+      return [
+        d.id, d.theme, d.name, d.burgaRef, d.burgaUrl,
+        stLabel,
+        getImageUrl(d.id) ? '○' : '×',
+        getNotes(d.id),
+        d.prompt,
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
     });
     const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -107,21 +177,38 @@ export default function PatternTracker() {
     URL.revokeObjectURL(url);
   };
 
-  const statusIcons: Record<string, React.ElementType> = {
-    pending: Clock,
-    generated: Sparkles,
-    approved: Check,
-    submitted: FileText,
+  // ── 画像ダウンロード ────────────────────────────────────────────
+  const downloadImage = async (id: string, url: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = `cococase-${id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
+  const statusIcons: Record<string, React.ElementType> = {
+    pending: Clock, generated: Sparkles, approved: Check, submitted: FileText,
+  };
+
+  // ── ローディング ─────────────────────────────────────────────────
   if (!loaded) {
     return (
-      <div style={{ minHeight: '100vh', background: '#F5EFE4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', color: '#3A3530' }}>
-        Loading…
+      <div style={{ minHeight: '100vh', background: '#F5EFE4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="serif" style={{ fontSize: 18, fontStyle: 'italic', color: '#8B7355' }}>Loading…</div>
       </div>
     );
   }
 
+  // ────────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', background: '#F5EFE4', color: '#2B2620', fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", paddingBottom: 48 }}>
       <style>{`
@@ -141,9 +228,13 @@ export default function PatternTracker() {
         ::-webkit-scrollbar { height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #D4C5A9; border-radius: 2px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fade-in 0.3s ease; }
       `}</style>
 
-      {/* ── HEADER ── */}
+      {/* ═══════════════════════════════════ HEADER ═══════════════════════════════════ */}
       <header style={{ background: '#2B2620', color: '#F5EFE4', padding: '28px 20px 22px', borderBottom: '1px solid #3A3530' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div className="sans" style={{ fontSize: 10, letterSpacing: 3, opacity: 0.55, marginBottom: 6 }}>
@@ -158,9 +249,16 @@ export default function PatternTracker() {
           <div style={{ marginTop: 22 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
               <div className="sans" style={{ fontSize: 10, letterSpacing: 2.5, opacity: 0.55 }}>PROGRESS</div>
-              <div className="serif" style={{ fontSize: 19, fontWeight: 600 }}>
-                <span style={{ color: '#D4A574' }}>{completedCount}</span>
-                <span style={{ opacity: 0.4, fontSize: 13 }}> / 100</span>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
+                {generatedImages > 0 && (
+                  <div className="sans" style={{ fontSize: 11, color: '#D4A574', opacity: 0.8 }}>
+                    🖼 {generatedImages} 画像生成済
+                  </div>
+                )}
+                <div className="serif" style={{ fontSize: 19, fontWeight: 600 }}>
+                  <span style={{ color: '#D4A574' }}>{completedCount}</span>
+                  <span style={{ opacity: 0.4, fontSize: 13 }}> / 100</span>
+                </div>
               </div>
             </div>
             <div style={{ height: 5, background: 'rgba(245,239,228,0.12)', borderRadius: 3, overflow: 'hidden' }}>
@@ -196,7 +294,7 @@ export default function PatternTracker() {
         </div>
       </header>
 
-      {/* ── CONTROLS (sticky) ── */}
+      {/* ═══════════════════════════════════ CONTROLS ═══════════════════════════════════ */}
       <div style={{ background: '#EDE5D5', borderBottom: '1px solid #D4C5A9', padding: '12px 20px', position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           {/* Theme chips */}
@@ -253,7 +351,21 @@ export default function PatternTracker() {
         </div>
       </div>
 
-      {/* ── LIST ── */}
+      {/* エラーバナー */}
+      {generateError && (
+        <div
+          className="fade-in sans"
+          style={{ background: '#FDE8E8', border: '1px solid #E8AAAA', borderRadius: 6, padding: '10px 14px', margin: '12px 16px 0', maxWidth: 900 - 32, marginLeft: 'auto', marginRight: 'auto', display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, color: '#7A3030' }}
+        >
+          <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span style={{ flex: 1 }}>{generateError}</span>
+          <button className="btn" onClick={() => setGenerateError(null)} style={{ background: 'transparent', padding: 0, color: '#7A3030' }}>
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════ LIST ═══════════════════════════════════ */}
       <main style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 0' }}>
         <div className="sans" style={{ fontSize: 10, color: '#8B7355', letterSpacing: 2, marginBottom: 12 }}>
           {filtered.length} 件表示
@@ -267,10 +379,12 @@ export default function PatternTracker() {
         )}
 
         {filtered.map(d => {
-          const status = getStatus(d.id);
-          const info = STATUSES.find(s => s.id === status)!;
+          const status    = getStatus(d.id);
+          const info      = STATUSES.find(s => s.id === status)!;
           const isExpanded = expandedId === d.id;
-          const themeInfo = THEMES.find(t => t.id === d.theme);
+          const themeInfo  = THEMES.find(t => t.id === d.theme);
+          const imageUrl   = getImageUrl(d.id);
+          const isGenerating = generatingId === d.id;
 
           return (
             <div
@@ -285,12 +399,34 @@ export default function PatternTracker() {
                 overflow: 'hidden',
               }}
             >
-              {/* Main row */}
+              {/* ── Main row ── */}
               <div style={{ padding: '12px 14px' }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  {/* ID */}
-                  <div className="serif" style={{ fontSize: 22, fontWeight: 600, color: '#D4A574', lineHeight: 1, flexShrink: 0, fontStyle: 'italic', minWidth: 46 }}>
-                    {d.id}
+
+                  {/* サムネイル or プレースホルダー */}
+                  <div
+                    onClick={() => imageUrl && setLightboxUrl(imageUrl)}
+                    style={{
+                      width: 52, height: 52, flexShrink: 0,
+                      borderRadius: 6,
+                      border: `1px solid ${info.border}`,
+                      overflow: 'hidden',
+                      background: '#F0EAE0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: imageUrl ? 'zoom-in' : 'default',
+                      position: 'relative',
+                    }}
+                  >
+                    {imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imageUrl} alt={d.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : isGenerating ? (
+                      <div className="spin" style={{ width: 18, height: 18, border: '2px solid #D4C5A9', borderTopColor: '#D4A574', borderRadius: '50%' }} />
+                    ) : (
+                      <div className="serif" style={{ fontSize: 16, fontWeight: 600, color: '#D4A574', fontStyle: 'italic', lineHeight: 1 }}>
+                        {d.id}
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
@@ -332,7 +468,8 @@ export default function PatternTracker() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
+                <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                  {/* プロンプトコピー */}
                   <button
                     onClick={() => copyPrompt(d.id, d.prompt)}
                     className="btn sans"
@@ -345,6 +482,32 @@ export default function PatternTracker() {
                   >
                     {copiedId === d.id ? <><Check size={12} />コピー済み</> : <><Copy size={12} />プロンプト</>}
                   </button>
+
+                  {/* AI 生成ボタン */}
+                  <button
+                    onClick={() => !isGenerating && generateImage(d.id, d.prompt)}
+                    disabled={isGenerating}
+                    className="btn sans"
+                    title={imageUrl ? '再生成（DALL-E 3）' : 'AI画像生成（DALL-E 3）'}
+                    style={{
+                      background: imageUrl ? 'transparent' : '#D4A574',
+                      color: imageUrl ? '#8B7355' : '#2B2620',
+                      border: imageUrl ? '1px solid #D4C5A9' : '1px solid #C4915A',
+                      borderRadius: 14,
+                      padding: '5px 10px', fontSize: 11, fontWeight: 500,
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      opacity: isGenerating ? 0.6 : 1,
+                    }}
+                  >
+                    {isGenerating
+                      ? <><div className="spin" style={{ width: 11, height: 11, border: '1.5px solid #8B7355', borderTopColor: '#2B2620', borderRadius: '50%' }} />生成中…</>
+                      : imageUrl
+                        ? <><ImageOff size={11} />再生成</>
+                        : <><Wand2 size={11} />AI生成</>
+                    }
+                  </button>
+
+                  {/* BURGA リンク */}
                   {d.burgaUrl && (
                     <a
                       href={d.burgaUrl}
@@ -361,6 +524,8 @@ export default function PatternTracker() {
                       <ExternalLink size={11} /> BURGA
                     </a>
                   )}
+
+                  {/* 展開ボタン */}
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : d.id)}
                     className="btn"
@@ -375,9 +540,53 @@ export default function PatternTracker() {
                 </div>
               </div>
 
-              {/* Expanded */}
+              {/* ── Expanded ── */}
               {isExpanded && (
-                <div style={{ background: '#F5EFE4', padding: '12px 14px', borderTop: `1px solid ${info.border}` }}>
+                <div className="fade-in" style={{ background: '#F5EFE4', padding: '14px 14px', borderTop: `1px solid ${info.border}` }}>
+
+                  {/* 生成画像 */}
+                  {imageUrl && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div className="sans" style={{ fontSize: 9, letterSpacing: 2, color: '#8B7355', marginBottom: 8, fontWeight: 600 }}>
+                        GENERATED IMAGE
+                        {progress[d.id]?.generatedAt && (
+                          <span style={{ marginLeft: 8, opacity: 0.6, letterSpacing: 0 }}>
+                            {new Date(progress[d.id].generatedAt!).toLocaleString('ja-JP')}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ position: 'relative', display: 'inline-block' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imageUrl}
+                          alt={d.name}
+                          onClick={() => setLightboxUrl(imageUrl)}
+                          style={{ width: 180, height: 180, objectFit: 'cover', borderRadius: 8, border: '1px solid #D4C5A9', cursor: 'zoom-in', display: 'block' }}
+                        />
+                        <button
+                          onClick={() => downloadImage(d.id, imageUrl)}
+                          className="btn sans"
+                          title="画像をダウンロード"
+                          style={{
+                            position: 'absolute', bottom: 8, right: 8,
+                            background: 'rgba(43,38,32,0.75)', color: '#F5EFE4',
+                            border: 'none', borderRadius: 6,
+                            padding: '4px 8px', fontSize: 10,
+                            display: 'inline-flex', alignItems: 'center', gap: 3,
+                          }}
+                        >
+                          <Download size={10} /> DL
+                        </button>
+                      </div>
+                      {progress[d.id]?.revisedPrompt && (
+                        <div className="sans" style={{ fontSize: 10, color: '#8B7355', marginTop: 6, fontStyle: 'italic', lineHeight: 1.4 }}>
+                          DALL-E修正: {progress[d.id].revisedPrompt!.slice(0, 120)}…
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* プロンプト */}
                   <div className="sans" style={{ fontSize: 9, letterSpacing: 2, color: '#8B7355', marginBottom: 4, fontWeight: 600 }}>PROMPT</div>
                   <div
                     className="serif"
@@ -385,6 +594,8 @@ export default function PatternTracker() {
                   >
                     {d.prompt}
                   </div>
+
+                  {/* メモ */}
                   <div className="sans" style={{ fontSize: 9, letterSpacing: 2, color: '#8B7355', marginBottom: 4, fontWeight: 600 }}>NOTES</div>
                   <textarea
                     value={getNotes(d.id)}
@@ -400,7 +611,30 @@ export default function PatternTracker() {
         })}
       </main>
 
-      {/* ── RESET CONFIRM ── */}
+      {/* ═══════════════════════════════════ LIGHTBOX ═══════════════════════════════════ */}
+      {lightboxUrl && (
+        <div
+          onClick={() => setLightboxUrl(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(43,38,32,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 200 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxUrl}
+            alt="Generated pattern"
+            onClick={e => e.stopPropagation()}
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8, objectFit: 'contain', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+          />
+          <button
+            onClick={() => setLightboxUrl(null)}
+            className="btn"
+            style={{ position: 'fixed', top: 20, right: 20, background: 'rgba(245,239,228,0.15)', color: '#F5EFE4', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════ RESET CONFIRM ═══════════════════════════════════ */}
       {showResetConfirm && (
         <div
           onClick={() => setShowResetConfirm(false)}
@@ -412,7 +646,7 @@ export default function PatternTracker() {
           >
             <h3 className="serif" style={{ fontSize: 20, margin: '0 0 8px', color: '#2B2620' }}>全データをリセット？</h3>
             <p className="sans" style={{ fontSize: 13, color: '#6B5B45', margin: '0 0 18px', lineHeight: 1.5 }}>
-              100件すべての進捗・ステータス・メモが消去されます。この操作は取り消せません。
+              100件すべての進捗・ステータス・メモ・生成画像URLが消去されます。この操作は取り消せません。
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button

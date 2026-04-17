@@ -5,11 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "generate": "tsx scripts/batch-generate.ts",
+    "generate:dry": "tsx scripts/batch-generate.ts --dry-run",
+    "generate:floral": "tsx scripts/batch-generate.ts --theme floral",
+    "generate:limit": "tsx scripts/batch-generate.ts --limit 5 --skip-existing"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
+    "openai": "^6.34.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -18,7 +23,9 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
