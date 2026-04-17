@@ -53,7 +53,23 @@ export default function PatternTracker() {
     // バッチ生成 manifest を取得（存在しなければ空）
     fetch('/api/manifest')
       .then(r => r.ok ? r.json() : {})
-      .then((m: Manifest) => setManifest(m))
+      .then((m: Manifest) => {
+        setManifest(m);
+        // manifest に画像がある ID のうち、ステータスが pending のものを generated に昇格
+        setProgress(prev => {
+          const updated = { ...prev };
+          let changed = false;
+          Object.keys(m).forEach(id => {
+            const current = updated[id] ?? { status: 'pending' as Status, notes: '' };
+            if (current.status === 'pending') {
+              updated[id] = { ...current, status: 'generated' as Status };
+              changed = true;
+            }
+          });
+          if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          return changed ? updated : prev;
+        });
+      })
       .catch(() => { /* manifest なし → スルー */ });
   }, []);
 
