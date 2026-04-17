@@ -47,7 +47,7 @@ export const DESIGNS: Design[] = [
 
   // 2. MARBLE (011-020)
   { id: "011", theme: "marble", burgaRef: "Vanilla Sand", burgaUrl: "https://burga.com/products/marble-airpods-3-case", name: "Vanilla Sand", prompt: "Seamless pattern of creamy white marble with subtle beige and gray veining, realistic luxury stone texture, elegant and timeless, tileable, no text" },
-  { id: "012", theme: "marble", burgaRef: "Golden Coral", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Golden Coral", prompt: "Seamless pattern of soft pink marble with golden metallic veins, realistic luxury stone texture, romantic and glamorous, tileable, no text" },
+  { id: "012", theme: "marble", burgaRef: "Golden Coral", burgaUrl: "", name: "Golden Coral", prompt: "Seamless pattern of soft pink marble with golden metallic veins, realistic luxury stone texture, romantic and glamorous, tileable, no text" },
   { id: "013", theme: "marble", burgaRef: "—", burgaUrl: "", name: "Black Onyx", prompt: "Seamless pattern of jet black marble with fine silver and white veining, realistic luxury stone texture, sophisticated and dramatic, tileable, no text" },
   { id: "014", theme: "marble", burgaRef: "—", burgaUrl: "", name: "Rose Quartz", prompt: "Seamless pattern of translucent rose quartz crystal with soft pink tones and white streaks, realistic stone texture, tileable, no text" },
   { id: "015", theme: "marble", burgaRef: "—", burgaUrl: "", name: "Malachite", prompt: "Seamless pattern of deep green malachite with concentric dark and light rings, realistic luxury stone texture, tileable, no text" },
@@ -58,8 +58,8 @@ export const DESIGNS: Design[] = [
   { id: "020", theme: "marble", burgaRef: "—", burgaUrl: "", name: "Iridescent Pearl", prompt: "Seamless pattern of iridescent pearlescent marble with rainbow shimmer, realistic luxury stone texture, mystical, tileable, no text" },
 
   // 3. ANIMAL (021-030)
-  { id: "021", theme: "animal", burgaRef: "Celestial", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Celestial Cow", prompt: "Seamless pattern of brown and cream cow print, organic irregular shapes, realistic hide texture, rustic chic, tileable, no text" },
-  { id: "022", theme: "animal", burgaRef: "Derby Race", burgaUrl: "https://burga.com", name: "Derby Horse", prompt: "Seamless pattern of horses in various poses galloping trotting and standing, hand-drawn navy blue ink sketch, vintage engraving style on cream background, tileable, no text" },
+  { id: "021", theme: "animal", burgaRef: "Celestial", burgaUrl: "", name: "Celestial Cow", prompt: "Seamless pattern of brown and cream cow print, organic irregular shapes, realistic hide texture, rustic chic, tileable, no text" },
+  { id: "022", theme: "animal", burgaRef: "Derby Race", burgaUrl: "", name: "Derby Horse", prompt: "Seamless pattern of horses in various poses galloping trotting and standing, hand-drawn navy blue ink sketch, vintage engraving style on cream background, tileable, no text" },
   { id: "023", theme: "animal", burgaRef: "—", burgaUrl: "", name: "Leopard Classic", prompt: "Seamless pattern of classic leopard print spots in black and brown on tan background, realistic fur texture, bold and fashionable, tileable, no text" },
   { id: "024", theme: "animal", burgaRef: "—", burgaUrl: "", name: "Zebra Stripes", prompt: "Seamless pattern of organic zebra stripes in black on white background, realistic and elegant, tileable, no text" },
   { id: "025", theme: "animal", burgaRef: "—", burgaUrl: "", name: "Python Skin", prompt: "Seamless pattern of python snake skin in natural beige and brown tones, detailed scales texture, exotic, tileable, no text" },
@@ -75,15 +75,15 @@ export const DESIGNS: Design[] = [
   { id: "033", theme: "food", burgaRef: "Pickled", burgaUrl: "https://burga.com/products/pickled-airpods-pro-3-case", name: "Pickled", prompt: "Seamless pattern of pickle jars and cucumbers with dill, vintage illustration, on olive green background, quirky vintage charm, tileable, no text" },
   { id: "034", theme: "food", burgaRef: "Honeycomb", burgaUrl: "https://burga.com/products/honeycomb-airpods-pro-3-case", name: "Honeycomb Bee", prompt: "Seamless pattern of honey bees with honeycomb hexagons and yellow gingham accents, graphic illustration, warm and golden, tileable, no text" },
   { id: "035", theme: "food", burgaRef: "Cinnamon Roll", burgaUrl: "https://burga.com/products/cinnamon-roll-airpods-pro-3-case", name: "Cinnamon Roll", prompt: "Seamless pattern of swirled cinnamon rolls with icing, cozy illustration style, on warm beige background, comforting, tileable, no text" },
-  { id: "036", theme: "food", burgaRef: "Cherrybomb", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Cherry", prompt: "Seamless pattern of red cherries with green stems on black background, glossy and elegant, tileable, no text" },
+  { id: "036", theme: "food", burgaRef: "Cherrybomb", burgaUrl: "", name: "Cherry", prompt: "Seamless pattern of red cherries with green stems on black background, glossy and elegant, tileable, no text" },
   { id: "037", theme: "food", burgaRef: "—", burgaUrl: "", name: "Lemon Zest", prompt: "Seamless pattern of bright yellow lemons with green leaves, watercolor illustration, on soft blue background, Mediterranean summer, tileable, no text" },
   { id: "038", theme: "food", burgaRef: "—", burgaUrl: "", name: "Mushroom Forest", prompt: "Seamless pattern of various woodland mushrooms including red cap and chanterelle, vintage botanical illustration, on dark green background, foraged and whimsical, tileable, no text" },
   { id: "039", theme: "food", burgaRef: "—", burgaUrl: "", name: "Coffee Beans", prompt: "Seamless pattern of roasted coffee beans scattered, realistic illustration, on dark brown background, rich and warm, tileable, no text" },
   { id: "040", theme: "food", burgaRef: "—", burgaUrl: "", name: "Orange Grove", prompt: "Seamless pattern of bright oranges with green leaves and white blossoms, vintage botanical illustration, on terracotta background, Mediterranean, tileable, no text" },
 
   // 5. BOTANICAL (041-050)
-  { id: "041", theme: "botanical", burgaRef: "Velvet Night", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Velvet Ginkgo", prompt: "Seamless pattern of ginkgo leaves in deep navy and gold, art nouveau style, on midnight blue background, elegant and nocturnal, tileable, no text" },
-  { id: "042", theme: "botanical", burgaRef: "Barely Yours", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Barely Ginkgo", prompt: "Seamless pattern of ginkgo leaves in soft taupe and cream, minimalist botanical, on pale beige background, serene and understated, tileable, no text" },
+  { id: "041", theme: "botanical", burgaRef: "Velvet Night", burgaUrl: "", name: "Velvet Ginkgo", prompt: "Seamless pattern of ginkgo leaves in deep navy and gold, art nouveau style, on midnight blue background, elegant and nocturnal, tileable, no text" },
+  { id: "042", theme: "botanical", burgaRef: "Barely Yours", burgaUrl: "", name: "Barely Ginkgo", prompt: "Seamless pattern of ginkgo leaves in soft taupe and cream, minimalist botanical, on pale beige background, serene and understated, tileable, no text" },
   { id: "043", theme: "botanical", burgaRef: "—", burgaUrl: "", name: "Monstera Jungle", prompt: "Seamless pattern of large monstera leaves in rich green with natural splits, realistic botanical illustration, on dark green background, tropical, tileable, no text" },
   { id: "044", theme: "botanical", burgaRef: "—", burgaUrl: "", name: "Fern Lace", prompt: "Seamless pattern of delicate fern fronds in forest green, detailed botanical illustration, on cream background, woodland elegance, tileable, no text" },
   { id: "045", theme: "botanical", burgaRef: "—", burgaUrl: "", name: "Palm Shadow", prompt: "Seamless pattern of palm fronds in dark green silhouette style, on warm sand background, minimalist tropical, tileable, no text" },
@@ -106,7 +106,7 @@ export const DESIGNS: Design[] = [
   { id: "060", theme: "geometric", burgaRef: "—", burgaUrl: "", name: "Moroccan Tile", prompt: "Seamless pattern of intricate Moroccan tile motifs in deep blue and white, ornate geometric, tileable, no text" },
 
   // 7. ABSTRACT (061-070)
-  { id: "061", theme: "abstract", burgaRef: "Core", burgaUrl: "https://burga.jp/collections/airpods-pro-3-cases", name: "Core Blocks", prompt: "Seamless pattern of abstract color blocks in warm brown sky blue and cream, organic shapes overlapping, midcentury modern, tileable, no text" },
+  { id: "061", theme: "abstract", burgaRef: "Core", burgaUrl: "", name: "Core Blocks", prompt: "Seamless pattern of abstract color blocks in warm brown sky blue and cream, organic shapes overlapping, midcentury modern, tileable, no text" },
   { id: "062", theme: "abstract", burgaRef: "—", burgaUrl: "", name: "Sunset Gradient", prompt: "Seamless smooth gradient blending from coral pink to warm orange to deep purple, sunset colors, painterly wash, tileable, no text" },
   { id: "063", theme: "abstract", burgaRef: "—", burgaUrl: "", name: "Ocean Gradient", prompt: "Seamless smooth gradient blending from deep teal to turquoise to pale aqua, ocean colors, painterly, tileable, no text" },
   { id: "064", theme: "abstract", burgaRef: "—", burgaUrl: "", name: "Paint Splash", prompt: "Seamless pattern of abstract paint splashes in vibrant red cobalt blue and yellow, expressive and energetic, on white background, tileable, no text" },
@@ -118,7 +118,7 @@ export const DESIGNS: Design[] = [
   { id: "070", theme: "abstract", burgaRef: "—", burgaUrl: "", name: "Drip Paint", prompt: "Seamless pattern of vertical paint drips in rich oxblood red on cream background, painterly and raw, tileable, no text" },
 
   // 8. VINTAGE (071-080)
-  { id: "071", theme: "vintage", burgaRef: "La Muse", burgaUrl: "https://burga.com", name: "La Muse Deco", prompt: "Seamless pattern of art deco female silhouettes with fans and geometric frames, gold on black background, 1920s luxury glamour, tileable, no text" },
+  { id: "071", theme: "vintage", burgaRef: "La Muse", burgaUrl: "", name: "La Muse Deco", prompt: "Seamless pattern of art deco female silhouettes with fans and geometric frames, gold on black background, 1920s luxury glamour, tileable, no text" },
   { id: "072", theme: "vintage", burgaRef: "—", burgaUrl: "", name: "Victorian Damask", prompt: "Seamless pattern of ornate Victorian damask scrollwork in cream on burgundy background, regal and intricate, tileable, no text" },
   { id: "073", theme: "vintage", burgaRef: "—", burgaUrl: "", name: "William Morris", prompt: "Seamless pattern in William Morris style with stylized flowers and vines in muted forest green and rust red, arts and crafts movement, tileable, no text" },
   { id: "074", theme: "vintage", burgaRef: "—", burgaUrl: "", name: "Retro 70s Bloom", prompt: "Seamless pattern of stylized 1970s flowers with wavy petals in mustard avocado and burnt orange, groovy and retro, tileable, no text" },
