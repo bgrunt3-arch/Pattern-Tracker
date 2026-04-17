@@ -211,6 +211,8 @@
       border: 0.5pt solid #D4C5A9;
       overflow: hidden;
       position: relative;
+      display: block;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     }
     .card img {
       width: 100%;
@@ -312,6 +314,38 @@
       color: #8B7355;
       font-size: 11pt;
       font-style: italic;
+    }
+
+    /* ─── BURGAリンク ─── */
+    @media screen {
+      .card { cursor: zoom-in; }
+      .card.has-link { cursor: pointer; }
+      .card.has-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(43,38,32,0.22);
+        border-color: #D4A574;
+        z-index: 1;
+      }
+    }
+    .card-ext {
+      position: absolute;
+      bottom: 3pt;
+      right: 4pt;
+      font-size: 8pt;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 0 3pt rgba(0,0,0,0.6);
+      line-height: 1;
+      pointer-events: none;
+    }
+    a.name-ref-link {
+      color: #D4A574;
+      text-decoration: none;
+      font-size: 7pt;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+    @media screen {
+      a.name-ref-link:hover { text-decoration: underline; }
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
@@ -520,68 +554,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/001_sakura_pink.png" alt="Sakura Pink" /><span class="card-id">001</span></div><div class="card"><img src="/patterns/002_lush_meadow.png" alt="Lush Meadow" /><span class="card-id">002</span></div><div class="card"><img src="/patterns/003_vintage_rose.png" alt="Vintage Rose" /><span class="card-id">003</span></div><div class="card"><img src="/patterns/004_pastel_peony.png" alt="Pastel Peony" /><span class="card-id">004</span></div><div class="card"><img src="/patterns/005_tropical_hibiscus.png" alt="Tropical Hibiscus" /><span class="card-id">005</span></div><div class="card"><img src="/patterns/006_watercolor_daisies.png" alt="Watercolor Daisies" /><span class="card-id">006</span></div><div class="card"><img src="/patterns/007_art_nouveau_lily.png" alt="Art Nouveau Lily" /><span class="card-id">007</span></div><div class="card"><img src="/patterns/008_forget_me_not.png" alt="Forget Me Not" /><span class="card-id">008</span></div><div class="card"><img src="/patterns/009_botanical_garden.png" alt="Botanical Garden" /><span class="card-id">009</span></div><div class="card"><img src="/patterns/010_japanese_iris.png" alt="Japanese Iris" /><span class="card-id">010</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.com/products/sakura-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Sakura"><img src="/patterns/001_sakura_pink.png" alt="Sakura Pink" /><span class="card-id">001</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com/products/floral-airpods-pro-case" target="_blank" rel="noopener" title="BURGA参考: Lush Meadows"><img src="/patterns/002_lush_meadow.png" alt="Lush Meadow" /><span class="card-id">002</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/003_vintage_rose.png" alt="Vintage Rose" /><span class="card-id">003</span></div><div class="card"><img src="/patterns/004_pastel_peony.png" alt="Pastel Peony" /><span class="card-id">004</span></div><div class="card"><img src="/patterns/005_tropical_hibiscus.png" alt="Tropical Hibiscus" /><span class="card-id">005</span></div><div class="card"><img src="/patterns/006_watercolor_daisies.png" alt="Watercolor Daisies" /><span class="card-id">006</span></div><div class="card"><img src="/patterns/007_art_nouveau_lily.png" alt="Art Nouveau Lily" /><span class="card-id">007</span></div><div class="card"><img src="/patterns/008_forget_me_not.png" alt="Forget Me Not" /><span class="card-id">008</span></div><div class="card"><img src="/patterns/009_botanical_garden.png" alt="Botanical Garden" /><span class="card-id">009</span></div><div class="card"><img src="/patterns/010_japanese_iris.png" alt="Japanese Iris" /><span class="card-id">010</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">001</span>
         <span class="name-label">Sakura Pink</span>
-        <span class="name-ref">ref: Sakura</span>
+        <a class="name-ref-link" href="https://burga.com/products/sakura-airpods-pro-3-case" target="_blank" rel="noopener">ref: Sakura</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">002</span>
         <span class="name-label">Lush Meadow</span>
-        <span class="name-ref">ref: Lush Meadows</span>
+        <a class="name-ref-link" href="https://burga.com/products/floral-airpods-pro-case" target="_blank" rel="noopener">ref: Lush Meadows</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">003</span>
         <span class="name-label">Vintage Rose</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">004</span>
         <span class="name-label">Pastel Peony</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">005</span>
         <span class="name-label">Tropical Hibiscus</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">006</span>
         <span class="name-label">Watercolor Daisies</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">007</span>
         <span class="name-label">Art Nouveau Lily</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">008</span>
         <span class="name-label">Forget Me Not</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">009</span>
         <span class="name-label">Botanical Garden</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">010</span>
         <span class="name-label">Japanese Iris</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · FLORAL</span>
           <span class="serif italic">p.04</span>
@@ -596,68 +620,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/011_vanilla_sand.png" alt="Vanilla Sand" /><span class="card-id">011</span></div><div class="card"><img src="/patterns/012_golden_coral.png" alt="Golden Coral" /><span class="card-id">012</span></div><div class="card"><img src="/patterns/013_black_onyx.png" alt="Black Onyx" /><span class="card-id">013</span></div><div class="card"><img src="/patterns/014_rose_quartz.png" alt="Rose Quartz" /><span class="card-id">014</span></div><div class="card"><img src="/patterns/015_malachite.png" alt="Malachite" /><span class="card-id">015</span></div><div class="card"><img src="/patterns/016_navy_royale.png" alt="Navy Royale" /><span class="card-id">016</span></div><div class="card"><img src="/patterns/017_carrara_classic.png" alt="Carrara Classic" /><span class="card-id">017</span></div><div class="card"><img src="/patterns/018_terracotta.png" alt="Terracotta" /><span class="card-id">018</span></div><div class="card"><img src="/patterns/019_emerald_jade.png" alt="Emerald Jade" /><span class="card-id">019</span></div><div class="card"><img src="/patterns/020_iridescent_pearl.png" alt="Iridescent Pearl" /><span class="card-id">020</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.com/products/marble-airpods-3-case" target="_blank" rel="noopener" title="BURGA参考: Vanilla Sand"><img src="/patterns/011_vanilla_sand.png" alt="Vanilla Sand" /><span class="card-id">011</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Golden Coral"><img src="/patterns/012_golden_coral.png" alt="Golden Coral" /><span class="card-id">012</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/013_black_onyx.png" alt="Black Onyx" /><span class="card-id">013</span></div><div class="card"><img src="/patterns/014_rose_quartz.png" alt="Rose Quartz" /><span class="card-id">014</span></div><div class="card"><img src="/patterns/015_malachite.png" alt="Malachite" /><span class="card-id">015</span></div><div class="card"><img src="/patterns/016_navy_royale.png" alt="Navy Royale" /><span class="card-id">016</span></div><div class="card"><img src="/patterns/017_carrara_classic.png" alt="Carrara Classic" /><span class="card-id">017</span></div><div class="card"><img src="/patterns/018_terracotta.png" alt="Terracotta" /><span class="card-id">018</span></div><div class="card"><img src="/patterns/019_emerald_jade.png" alt="Emerald Jade" /><span class="card-id">019</span></div><div class="card"><img src="/patterns/020_iridescent_pearl.png" alt="Iridescent Pearl" /><span class="card-id">020</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">011</span>
         <span class="name-label">Vanilla Sand</span>
-        <span class="name-ref">ref: Vanilla Sand</span>
+        <a class="name-ref-link" href="https://burga.com/products/marble-airpods-3-case" target="_blank" rel="noopener">ref: Vanilla Sand</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">012</span>
         <span class="name-label">Golden Coral</span>
-        <span class="name-ref">ref: Golden Coral</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Golden Coral</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">013</span>
         <span class="name-label">Black Onyx</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">014</span>
         <span class="name-label">Rose Quartz</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">015</span>
         <span class="name-label">Malachite</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">016</span>
         <span class="name-label">Navy Royale</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">017</span>
         <span class="name-label">Carrara Classic</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">018</span>
         <span class="name-label">Terracotta</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">019</span>
         <span class="name-label">Emerald Jade</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">020</span>
         <span class="name-label">Iridescent Pearl</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · MARBLE</span>
           <span class="serif italic">p.05</span>
@@ -672,68 +686,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/021_celestial_cow.png" alt="Celestial Cow" /><span class="card-id">021</span></div><div class="card"><img src="/patterns/022_derby_horse.png" alt="Derby Horse" /><span class="card-id">022</span></div><div class="card"><img src="/patterns/023_leopard_classic.png" alt="Leopard Classic" /><span class="card-id">023</span></div><div class="card"><img src="/patterns/024_zebra_stripes.png" alt="Zebra Stripes" /><span class="card-id">024</span></div><div class="card"><img src="/patterns/025_python_skin.png" alt="Python Skin" /><span class="card-id">025</span></div><div class="card"><img src="/patterns/026_giraffe_mosaic.png" alt="Giraffe Mosaic" /><span class="card-id">026</span></div><div class="card"><img src="/patterns/027_tiger_stripes.png" alt="Tiger Stripes" /><span class="card-id">027</span></div><div class="card"><img src="/patterns/028_pink_leopard.png" alt="Pink Leopard" /><span class="card-id">028</span></div><div class="card"><img src="/patterns/029_dalmatian_spots.png" alt="Dalmatian Spots" /><span class="card-id">029</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">030</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Celestial"><img src="/patterns/021_celestial_cow.png" alt="Celestial Cow" /><span class="card-id">021</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com" target="_blank" rel="noopener" title="BURGA参考: Derby Race"><img src="/patterns/022_derby_horse.png" alt="Derby Horse" /><span class="card-id">022</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/023_leopard_classic.png" alt="Leopard Classic" /><span class="card-id">023</span></div><div class="card"><img src="/patterns/024_zebra_stripes.png" alt="Zebra Stripes" /><span class="card-id">024</span></div><div class="card"><img src="/patterns/025_python_skin.png" alt="Python Skin" /><span class="card-id">025</span></div><div class="card"><img src="/patterns/026_giraffe_mosaic.png" alt="Giraffe Mosaic" /><span class="card-id">026</span></div><div class="card"><img src="/patterns/027_tiger_stripes.png" alt="Tiger Stripes" /><span class="card-id">027</span></div><div class="card"><img src="/patterns/028_pink_leopard.png" alt="Pink Leopard" /><span class="card-id">028</span></div><div class="card"><img src="/patterns/029_dalmatian_spots.png" alt="Dalmatian Spots" /><span class="card-id">029</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">030</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">021</span>
         <span class="name-label">Celestial Cow</span>
-        <span class="name-ref">ref: Celestial</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Celestial</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">022</span>
         <span class="name-label">Derby Horse</span>
-        <span class="name-ref">ref: Derby Race</span>
+        <a class="name-ref-link" href="https://burga.com" target="_blank" rel="noopener">ref: Derby Race</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">023</span>
         <span class="name-label">Leopard Classic</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">024</span>
         <span class="name-label">Zebra Stripes</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">025</span>
         <span class="name-label">Python Skin</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">026</span>
         <span class="name-label">Giraffe Mosaic</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">027</span>
         <span class="name-label">Tiger Stripes</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">028</span>
         <span class="name-label">Pink Leopard</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">029</span>
         <span class="name-label">Dalmatian Spots</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">030</span>
         <span class="name-label">Cheetah Minimal</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · ANIMAL</span>
           <span class="serif italic">p.06</span>
@@ -748,68 +752,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/031_harvest_tomato.png" alt="Harvest Tomato" /><span class="card-id">031</span></div><div class="card"><img src="/patterns/032_freshly_picked.png" alt="Freshly Picked" /><span class="card-id">032</span></div><div class="card"><img src="/patterns/033_pickled.png" alt="Pickled" /><span class="card-id">033</span></div><div class="card"><img src="/patterns/034_honeycomb_bee.png" alt="Honeycomb Bee" /><span class="card-id">034</span></div><div class="card"><img src="/patterns/035_cinnamon_roll.png" alt="Cinnamon Roll" /><span class="card-id">035</span></div><div class="card"><img src="/patterns/036_cherry.png" alt="Cherry" /><span class="card-id">036</span></div><div class="card"><img src="/patterns/037_lemon_zest.png" alt="Lemon Zest" /><span class="card-id">037</span></div><div class="card"><img src="/patterns/038_mushroom_forest.png" alt="Mushroom Forest" /><span class="card-id">038</span></div><div class="card"><img src="/patterns/039_coffee_beans.png" alt="Coffee Beans" /><span class="card-id">039</span></div><div class="card"><img src="/patterns/040_orange_grove.png" alt="Orange Grove" /><span class="card-id">040</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.com/products/harvest-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Harvest"><img src="/patterns/031_harvest_tomato.png" alt="Harvest Tomato" /><span class="card-id">031</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com/products/freshly-picked-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Freshly Picked"><img src="/patterns/032_freshly_picked.png" alt="Freshly Picked" /><span class="card-id">032</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com/products/pickled-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Pickled"><img src="/patterns/033_pickled.png" alt="Pickled" /><span class="card-id">033</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com/products/honeycomb-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Honeycomb"><img src="/patterns/034_honeycomb_bee.png" alt="Honeycomb Bee" /><span class="card-id">034</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.com/products/cinnamon-roll-airpods-pro-3-case" target="_blank" rel="noopener" title="BURGA参考: Cinnamon Roll"><img src="/patterns/035_cinnamon_roll.png" alt="Cinnamon Roll" /><span class="card-id">035</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Cherrybomb"><img src="/patterns/036_cherry.png" alt="Cherry" /><span class="card-id">036</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/037_lemon_zest.png" alt="Lemon Zest" /><span class="card-id">037</span></div><div class="card"><img src="/patterns/038_mushroom_forest.png" alt="Mushroom Forest" /><span class="card-id">038</span></div><div class="card"><img src="/patterns/039_coffee_beans.png" alt="Coffee Beans" /><span class="card-id">039</span></div><div class="card"><img src="/patterns/040_orange_grove.png" alt="Orange Grove" /><span class="card-id">040</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">031</span>
         <span class="name-label">Harvest Tomato</span>
-        <span class="name-ref">ref: Harvest</span>
+        <a class="name-ref-link" href="https://burga.com/products/harvest-airpods-pro-3-case" target="_blank" rel="noopener">ref: Harvest</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">032</span>
         <span class="name-label">Freshly Picked</span>
-        <span class="name-ref">ref: Freshly Picked</span>
+        <a class="name-ref-link" href="https://burga.com/products/freshly-picked-airpods-pro-3-case" target="_blank" rel="noopener">ref: Freshly Picked</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">033</span>
         <span class="name-label">Pickled</span>
-        <span class="name-ref">ref: Pickled</span>
+        <a class="name-ref-link" href="https://burga.com/products/pickled-airpods-pro-3-case" target="_blank" rel="noopener">ref: Pickled</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">034</span>
         <span class="name-label">Honeycomb Bee</span>
-        <span class="name-ref">ref: Honeycomb</span>
+        <a class="name-ref-link" href="https://burga.com/products/honeycomb-airpods-pro-3-case" target="_blank" rel="noopener">ref: Honeycomb</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">035</span>
         <span class="name-label">Cinnamon Roll</span>
-        <span class="name-ref">ref: Cinnamon Roll</span>
+        <a class="name-ref-link" href="https://burga.com/products/cinnamon-roll-airpods-pro-3-case" target="_blank" rel="noopener">ref: Cinnamon Roll</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">036</span>
         <span class="name-label">Cherry</span>
-        <span class="name-ref">ref: Cherrybomb</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Cherrybomb</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">037</span>
         <span class="name-label">Lemon Zest</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">038</span>
         <span class="name-label">Mushroom Forest</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">039</span>
         <span class="name-label">Coffee Beans</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">040</span>
         <span class="name-label">Orange Grove</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · FOOD</span>
           <span class="serif italic">p.07</span>
@@ -824,68 +818,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/041_velvet_ginkgo.png" alt="Velvet Ginkgo" /><span class="card-id">041</span></div><div class="card"><img src="/patterns/042_barely_ginkgo.png" alt="Barely Ginkgo" /><span class="card-id">042</span></div><div class="card"><img src="/patterns/043_monstera_jungle.png" alt="Monstera Jungle" /><span class="card-id">043</span></div><div class="card"><img src="/patterns/044_fern_lace.png" alt="Fern Lace" /><span class="card-id">044</span></div><div class="card"><img src="/patterns/045_palm_shadow.png" alt="Palm Shadow" /><span class="card-id">045</span></div><div class="card"><img src="/patterns/046_eucalyptus.png" alt="Eucalyptus" /><span class="card-id">046</span></div><div class="card"><img src="/patterns/047_ivy_trellis.png" alt="Ivy Trellis" /><span class="card-id">047</span></div><div class="card"><img src="/patterns/048_jungle_canopy.png" alt="Jungle Canopy" /><span class="card-id">048</span></div><div class="card"><img src="/patterns/049_bamboo_grove.png" alt="Bamboo Grove" /><span class="card-id">049</span></div><div class="card"><img src="/patterns/050_pressed_florals.png" alt="Pressed Florals" /><span class="card-id">050</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Velvet Night"><img src="/patterns/041_velvet_ginkgo.png" alt="Velvet Ginkgo" /><span class="card-id">041</span><span class="card-ext">↗</span></a><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Barely Yours"><img src="/patterns/042_barely_ginkgo.png" alt="Barely Ginkgo" /><span class="card-id">042</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/043_monstera_jungle.png" alt="Monstera Jungle" /><span class="card-id">043</span></div><div class="card"><img src="/patterns/044_fern_lace.png" alt="Fern Lace" /><span class="card-id">044</span></div><div class="card"><img src="/patterns/045_palm_shadow.png" alt="Palm Shadow" /><span class="card-id">045</span></div><div class="card"><img src="/patterns/046_eucalyptus.png" alt="Eucalyptus" /><span class="card-id">046</span></div><div class="card"><img src="/patterns/047_ivy_trellis.png" alt="Ivy Trellis" /><span class="card-id">047</span></div><div class="card"><img src="/patterns/048_jungle_canopy.png" alt="Jungle Canopy" /><span class="card-id">048</span></div><div class="card"><img src="/patterns/049_bamboo_grove.png" alt="Bamboo Grove" /><span class="card-id">049</span></div><div class="card"><img src="/patterns/050_pressed_florals.png" alt="Pressed Florals" /><span class="card-id">050</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">041</span>
         <span class="name-label">Velvet Ginkgo</span>
-        <span class="name-ref">ref: Velvet Night</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Velvet Night</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">042</span>
         <span class="name-label">Barely Ginkgo</span>
-        <span class="name-ref">ref: Barely Yours</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Barely Yours</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">043</span>
         <span class="name-label">Monstera Jungle</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">044</span>
         <span class="name-label">Fern Lace</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">045</span>
         <span class="name-label">Palm Shadow</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">046</span>
         <span class="name-label">Eucalyptus</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">047</span>
         <span class="name-label">Ivy Trellis</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">048</span>
         <span class="name-label">Jungle Canopy</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">049</span>
         <span class="name-label">Bamboo Grove</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">050</span>
         <span class="name-label">Pressed Florals</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · BOTANICAL</span>
           <span class="serif italic">p.08</span>
@@ -907,61 +891,51 @@
         <span class="name-label">Black White Checker</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">052</span>
         <span class="name-label">Red Gingham</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">053</span>
         <span class="name-label">Art Deco Gold</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">054</span>
         <span class="name-label">Houndstooth</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">055</span>
         <span class="name-label">Argyle</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">056</span>
         <span class="name-label">Retro Circles</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">057</span>
         <span class="name-label">Minimal Stripes</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">058</span>
         <span class="name-label">Triangle Mountains</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">059</span>
         <span class="name-label">Hexagon Gold</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">060</span>
         <span class="name-label">Moroccan Tile</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · GEOMETRIC</span>
           <span class="serif italic">p.09</span>
@@ -976,68 +950,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/061_core_blocks.png" alt="Core Blocks" /><span class="card-id">061</span></div><div class="card"><img src="/patterns/062_sunset_gradient.png" alt="Sunset Gradient" /><span class="card-id">062</span></div><div class="card"><img src="/patterns/063_ocean_gradient.png" alt="Ocean Gradient" /><span class="card-id">063</span></div><div class="card"><img src="/patterns/064_paint_splash.png" alt="Paint Splash" /><span class="card-id">064</span></div><div class="card"><img src="/patterns/065_organic_blobs.png" alt="Organic Blobs" /><span class="card-id">065</span></div><div class="card"><img src="/patterns/066_brush_strokes.png" alt="Brush Strokes" /><span class="card-id">066</span></div><div class="card"><img src="/patterns/067_watercolor_wash.png" alt="Watercolor Wash" /><span class="card-id">067</span></div><div class="card"><img src="/patterns/068_risograph_grain.png" alt="Risograph Grain" /><span class="card-id">068</span></div><div class="card"><img src="/patterns/069_memphis_style.png" alt="Memphis Style" /><span class="card-id">069</span></div><div class="card"><img src="/patterns/070_drip_paint.png" alt="Drip Paint" /><span class="card-id">070</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener" title="BURGA参考: Core"><img src="/patterns/061_core_blocks.png" alt="Core Blocks" /><span class="card-id">061</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/062_sunset_gradient.png" alt="Sunset Gradient" /><span class="card-id">062</span></div><div class="card"><img src="/patterns/063_ocean_gradient.png" alt="Ocean Gradient" /><span class="card-id">063</span></div><div class="card"><img src="/patterns/064_paint_splash.png" alt="Paint Splash" /><span class="card-id">064</span></div><div class="card"><img src="/patterns/065_organic_blobs.png" alt="Organic Blobs" /><span class="card-id">065</span></div><div class="card"><img src="/patterns/066_brush_strokes.png" alt="Brush Strokes" /><span class="card-id">066</span></div><div class="card"><img src="/patterns/067_watercolor_wash.png" alt="Watercolor Wash" /><span class="card-id">067</span></div><div class="card"><img src="/patterns/068_risograph_grain.png" alt="Risograph Grain" /><span class="card-id">068</span></div><div class="card"><img src="/patterns/069_memphis_style.png" alt="Memphis Style" /><span class="card-id">069</span></div><div class="card"><img src="/patterns/070_drip_paint.png" alt="Drip Paint" /><span class="card-id">070</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">061</span>
         <span class="name-label">Core Blocks</span>
-        <span class="name-ref">ref: Core</span>
+        <a class="name-ref-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">ref: Core</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">062</span>
         <span class="name-label">Sunset Gradient</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">063</span>
         <span class="name-label">Ocean Gradient</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">064</span>
         <span class="name-label">Paint Splash</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">065</span>
         <span class="name-label">Organic Blobs</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">066</span>
         <span class="name-label">Brush Strokes</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">067</span>
         <span class="name-label">Watercolor Wash</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">068</span>
         <span class="name-label">Risograph Grain</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">069</span>
         <span class="name-label">Memphis Style</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">070</span>
         <span class="name-label">Drip Paint</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · ABSTRACT</span>
           <span class="serif italic">p.10</span>
@@ -1052,68 +1016,58 @@
           </div>
           <div class="header-meta">10 DESIGNS</div>
         </div>
-        <div class="grid"><div class="card"><img src="/patterns/071_la_muse_deco.png" alt="La Muse Deco" /><span class="card-id">071</span></div><div class="card"><img src="/patterns/072_victorian_damask.png" alt="Victorian Damask" /><span class="card-id">072</span></div><div class="card"><img src="/patterns/073_william_morris.png" alt="William Morris" /><span class="card-id">073</span></div><div class="card"><img src="/patterns/074_retro_70s_bloom.png" alt="Retro 70s Bloom" /><span class="card-id">074</span></div><div class="card"><img src="/patterns/075_vintage_lace.png" alt="Vintage Lace" /><span class="card-id">075</span></div><div class="card"><img src="/patterns/076_toile_de_jouy.png" alt="Toile de Jouy" /><span class="card-id">076</span></div><div class="card"><img src="/patterns/077_baroque_gold.png" alt="Baroque Gold" /><span class="card-id">077</span></div><div class="card"><img src="/patterns/078_rococo_rose.png" alt="Rococo Rose" /><span class="card-id">078</span></div><div class="card"><img src="/patterns/079_moroccan_medallion.png" alt="Moroccan Medallion" /><span class="card-id">079</span></div><div class="card"><img src="/patterns/080_persian_carpet.png" alt="Persian Carpet" /><span class="card-id">080</span></div></div>
+        <div class="grid"><a class="card has-link" href="https://burga.com" target="_blank" rel="noopener" title="BURGA参考: La Muse"><img src="/patterns/071_la_muse_deco.png" alt="La Muse Deco" /><span class="card-id">071</span><span class="card-ext">↗</span></a><div class="card"><img src="/patterns/072_victorian_damask.png" alt="Victorian Damask" /><span class="card-id">072</span></div><div class="card"><img src="/patterns/073_william_morris.png" alt="William Morris" /><span class="card-id">073</span></div><div class="card"><img src="/patterns/074_retro_70s_bloom.png" alt="Retro 70s Bloom" /><span class="card-id">074</span></div><div class="card"><img src="/patterns/075_vintage_lace.png" alt="Vintage Lace" /><span class="card-id">075</span></div><div class="card"><img src="/patterns/076_toile_de_jouy.png" alt="Toile de Jouy" /><span class="card-id">076</span></div><div class="card"><img src="/patterns/077_baroque_gold.png" alt="Baroque Gold" /><span class="card-id">077</span></div><div class="card"><img src="/patterns/078_rococo_rose.png" alt="Rococo Rose" /><span class="card-id">078</span></div><div class="card"><img src="/patterns/079_moroccan_medallion.png" alt="Moroccan Medallion" /><span class="card-id">079</span></div><div class="card"><img src="/patterns/080_persian_carpet.png" alt="Persian Carpet" /><span class="card-id">080</span></div></div>
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">071</span>
         <span class="name-label">La Muse Deco</span>
-        <span class="name-ref">ref: La Muse</span>
+        <a class="name-ref-link" href="https://burga.com" target="_blank" rel="noopener">ref: La Muse</a>
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">072</span>
         <span class="name-label">Victorian Damask</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">073</span>
         <span class="name-label">William Morris</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">074</span>
         <span class="name-label">Retro 70s Bloom</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">075</span>
         <span class="name-label">Vintage Lace</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">076</span>
         <span class="name-label">Toile de Jouy</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">077</span>
         <span class="name-label">Baroque Gold</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">078</span>
         <span class="name-label">Rococo Rose</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">079</span>
         <span class="name-label">Moroccan Medallion</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">080</span>
         <span class="name-label">Persian Carpet</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · VINTAGE</span>
           <span class="serif italic">p.11</span>
@@ -1135,61 +1089,51 @@
         <span class="name-label">Starry Night</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">082</span>
         <span class="name-label">Moon Phases</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">083</span>
         <span class="name-label">Constellations</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">084</span>
         <span class="name-label">Galaxy Nebula</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">085</span>
         <span class="name-label">Solar System</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">086</span>
         <span class="name-label">Crescent Stars</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">087</span>
         <span class="name-label">Sun & Moon</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">088</span>
         <span class="name-label">Zodiac Glyphs</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">089</span>
         <span class="name-label">Cosmic Ombre</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">090</span>
         <span class="name-label">Gold Stars</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · CELESTIAL</span>
           <span class="serif italic">p.12</span>
@@ -1211,61 +1155,51 @@
         <span class="name-label">Hokusai Wave</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">092</span>
         <span class="name-label">Palm Sunset</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">093</span>
         <span class="name-label">Tropical Fish</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">094</span>
         <span class="name-label">Seashells</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">095</span>
         <span class="name-label">Mediterranean Tile</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">096</span>
         <span class="name-label">Coral Reef</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">097</span>
         <span class="name-label">Wave Gradient</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">098</span>
         <span class="name-label">Beach Sunset</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">099</span>
         <span class="name-label">Pineapple</span>
         
       </div>
-    
       <div class="name-row">
         <span class="name-id serif italic">100</span>
         <span class="name-label">Flamingo Tropical</span>
         
-      </div>
-    </div>
+      </div></div>
         <div class="footer">
           <span>COCOCASE · COASTAL</span>
           <span class="serif italic">p.13</span>
@@ -1404,9 +1338,11 @@
       document.body.style.overflow = '';
     }
 
-    // カードにクリックハンドラを付与
+    // カードにクリックハンドラを付与（BURGAリンクカードはライトボックス無効）
     cards.forEach(function(img, i) {
-      img.closest('.card').addEventListener('click', function() { open(i); });
+      var card = img.closest('.card');
+      if (card.classList.contains('has-link')) return; // リンクカードはブラウザデフォルト動作
+      card.addEventListener('click', function() { open(i); });
     });
 
     // 閉じる

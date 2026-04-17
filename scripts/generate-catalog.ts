@@ -109,20 +109,30 @@ function buildThemePages(web = false): string {
     const p       = String(pageNum++).padStart(2, "0");
 
     const gridHTML = designs.map(d => {
-      const src = patternSrc(d.id, d.name, web);
-      const img = src
-        ? `<img src="${src}" alt="${d.name}" />`
-        : `<div class="card-placeholder"></div>`;
-      return `<div class="card">${img}<span class="card-id">${d.id}</span></div>`;
+      const src     = patternSrc(d.id, d.name, web);
+      const img     = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
+      const hasLink = !!d.burgaUrl;
+      const extIcon = hasLink ? `<span class="card-ext">↗</span>` : "";
+      const inner   = `${img}<span class="card-id">${d.id}</span>${extIcon}`;
+      if (hasLink) {
+        return `<a class="card has-link" href="${d.burgaUrl}" target="_blank" rel="noopener" title="BURGA参考: ${d.burgaRef}">${inner}</a>`;
+      }
+      return `<div class="card">${inner}</div>`;
     }).join("");
 
-    const namesHTML = designs.map(d => `
+    const namesHTML = designs.map(d => {
+      const refPart = d.burgaRef !== "—"
+        ? (d.burgaUrl
+            ? `<a class="name-ref-link" href="${d.burgaUrl}" target="_blank" rel="noopener">ref: ${d.burgaRef}</a>`
+            : `<span class="name-ref">ref: ${d.burgaRef}</span>`)
+        : "";
+      return `
       <div class="name-row">
         <span class="name-id serif italic">${d.id}</span>
         <span class="name-label">${d.name}</span>
-        ${d.burgaRef !== "—" ? `<span class="name-ref">ref: ${d.burgaRef}</span>` : ""}
-      </div>
-    `).join("");
+        ${refPart}
+      </div>`;
+    }).join("");
 
     return `
       <div class="page">
@@ -531,6 +541,8 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       border: 0.5pt solid #D4C5A9;
       overflow: hidden;
       position: relative;
+      display: block;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     }
     .card img {
       width: 100%;
@@ -632,6 +644,38 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       color: #8B7355;
       font-size: 11pt;
       font-style: italic;
+    }
+
+    /* ─── BURGAリンク ─── */
+    @media screen {
+      .card { cursor: zoom-in; }
+      .card.has-link { cursor: pointer; }
+      .card.has-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(43,38,32,0.22);
+        border-color: #D4A574;
+        z-index: 1;
+      }
+    }
+    .card-ext {
+      position: absolute;
+      bottom: 3pt;
+      right: 4pt;
+      font-size: 8pt;
+      color: rgba(255,255,255,0.85);
+      text-shadow: 0 0 3pt rgba(0,0,0,0.6);
+      line-height: 1;
+      pointer-events: none;
+    }
+    a.name-ref-link {
+      color: #D4A574;
+      text-decoration: none;
+      font-size: 7pt;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+    @media screen {
+      a.name-ref-link:hover { text-decoration: underline; }
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
@@ -817,9 +861,11 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       document.body.style.overflow = '';
     }
 
-    // カードにクリックハンドラを付与
+    // カードにクリックハンドラを付与（BURGAリンクカードはライトボックス無効）
     cards.forEach(function(img, i) {
-      img.closest('.card').addEventListener('click', function() { open(i); });
+      var card = img.closest('.card');
+      if (card.classList.contains('has-link')) return; // リンクカードはブラウザデフォルト動作
+      card.addEventListener('click', function() { open(i); });
     });
 
     // 閉じる
