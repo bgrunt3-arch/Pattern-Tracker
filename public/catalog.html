@@ -324,14 +324,27 @@
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 8.5pt;
+      display: flex;
+      align-items: center;
+      gap: 5pt;
     }
     @media screen {
       a.name-label-link:hover { color: #D4A574; }
+      a.name-label-link:hover .name-ext { background: #C49060; }
     }
     .name-ext {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #D4A574;
+      color: #fff;
       font-size: 7pt;
-      color: #D4A574;
-      margin-left: 2pt;
+      font-style: normal;
+      border-radius: 3pt;
+      padding: 1pt 4pt;
+      line-height: 1.5;
+      letter-spacing: 0;
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
@@ -544,12 +557,12 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">001</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/sakura-airpods-pro-3-case" target="_blank" rel="noopener">Sakura Pink <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/sakura-airpods-pro-3-case" target="_blank" rel="noopener">Sakura Pink<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Sakura</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">002</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/floral-airpods-pro-case" target="_blank" rel="noopener">Lush Meadow <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/floral-airpods-pro-case" target="_blank" rel="noopener">Lush Meadow<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Lush Meadows</span>
       </div>
       <div class="name-row">
@@ -610,12 +623,12 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">011</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/marble-airpods-3-case" target="_blank" rel="noopener">Vanilla Sand <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/marble-airpods-3-case" target="_blank" rel="noopener">Vanilla Sand<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Vanilla Sand</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">012</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Golden Coral <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Golden Coral<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Golden Coral</span>
       </div>
       <div class="name-row">
@@ -676,12 +689,12 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">021</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Celestial Cow <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Celestial Cow<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Celestial</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">022</span>
-        <a class="name-label name-label-link" href="https://burga.com" target="_blank" rel="noopener">Derby Horse <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com" target="_blank" rel="noopener">Derby Horse<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Derby Race</span>
       </div>
       <div class="name-row">
@@ -742,32 +755,32 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">031</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/harvest-airpods-pro-3-case" target="_blank" rel="noopener">Harvest Tomato <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/harvest-airpods-pro-3-case" target="_blank" rel="noopener">Harvest Tomato<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Harvest</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">032</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/freshly-picked-airpods-pro-3-case" target="_blank" rel="noopener">Freshly Picked <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/freshly-picked-airpods-pro-3-case" target="_blank" rel="noopener">Freshly Picked<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Freshly Picked</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">033</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/pickled-airpods-pro-3-case" target="_blank" rel="noopener">Pickled <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/pickled-airpods-pro-3-case" target="_blank" rel="noopener">Pickled<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Pickled</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">034</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/honeycomb-airpods-pro-3-case" target="_blank" rel="noopener">Honeycomb Bee <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/honeycomb-airpods-pro-3-case" target="_blank" rel="noopener">Honeycomb Bee<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Honeycomb</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">035</span>
-        <a class="name-label name-label-link" href="https://burga.com/products/cinnamon-roll-airpods-pro-3-case" target="_blank" rel="noopener">Cinnamon Roll <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com/products/cinnamon-roll-airpods-pro-3-case" target="_blank" rel="noopener">Cinnamon Roll<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Cinnamon Roll</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">036</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Cherry <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Cherry<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Cherrybomb</span>
       </div>
       <div class="name-row">
@@ -808,12 +821,12 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">041</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Velvet Ginkgo <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Velvet Ginkgo<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Velvet Night</span>
       </div>
       <div class="name-row">
         <span class="name-id serif italic">042</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Barely Ginkgo <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Barely Ginkgo<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Barely Yours</span>
       </div>
       <div class="name-row">
@@ -940,7 +953,7 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">061</span>
-        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Core Blocks <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.jp/collections/airpods-pro-3-cases" target="_blank" rel="noopener">Core Blocks<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: Core</span>
       </div>
       <div class="name-row">
@@ -1006,7 +1019,7 @@
         <div class="names">
       <div class="name-row">
         <span class="name-id serif italic">071</span>
-        <a class="name-label name-label-link" href="https://burga.com" target="_blank" rel="noopener">La Muse Deco <span class="name-ext">↗</span></a>
+        <a class="name-label name-label-link" href="https://burga.com" target="_blank" rel="noopener">La Muse Deco<span class="name-ext">BURGA ↗</span></a>
         <span class="name-ref">ref: La Muse</span>
       </div>
       <div class="name-row">

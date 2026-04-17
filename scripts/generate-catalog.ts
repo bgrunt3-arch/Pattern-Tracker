@@ -117,7 +117,7 @@ function buildThemePages(web = false): string {
     const namesHTML = designs.map(d => {
       const hasLink = !!d.burgaUrl;
       const nameEl = hasLink
-        ? `<a class="name-label name-label-link" href="${d.burgaUrl}" target="_blank" rel="noopener">${d.name} <span class="name-ext">↗</span></a>`
+        ? `<a class="name-label name-label-link" href="${d.burgaUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">BURGA ↗</span></a>`
         : `<span class="name-label">${d.name}</span>`;
       const refPart = d.burgaRef !== "—"
         ? `<span class="name-ref">ref: ${d.burgaRef}</span>`
@@ -650,14 +650,27 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       overflow: hidden;
       text-overflow: ellipsis;
       font-size: 8.5pt;
+      display: flex;
+      align-items: center;
+      gap: 5pt;
     }
     @media screen {
       a.name-label-link:hover { color: #D4A574; }
+      a.name-label-link:hover .name-ext { background: #C49060; }
     }
     .name-ext {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #D4A574;
+      color: #fff;
       font-size: 7pt;
-      color: #D4A574;
-      margin-left: 2pt;
+      font-style: normal;
+      border-radius: 3pt;
+      padding: 1pt 4pt;
+      line-height: 1.5;
+      letter-spacing: 0;
     }
 
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
