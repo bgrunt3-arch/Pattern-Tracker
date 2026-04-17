@@ -12,6 +12,8 @@
  *   --theme  <theme>   テーマ絞り込み
  *                      (floral|marble|animal|food|botanical|geometric|abstract|vintage|celestial|coastal)
  *   --ids    <ids>     カンマ区切りのID絞り込み (例: 001,002,003)
+ *   --from   <id>      このID以降を対象 (例: 030 → 030〜100)
+ *   --to     <id>      このID以前を対象 (例: 050 → 001〜050)
  *   --limit  <n>       最大生成件数
  *   --skip-existing    public/generated/{id}.png が既に存在するIDをスキップ
  *   --dry-run          実際にはAPIを呼ばず、対象リストだけ表示
@@ -19,9 +21,11 @@
  *
  * 例:
  *   npx tsx scripts/generate-images.ts --dry-run
+ *   npx tsx scripts/generate-images.ts --from 030           # 030〜100
+ *   npx tsx scripts/generate-images.ts --from 030 --to 050  # 030〜050
  *   npx tsx scripts/generate-images.ts --theme floral --limit 3
  *   npx tsx scripts/generate-images.ts --ids 001,002,003
- *   npx tsx scripts/generate-images.ts --theme marble --skip-existing
+ *   npx tsx scripts/generate-images.ts --skip-existing
  *   npx tsx scripts/generate-images.ts --limit 10 --delay 2000
  *
  * 生成した画像は public/generated/{id}.png に保存されます。
@@ -57,6 +61,8 @@ const hasFlag = (flag: string) => args.includes(flag);
 
 const themeFilter  = getArg('--theme') as Theme | undefined;
 const idsFilter    = getArg('--ids')?.split(',').map(s => s.trim());
+const fromId       = getArg('--from');   // 例: "030"
+const toId         = getArg('--to');     // 例: "100"
 const limitStr     = getArg('--limit');
 const limit        = limitStr ? parseInt(limitStr, 10) : Infinity;
 const skipExisting = hasFlag('--skip-existing');
@@ -108,6 +114,8 @@ async function main() {
   let targets = DESIGNS.filter(d => {
     if (themeFilter && d.theme !== themeFilter) return false;
     if (idsFilter && !idsFilter.includes(d.id)) return false;
+    if (fromId && d.id < fromId) return false;
+    if (toId   && d.id > toId)   return false;
     if (skipExisting && fs.existsSync(path.join(OUT_DIR, `${d.id}.png`))) return false;
     return true;
   });
@@ -119,9 +127,10 @@ async function main() {
   console.log(`🎨  COCOcase Imagen 4 Fast バッチ生成`);
   console.log(`    モデル: imagen-4.0-fast-generate-001`);
   console.log(`    対象:   ${total} 件`);
-  if (themeFilter)  console.log(`    テーマ: ${themeFilter}`);
-  if (idsFilter)    console.log(`    IDs:    ${idsFilter.join(', ')}`);
-  if (skipExisting) console.log(`    既存スキップ: ON`);
+  if (themeFilter)       console.log(`    テーマ: ${themeFilter}`);
+  if (idsFilter)         console.log(`    IDs:    ${idsFilter.join(', ')}`);
+  if (fromId || toId)    console.log(`    範囲:   ${fromId ?? '001'} 〜 ${toId ?? '100'}`);
+  if (skipExisting)      console.log(`    既存スキップ: ON`);
   if (dryRun)       console.log(`    ⚠️  DRY RUN モード（APIは呼ばれません）`);
   console.log('');
 
