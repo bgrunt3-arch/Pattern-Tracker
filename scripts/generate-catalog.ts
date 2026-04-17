@@ -41,6 +41,27 @@ function patternDataUrl(id: string, name: string): string | null {
   return toDataUrl(path.join(PATTERNS_DIR, `${id}_${slugName(name)}.png`));
 }
 
+// web=true のとき /patterns/... の URL を返す（base64 不使用・軽量）
+function patternSrc(id: string, name: string, web: boolean): string | null {
+  if (web) {
+    const filename = `${id}_${slugName(name)}.png`;
+    if (!fs.existsSync(path.join(PATTERNS_DIR, filename))) return null;
+    return `/patterns/${filename}`;
+  }
+  return patternDataUrl(id, name);
+}
+
+// web=true のとき public/ 以下の相対URLを返す
+function manualSrc(filePath: string, web: boolean): string | null {
+  if (web) {
+    if (!fs.existsSync(filePath)) return null;
+    // /Users/.../public/patterns-manual/... → /patterns-manual/...
+    const rel = filePath.split(/[\/\\]public[\/\\]/)[1];
+    return rel ? `/${rel.replace(/\\/g, "/")}` : null;
+  }
+  return toDataUrl(filePath);
+}
+
 function today(): string {
   return new Date().toLocaleDateString("ja-JP", {
     year: "numeric", month: "2-digit", day: "2-digit",
@@ -79,7 +100,7 @@ function buildTOC(): string {
 }
 
 // ===== テーマ別ページ =====
-function buildThemePages(): string {
+function buildThemePages(web = false): string {
   const themes = THEMES.filter(t => t.id !== "all");
   let pageNum  = 4;
 
@@ -88,7 +109,7 @@ function buildThemePages(): string {
     const p       = String(pageNum++).padStart(2, "0");
 
     const gridHTML = designs.map(d => {
-      const src = patternDataUrl(d.id, d.name);
+      const src = patternSrc(d.id, d.name, web);
       const img = src
         ? `<img src="${src}" alt="${d.name}" />`
         : `<div class="card-placeholder"></div>`;
@@ -122,9 +143,57 @@ function buildThemePages(): string {
   }).join("\n");
 }
 
+// ===== 手動パターン スキャン =====
+type ManualSection = { label: string; files: string[] };
+
+function scanManualSections(): ManualSection[] {
+  console.log(`\n   [scanManualSections] manualDir: ${MANUAL_DIR}`);
+  console.log(`   [scanManualSections] exists: ${fs.existsSync(MANUAL_DIR)}`);
+
+  if (!fs.existsSync(MANUAL_DIR)) return [];
+
+  const entries = fs.readdirSync(MANUAL_DIR, { withFileTypes: true });
+  console.log(`   [scanManualSections] entries: ${entries.map(e => e.name).join(", ") || "(none)"}`);
+
+  const sections: ManualSection[] = [];
+
+  // トップレベルの画像ファイル（サブフォルダ外）
+  const topFiles = entries
+    .filter(e => e.isFile() && /\.(png|jpg|jpeg)$/i.test(e.name))
+    .map(e => path.join(MANUAL_DIR, e.name))
+    .sort();
+  if (topFiles.length > 0) {
+    sections.push({ label: "Original", files: topFiles });
+    console.log(`   [scanManualSections] top-level files: ${topFiles.length}`);
+  }
+
+  // サブフォルダ内を再帰スキャン
+  const subDirs = entries
+    .filter(e => e.isDirectory() && !e.name.startsWith("."))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  for (const dir of subDirs) {
+    const subPath = path.join(MANUAL_DIR, dir.name);
+    const subFiles = fs.readdirSync(subPath)
+      .filter(f => /\.(png|jpg|jpeg)$/i.test(f))
+      .map(f => path.join(subPath, f))
+      .sort();
+    console.log(`   [scanManualSections] subdir "${dir.name}": ${subFiles.length} files`);
+    if (subFiles.length > 0) {
+      // フォルダ名をラベルに変換 (gemini-ai → Gemini AI)
+      const label = dir.name.replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      sections.push({ label, files: subFiles });
+    }
+  }
+
+  return sections;
+}
+
 // ===== 手動パターンページ =====
-function buildManualPage(files: string[], startPage: number): string {
-  if (files.length === 0) {
+function buildManualPage(sections: ManualSection[], startPage: number, web = false): string {
+  const allFiles = sections.flatMap(s => s.files);
+
+  if (allFiles.length === 0) {
     return `
       <div class="page">
         <div class="header">
@@ -142,27 +211,38 @@ function buildManualPage(files: string[], startPage: number): string {
     `;
   }
 
-  // 10枚ごとにページ分割
-  const pages: string[][] = [];
-  for (let i = 0; i < files.length; i += 10) {
-    pages.push(files.slice(i, i + 10));
+  // セクションをまたいで10枚ごとにページ分割
+  const pages: Array<{ filePath: string; label: string }[]> = [];
+  let current: Array<{ filePath: string; label: string }> = [];
+
+  for (const section of sections) {
+    for (const filePath of section.files) {
+      const label = path.basename(filePath, path.extname(filePath));
+      current.push({ filePath, label });
+      if (current.length === 10) {
+        pages.push(current);
+        current = [];
+      }
+    }
   }
+  if (current.length > 0) pages.push(current);
 
   return pages.map((chunk, pi) => {
     const p = String(startPage + pi).padStart(2, "0");
 
-    const gridHTML = chunk.map(filename => {
-      const filePath = path.join(MANUAL_DIR, filename);
-      const src      = toDataUrl(filePath);
-      const label    = path.basename(filename, path.extname(filename));
-      const img      = src ? `<img src="${src}" alt="${label}" />` : `<div class="card-placeholder"></div>`;
+    const gridHTML = chunk.map(({ filePath, label }) => {
+      const src = manualSrc(filePath, web);
+      const img = src ? `<img src="${src}" alt="${label}" />` : `<div class="card-placeholder"></div>`;
       return `<div class="card">${img}</div>`;
     }).join("");
 
-    const namesHTML = chunk.map(filename => {
-      const label = path.basename(filename, path.extname(filename));
-      return `<div class="name-row"><span class="name-label">${label}</span></div>`;
-    }).join("");
+    const namesHTML = chunk.map(({ label }) =>
+      `<div class="name-row"><span class="name-label">${label}</span></div>`
+    ).join("");
+
+    // セクション名をサブタイトルに（先頭ページのみ）
+    const sectionLabel = sections.map(s => s.label).join(" / ");
+    const meta = pi === 0 ? `${sectionLabel} · ${allFiles.length} FILES` : `CONTINUED · ${allFiles.length} FILES`;
 
     return `
       <div class="page">
@@ -170,7 +250,7 @@ function buildManualPage(files: string[], startPage: number): string {
           <div class="header-title serif italic">
             Original <span class="header-jp">手動デザイン</span>
           </div>
-          <div class="header-meta">MANUAL PATTERNS · ${chunk.length} FILES</div>
+          <div class="header-meta">${meta}</div>
         </div>
         <div class="grid">${gridHTML}</div>
         <div class="names">${namesHTML}</div>
@@ -232,7 +312,8 @@ function buildContactPage(pageNum: number): string {
 }
 
 // ===== HTML組み立て =====
-function buildHTML(manualFiles: string[]): string {
+function buildHTML(manualSections: ManualSection[], web = false): string {
+  const manualFiles     = manualSections.flatMap(s => s.files);
   const manualStartPage = 14;
   const contactPage     = manualStartPage + Math.max(1, Math.ceil(manualFiles.length / 10));
   const dateStr         = today();
@@ -552,6 +633,77 @@ function buildHTML(manualFiles: string[]): string {
       font-size: 11pt;
       font-style: italic;
     }
+
+    /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
+    @media screen {
+      .card { cursor: zoom-in; }
+    }
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20,14,10,0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .lb-overlay.active { display: flex; }
+    .lb-img {
+      max-width: 88vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border: 1px solid rgba(212,165,116,0.35);
+      box-shadow: 0 12px 80px rgba(0,0,0,0.7);
+    }
+    .lb-label {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: #D4A574;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .lb-close {
+      position: fixed;
+      top: 18px;
+      right: 26px;
+      font-size: 30px;
+      color: #8B7355;
+      cursor: pointer;
+      line-height: 1;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .lb-close:hover { color: #fff; }
+    .lb-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 40px;
+      color: #8B7355;
+      cursor: pointer;
+      padding: 10px 20px;
+      user-select: none;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .lb-nav:hover { color: #D4A574; }
+    .lb-prev { left: 10px; }
+    .lb-next { right: 10px; }
+    .lb-counter {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #8B7355;
+    }
+    @media print {
+      .lb-overlay { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -621,13 +773,78 @@ function buildHTML(manualFiles: string[]): string {
   </div>
 
   <!-- ══════════════ テーマ別ページ ══════════════ -->
-  ${buildThemePages()}
+  ${buildThemePages(web)}
 
   <!-- ══════════════ Original（手動） ══════════════ -->
-  ${buildManualPage(manualFiles, manualStartPage)}
+  ${buildManualPage(manualSections, manualStartPage, web)}
 
   <!-- ══════════════ Contact ══════════════ -->
   ${buildContactPage(contactPage)}
+
+  <!-- ══════════════ ライトボックス ══════════════ -->
+  <div id="lb-overlay" class="lb-overlay" role="dialog" aria-modal="true">
+    <span class="lb-close" id="lb-close" title="閉じる (ESC)">✕</span>
+    <span class="lb-nav lb-prev" id="lb-prev" title="前 (←)">&#8249;</span>
+    <img id="lb-img" class="lb-img" src="" alt="" />
+    <div id="lb-label" class="lb-label"></div>
+    <span class="lb-nav lb-next" id="lb-next" title="次 (→)">&#8250;</span>
+    <div id="lb-counter" class="lb-counter"></div>
+  </div>
+  <script>
+  (function () {
+    // 画像を持つすべての .card を収集
+    var cards = Array.from(document.querySelectorAll('.card img'));
+    var current = 0;
+
+    var overlay = document.getElementById('lb-overlay');
+    var lbImg   = document.getElementById('lb-img');
+    var lbLabel = document.getElementById('lb-label');
+    var lbCount = document.getElementById('lb-counter');
+
+    function open(index) {
+      current = (index + cards.length) % cards.length;
+      var img = cards[current];
+      lbImg.src = img.src;
+      lbImg.alt = img.alt || '';
+      lbLabel.textContent = img.alt || '';
+      lbCount.textContent = (current + 1) + ' / ' + cards.length;
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // カードにクリックハンドラを付与
+    cards.forEach(function(img, i) {
+      img.closest('.card').addEventListener('click', function() { open(i); });
+    });
+
+    // 閉じる
+    document.getElementById('lb-close').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) close();
+    });
+
+    // 前後ナビ
+    document.getElementById('lb-prev').addEventListener('click', function(e) {
+      e.stopPropagation(); open(current - 1);
+    });
+    document.getElementById('lb-next').addEventListener('click', function(e) {
+      e.stopPropagation(); open(current + 1);
+    });
+
+    // キーボード操作
+    document.addEventListener('keydown', function(e) {
+      if (!overlay.classList.contains('active')) return;
+      if (e.key === 'Escape')      close();
+      if (e.key === 'ArrowLeft')   open(current - 1);
+      if (e.key === 'ArrowRight')  open(current + 1);
+    });
+  })();
+  </script>
 
 </body>
 </html>`;
@@ -637,29 +854,38 @@ function buildHTML(manualFiles: string[]): string {
 async function generateCatalog() {
   console.log("\n📖 COCOcase Pattern Catalog 生成中...\n");
 
-  // 手動パターン読み込み
-  const manualFiles = fs.existsSync(MANUAL_DIR)
-    ? fs.readdirSync(MANUAL_DIR)
-        .filter(f => /\.(png|jpg|jpeg)$/i.test(f))
-        .sort()
-    : [];
+  // 手動パターン読み込み（サブフォルダ対応）
+  const manualSections = scanManualSections();
+  const manualFileCount = manualSections.reduce((sum, s) => sum + s.files.length, 0);
 
   const patternCount = fs.existsSync(PATTERNS_DIR)
     ? fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith(".png") && f !== "manifest.json").length
     : 0;
 
-  console.log(`   自動生成パターン: ${patternCount} 枚`);
-  console.log(`   手動パターン:     ${manualFiles.length} 枚`);
+  console.log(`\n   自動生成パターン: ${patternCount} 枚`);
+  console.log(`   手動パターン:     ${manualFileCount} 枚`);
+  if (manualSections.length > 0) {
+    manualSections.forEach(s => console.log(`     · ${s.label}: ${s.files.length} 枚`));
+  }
 
-  // HTML生成
-  const html     = buildHTML(manualFiles);
-  const tmpHtml  = path.join(process.cwd(), ".tmp-catalog.html");
+  // HTML生成（PDF用・base64埋め込み）
+  const html    = buildHTML(manualSections, false);
+  const tmpHtml = path.join(process.cwd(), ".tmp-catalog.html");
   fs.writeFileSync(tmpHtml, html, "utf-8");
 
-  // PDF出力先
+  // Web用HTML生成（画像URL参照・軽量）
+  const webHtml     = buildHTML(manualSections, true);
+  const publicHtml  = path.join(process.cwd(), "public", "catalog.html");
+  fs.writeFileSync(publicHtml, webHtml, "utf-8");
+
+  // PDF・ローカルHTML 出力先
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const date    = new Date().toISOString().slice(0, 10);
-  const outPath = path.join(OUT_DIR, `cococase-catalog-${date}.pdf`);
+  const date     = new Date().toISOString().slice(0, 10);
+  const outPath  = path.join(OUT_DIR, `cococase-catalog-${date}.pdf`);
+  const htmlPath = path.join(OUT_DIR, `cococase-catalog-${date}.html`);
+
+  // ローカル閲覧用HTML保存
+  fs.copyFileSync(tmpHtml, htmlPath);
 
   // Puppeteer で PDF 化
   console.log("   Puppeteer 起動中...");
@@ -688,8 +914,9 @@ async function generateCatalog() {
     });
 
     console.log(`\n✨ 完成!`);
-    console.log(`   ${outPath}`);
-    console.log(`\n   open "${outPath}"`);
+    console.log(`   PDF:        ${outPath}`);
+    console.log(`   ローカルHTML: ${htmlPath}`);
+    console.log(`   Web用HTML:  ${publicHtml}`);
   } finally {
     await browser.close();
     fs.unlinkSync(tmpHtml);

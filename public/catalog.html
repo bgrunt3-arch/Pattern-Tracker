@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Inter:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;500&display=swap');
+
+    @page { size: A4; margin: 0; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Noto Serif JP', -apple-system, sans-serif;
+      color: #2B2620;
+      background: #F5EFE4;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .serif  { font-family: 'Fraunces', 'Noto Serif JP', Georgia, serif; }
+    .italic { font-style: italic; }
+
+    /* ─── ページ共通 ─── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      height: 297mm;
+      background: #F5EFE4;
+      page-break-after: always;
+      position: relative;
+      padding: 16mm 18mm 22mm;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: auto; }
+
+    /* ─── ヘッダー ─── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 7pt;
+      border-bottom: 0.5pt solid #C4B59A;
+      margin-bottom: 12pt;
+      flex-shrink: 0;
+    }
+    .header-title {
+      font-size: 22pt;
+      font-weight: 400;
+      color: #2B2620;
+      letter-spacing: -0.3pt;
+    }
+    .header-jp {
+      font-size: 11pt;
+      color: #8B7355;
+      font-style: normal;
+      margin-left: 6pt;
+    }
+    .header-meta {
+      font-size: 7.5pt;
+      letter-spacing: 2pt;
+      color: #8B7355;
+    }
+
+    /* ─── フッター ─── */
+    .footer {
+      position: absolute;
+      bottom: 9mm;
+      left: 18mm;
+      right: 18mm;
+      display: flex;
+      justify-content: space-between;
+      padding-top: 6pt;
+      border-top: 0.5pt solid #C4B59A;
+      font-size: 7.5pt;
+      letter-spacing: 1.5pt;
+      color: #8B7355;
+    }
+
+    /* ─── 表紙 ─── */
+    .cover {
+      justify-content: space-between;
+      padding: 18mm 20mm;
+    }
+    .cover-eyebrow {
+      font-size: 7.5pt;
+      letter-spacing: 4pt;
+      color: #8B7355;
+      text-transform: uppercase;
+    }
+    .cover-body {}
+    .cover-title {
+      font-family: 'Fraunces', 'Noto Serif JP', Georgia, serif;
+      font-size: 72pt;
+      font-weight: 300;
+      line-height: 0.88;
+      color: #2B2620;
+      letter-spacing: -1pt;
+      margin-bottom: 16pt;
+    }
+    .cover-title em {
+      font-style: italic;
+      font-weight: 600;
+      color: #D4A574;
+    }
+    .cover-rule {
+      width: 60pt;
+      height: 0.75pt;
+      background: #D4A574;
+      margin: 16pt 0;
+    }
+    .cover-sub {
+      font-size: 10.5pt;
+      color: #8B7355;
+      line-height: 1.8;
+      max-width: 260pt;
+    }
+    .cover-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 8pt;
+      letter-spacing: 2.5pt;
+      color: #8B7355;
+      border-top: 0.5pt solid #C4B59A;
+      padding-top: 10pt;
+    }
+    .cover-vol {
+      position: absolute;
+      top: 18mm;
+      right: 20mm;
+      text-align: right;
+    }
+    .cover-vol div {
+      font-size: 7pt;
+      letter-spacing: 3pt;
+      color: #C4B59A;
+      line-height: 1.8;
+    }
+
+    /* ─── 目次 ─── */
+    .toc { flex: 1; }
+    .toc-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10pt;
+      padding: 7pt 0;
+      border-bottom: 0.25pt dotted #C4B59A;
+    }
+    .toc-theme {
+      font-size: 13pt;
+      font-weight: 400;
+      min-width: 130pt;
+      flex-shrink: 0;
+    }
+    .toc-jp {
+      font-size: 9pt;
+      color: #8B7355;
+      font-style: normal;
+      margin-left: 4pt;
+    }
+    .toc-range {
+      font-size: 9pt;
+      color: #8B7355;
+      letter-spacing: 0.5pt;
+      flex: 1;
+    }
+    .toc-page {
+      font-size: 11pt;
+      color: #D4A574;
+      flex-shrink: 0;
+    }
+
+    /* ─── Editorial Note ─── */
+    .note-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20pt 0;
+    }
+    .note-text {
+      font-family: 'Noto Serif JP', 'Fraunces', Georgia, serif;
+      font-size: 12.5pt;
+      line-height: 2.4;
+      color: #2B2620;
+      max-width: 420pt;
+    }
+    .note-signature {
+      margin-top: 36pt;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 13pt;
+      color: #8B7355;
+      text-align: right;
+      max-width: 420pt;
+    }
+
+    /* ─── グリッド ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5pt;
+      margin-bottom: 10pt;
+      flex-shrink: 0;
+    }
+    .card {
+      aspect-ratio: 1 / 1;
+      background: #EDE5D5;
+      border: 0.5pt solid #D4C5A9;
+      overflow: hidden;
+      position: relative;
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .card-placeholder {
+      width: 100%;
+      height: 100%;
+      background: #EDE5D5;
+    }
+    .card-id {
+      position: absolute;
+      top: 2.5pt;
+      left: 3.5pt;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 8pt;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 0 3pt rgba(0,0,0,0.55);
+      pointer-events: none;
+    }
+
+    /* ─── 名前リスト ─── */
+    .names {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2pt 14pt;
+      flex: 1;
+    }
+    .name-row {
+      display: flex;
+      gap: 7pt;
+      align-items: baseline;
+      border-bottom: 0.2pt dotted #C4B59A;
+      padding: 2.5pt 0;
+    }
+    .name-id {
+      font-size: 8.5pt;
+      color: #D4A574;
+      min-width: 20pt;
+      flex-shrink: 0;
+    }
+    .name-label {
+      font-size: 8.5pt;
+      color: #2B2620;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .name-ref {
+      font-size: 7pt;
+      color: #8B7355;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+
+    /* ─── Contact ─── */
+    .contact-page {}
+    .contact-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18pt;
+      padding: 24pt 0;
+    }
+    .contact-section {}
+    .contact-label {
+      font-size: 7.5pt;
+      letter-spacing: 3pt;
+      color: #8B7355;
+      margin-bottom: 4pt;
+    }
+    .contact-value {
+      font-size: 13pt;
+      color: #2B2620;
+      line-height: 1.8;
+    }
+    .contact-divider {
+      height: 0.5pt;
+      background: #C4B59A;
+      margin: 4pt 0;
+    }
+    .contact-end {
+      font-size: 14pt;
+      color: #C4B59A;
+      text-align: center;
+      padding: 20pt 0;
+    }
+
+    /* ─── Empty note ─── */
+    .empty-note {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #8B7355;
+      font-size: 11pt;
+      font-style: italic;
+    }
+
+    /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
+    @media screen {
+      .card { cursor: zoom-in; }
+    }
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20,14,10,0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .lb-overlay.active { display: flex; }
+    .lb-img {
+      max-width: 88vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border: 1px solid rgba(212,165,116,0.35);
+      box-shadow: 0 12px 80px rgba(0,0,0,0.7);
+    }
+    .lb-label {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: #D4A574;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .lb-close {
+      position: fixed;
+      top: 18px;
+      right: 26px;
+      font-size: 30px;
+      color: #8B7355;
+      cursor: pointer;
+      line-height: 1;
+      user-select: none;
+      transition: color 0.15s;
+    }
+    .lb-close:hover { color: #fff; }
+    .lb-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 40px;
+      color: #8B7355;
+      cursor: pointer;
+      padding: 10px 20px;
+      user-select: none;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .lb-nav:hover { color: #D4A574; }
+    .lb-prev { left: 10px; }
+    .lb-next { right: 10px; }
+    .lb-counter {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #8B7355;
+    }
+    @media print {
+      .lb-overlay { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════ 表紙 ══════════════ -->
+  <div class="page cover">
+    <div class="cover-eyebrow">COCOCASE · PATTERN COLLECTION</div>
+    <div class="cover-vol">
+      <div>VOL.01</div>
+      <div>APR 2026</div>
+    </div>
+    <div class="cover-body">
+      <div class="cover-title">
+        Pattern<br><em>Collection</em>
+      </div>
+      <div class="cover-rule"></div>
+      <div class="cover-sub">
+        AirPods Pro 3 Case Design Proposal<br>
+        西さんプレゼン用 · 100 + Original Designs
+      </div>
+    </div>
+    <div class="cover-foot">
+      <span>2026.04.18</span>
+      <span>CURATED BY 辻本</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ Index ══════════════ -->
+  <div class="page">
+    <div class="header">
+      <div class="header-title serif italic">Index</div>
+      <div class="header-meta">CONTENTS</div>
+    </div>
+    <div class="toc">
+      <div class="toc-row">
+      <span class="toc-theme serif">Editorial Note</span>
+      <span class="toc-range"></span>
+      <span class="toc-page serif italic">p.03</span>
+    </div>
+<div class="toc-row">
+        <span class="toc-theme serif">FLORAL <span class="toc-jp">フローラル</span></span>
+        <span class="toc-range">001 – 010</span>
+        <span class="toc-page serif italic">p.04</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">MARBLE <span class="toc-jp">マーブル</span></span>
+        <span class="toc-range">011 – 020</span>
+        <span class="toc-page serif italic">p.05</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">ANIMAL <span class="toc-jp">アニマル</span></span>
+        <span class="toc-range">021 – 030</span>
+        <span class="toc-page serif italic">p.06</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">FOOD <span class="toc-jp">フード</span></span>
+        <span class="toc-range">031 – 040</span>
+        <span class="toc-page serif italic">p.07</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">BOTANICAL <span class="toc-jp">ボタニカル</span></span>
+        <span class="toc-range">041 – 050</span>
+        <span class="toc-page serif italic">p.08</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">GEOMETRIC <span class="toc-jp">幾何学</span></span>
+        <span class="toc-range">051 – 060</span>
+        <span class="toc-page serif italic">p.09</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">ABSTRACT <span class="toc-jp">アブストラクト</span></span>
+        <span class="toc-range">061 – 070</span>
+        <span class="toc-page serif italic">p.10</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">VINTAGE <span class="toc-jp">ヴィンテージ</span></span>
+        <span class="toc-range">071 – 080</span>
+        <span class="toc-page serif italic">p.11</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">CELESTIAL <span class="toc-jp">天体</span></span>
+        <span class="toc-range">081 – 090</span>
+        <span class="toc-page serif italic">p.12</span>
+      </div>
+<div class="toc-row">
+        <span class="toc-theme serif">COASTAL <span class="toc-jp">コースタル</span></span>
+        <span class="toc-range">091 – 100</span>
+        <span class="toc-page serif italic">p.13</span>
+      </div>
+<div class="toc-row">
+      <span class="toc-theme serif">Original <span class="toc-jp">手動デザイン</span></span>
+      <span class="toc-range"></span>
+      <span class="toc-page serif italic">p.14</span>
+    </div>
+    </div>
+    <div class="footer">
+      <span>COCOCASE</span>
+      <span class="serif italic">p.02</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ Editorial Note ══════════════ -->
+  <div class="page">
+    <div class="header">
+      <div class="header-title serif italic">Editorial <em>Note</em></div>
+      <div class="header-meta">FOREWORD</div>
+    </div>
+    <div class="note-body">
+      <div class="note-text">
+        BURGAを参考に、COCOcase AirPods Pro 3ケースの<br>
+        デザイン方向性として100パターン＋オリジナルを<br>
+        ご提案いたします。<br><br>
+        テキスタイル感を重視し、<br>
+        AIモデル（Google Imagen / Gemini）と<br>
+        手描きの組み合わせで制作しました。<br><br>
+        10のテーマに分類しており、<br>
+        コレクションとしての展開を想定しております。<br>
+        西さんのフィードバックをお待ちしております。
+      </div>
+      <div class="note-signature">— 辻本</div>
+    </div>
+    <div class="footer">
+      <span>COCOCASE</span>
+      <span class="serif italic">p.03</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ テーマ別ページ ══════════════ -->
+  
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            FLORAL <span class="header-jp">フローラル</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/001_sakura_pink.png" alt="Sakura Pink" /><span class="card-id">001</span></div><div class="card"><img src="/patterns/002_lush_meadow.png" alt="Lush Meadow" /><span class="card-id">002</span></div><div class="card"><img src="/patterns/003_vintage_rose.png" alt="Vintage Rose" /><span class="card-id">003</span></div><div class="card"><img src="/patterns/004_pastel_peony.png" alt="Pastel Peony" /><span class="card-id">004</span></div><div class="card"><img src="/patterns/005_tropical_hibiscus.png" alt="Tropical Hibiscus" /><span class="card-id">005</span></div><div class="card"><img src="/patterns/006_watercolor_daisies.png" alt="Watercolor Daisies" /><span class="card-id">006</span></div><div class="card"><img src="/patterns/007_art_nouveau_lily.png" alt="Art Nouveau Lily" /><span class="card-id">007</span></div><div class="card"><img src="/patterns/008_forget_me_not.png" alt="Forget Me Not" /><span class="card-id">008</span></div><div class="card"><img src="/patterns/009_botanical_garden.png" alt="Botanical Garden" /><span class="card-id">009</span></div><div class="card"><img src="/patterns/010_japanese_iris.png" alt="Japanese Iris" /><span class="card-id">010</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">001</span>
+        <span class="name-label">Sakura Pink</span>
+        <span class="name-ref">ref: Sakura</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">002</span>
+        <span class="name-label">Lush Meadow</span>
+        <span class="name-ref">ref: Lush Meadows</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">003</span>
+        <span class="name-label">Vintage Rose</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">004</span>
+        <span class="name-label">Pastel Peony</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">005</span>
+        <span class="name-label">Tropical Hibiscus</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">006</span>
+        <span class="name-label">Watercolor Daisies</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">007</span>
+        <span class="name-label">Art Nouveau Lily</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">008</span>
+        <span class="name-label">Forget Me Not</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">009</span>
+        <span class="name-label">Botanical Garden</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">010</span>
+        <span class="name-label">Japanese Iris</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · FLORAL</span>
+          <span class="serif italic">p.04</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            MARBLE <span class="header-jp">マーブル</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/011_vanilla_sand.png" alt="Vanilla Sand" /><span class="card-id">011</span></div><div class="card"><img src="/patterns/012_golden_coral.png" alt="Golden Coral" /><span class="card-id">012</span></div><div class="card"><img src="/patterns/013_black_onyx.png" alt="Black Onyx" /><span class="card-id">013</span></div><div class="card"><img src="/patterns/014_rose_quartz.png" alt="Rose Quartz" /><span class="card-id">014</span></div><div class="card"><img src="/patterns/015_malachite.png" alt="Malachite" /><span class="card-id">015</span></div><div class="card"><img src="/patterns/016_navy_royale.png" alt="Navy Royale" /><span class="card-id">016</span></div><div class="card"><img src="/patterns/017_carrara_classic.png" alt="Carrara Classic" /><span class="card-id">017</span></div><div class="card"><img src="/patterns/018_terracotta.png" alt="Terracotta" /><span class="card-id">018</span></div><div class="card"><img src="/patterns/019_emerald_jade.png" alt="Emerald Jade" /><span class="card-id">019</span></div><div class="card"><img src="/patterns/020_iridescent_pearl.png" alt="Iridescent Pearl" /><span class="card-id">020</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">011</span>
+        <span class="name-label">Vanilla Sand</span>
+        <span class="name-ref">ref: Vanilla Sand</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">012</span>
+        <span class="name-label">Golden Coral</span>
+        <span class="name-ref">ref: Golden Coral</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">013</span>
+        <span class="name-label">Black Onyx</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">014</span>
+        <span class="name-label">Rose Quartz</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">015</span>
+        <span class="name-label">Malachite</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">016</span>
+        <span class="name-label">Navy Royale</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">017</span>
+        <span class="name-label">Carrara Classic</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">018</span>
+        <span class="name-label">Terracotta</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">019</span>
+        <span class="name-label">Emerald Jade</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">020</span>
+        <span class="name-label">Iridescent Pearl</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · MARBLE</span>
+          <span class="serif italic">p.05</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            ANIMAL <span class="header-jp">アニマル</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/021_celestial_cow.png" alt="Celestial Cow" /><span class="card-id">021</span></div><div class="card"><img src="/patterns/022_derby_horse.png" alt="Derby Horse" /><span class="card-id">022</span></div><div class="card"><img src="/patterns/023_leopard_classic.png" alt="Leopard Classic" /><span class="card-id">023</span></div><div class="card"><img src="/patterns/024_zebra_stripes.png" alt="Zebra Stripes" /><span class="card-id">024</span></div><div class="card"><img src="/patterns/025_python_skin.png" alt="Python Skin" /><span class="card-id">025</span></div><div class="card"><img src="/patterns/026_giraffe_mosaic.png" alt="Giraffe Mosaic" /><span class="card-id">026</span></div><div class="card"><img src="/patterns/027_tiger_stripes.png" alt="Tiger Stripes" /><span class="card-id">027</span></div><div class="card"><img src="/patterns/028_pink_leopard.png" alt="Pink Leopard" /><span class="card-id">028</span></div><div class="card"><img src="/patterns/029_dalmatian_spots.png" alt="Dalmatian Spots" /><span class="card-id">029</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">030</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">021</span>
+        <span class="name-label">Celestial Cow</span>
+        <span class="name-ref">ref: Celestial</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">022</span>
+        <span class="name-label">Derby Horse</span>
+        <span class="name-ref">ref: Derby Race</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">023</span>
+        <span class="name-label">Leopard Classic</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">024</span>
+        <span class="name-label">Zebra Stripes</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">025</span>
+        <span class="name-label">Python Skin</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">026</span>
+        <span class="name-label">Giraffe Mosaic</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">027</span>
+        <span class="name-label">Tiger Stripes</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">028</span>
+        <span class="name-label">Pink Leopard</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">029</span>
+        <span class="name-label">Dalmatian Spots</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">030</span>
+        <span class="name-label">Cheetah Minimal</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · ANIMAL</span>
+          <span class="serif italic">p.06</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            FOOD <span class="header-jp">フード</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/031_harvest_tomato.png" alt="Harvest Tomato" /><span class="card-id">031</span></div><div class="card"><img src="/patterns/032_freshly_picked.png" alt="Freshly Picked" /><span class="card-id">032</span></div><div class="card"><img src="/patterns/033_pickled.png" alt="Pickled" /><span class="card-id">033</span></div><div class="card"><img src="/patterns/034_honeycomb_bee.png" alt="Honeycomb Bee" /><span class="card-id">034</span></div><div class="card"><img src="/patterns/035_cinnamon_roll.png" alt="Cinnamon Roll" /><span class="card-id">035</span></div><div class="card"><img src="/patterns/036_cherry.png" alt="Cherry" /><span class="card-id">036</span></div><div class="card"><img src="/patterns/037_lemon_zest.png" alt="Lemon Zest" /><span class="card-id">037</span></div><div class="card"><img src="/patterns/038_mushroom_forest.png" alt="Mushroom Forest" /><span class="card-id">038</span></div><div class="card"><img src="/patterns/039_coffee_beans.png" alt="Coffee Beans" /><span class="card-id">039</span></div><div class="card"><img src="/patterns/040_orange_grove.png" alt="Orange Grove" /><span class="card-id">040</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">031</span>
+        <span class="name-label">Harvest Tomato</span>
+        <span class="name-ref">ref: Harvest</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">032</span>
+        <span class="name-label">Freshly Picked</span>
+        <span class="name-ref">ref: Freshly Picked</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">033</span>
+        <span class="name-label">Pickled</span>
+        <span class="name-ref">ref: Pickled</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">034</span>
+        <span class="name-label">Honeycomb Bee</span>
+        <span class="name-ref">ref: Honeycomb</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">035</span>
+        <span class="name-label">Cinnamon Roll</span>
+        <span class="name-ref">ref: Cinnamon Roll</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">036</span>
+        <span class="name-label">Cherry</span>
+        <span class="name-ref">ref: Cherrybomb</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">037</span>
+        <span class="name-label">Lemon Zest</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">038</span>
+        <span class="name-label">Mushroom Forest</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">039</span>
+        <span class="name-label">Coffee Beans</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">040</span>
+        <span class="name-label">Orange Grove</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · FOOD</span>
+          <span class="serif italic">p.07</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            BOTANICAL <span class="header-jp">ボタニカル</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/041_velvet_ginkgo.png" alt="Velvet Ginkgo" /><span class="card-id">041</span></div><div class="card"><img src="/patterns/042_barely_ginkgo.png" alt="Barely Ginkgo" /><span class="card-id">042</span></div><div class="card"><img src="/patterns/043_monstera_jungle.png" alt="Monstera Jungle" /><span class="card-id">043</span></div><div class="card"><img src="/patterns/044_fern_lace.png" alt="Fern Lace" /><span class="card-id">044</span></div><div class="card"><img src="/patterns/045_palm_shadow.png" alt="Palm Shadow" /><span class="card-id">045</span></div><div class="card"><img src="/patterns/046_eucalyptus.png" alt="Eucalyptus" /><span class="card-id">046</span></div><div class="card"><img src="/patterns/047_ivy_trellis.png" alt="Ivy Trellis" /><span class="card-id">047</span></div><div class="card"><img src="/patterns/048_jungle_canopy.png" alt="Jungle Canopy" /><span class="card-id">048</span></div><div class="card"><img src="/patterns/049_bamboo_grove.png" alt="Bamboo Grove" /><span class="card-id">049</span></div><div class="card"><img src="/patterns/050_pressed_florals.png" alt="Pressed Florals" /><span class="card-id">050</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">041</span>
+        <span class="name-label">Velvet Ginkgo</span>
+        <span class="name-ref">ref: Velvet Night</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">042</span>
+        <span class="name-label">Barely Ginkgo</span>
+        <span class="name-ref">ref: Barely Yours</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">043</span>
+        <span class="name-label">Monstera Jungle</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">044</span>
+        <span class="name-label">Fern Lace</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">045</span>
+        <span class="name-label">Palm Shadow</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">046</span>
+        <span class="name-label">Eucalyptus</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">047</span>
+        <span class="name-label">Ivy Trellis</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">048</span>
+        <span class="name-label">Jungle Canopy</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">049</span>
+        <span class="name-label">Bamboo Grove</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">050</span>
+        <span class="name-label">Pressed Florals</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · BOTANICAL</span>
+          <span class="serif italic">p.08</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            GEOMETRIC <span class="header-jp">幾何学</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/051_black_white_checker.png" alt="Black White Checker" /><span class="card-id">051</span></div><div class="card"><img src="/patterns/052_red_gingham.png" alt="Red Gingham" /><span class="card-id">052</span></div><div class="card"><img src="/patterns/053_art_deco_gold.png" alt="Art Deco Gold" /><span class="card-id">053</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">054</span></div><div class="card"><img src="/patterns/055_argyle.png" alt="Argyle" /><span class="card-id">055</span></div><div class="card"><img src="/patterns/056_retro_circles.png" alt="Retro Circles" /><span class="card-id">056</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">057</span></div><div class="card"><img src="/patterns/058_triangle_mountains.png" alt="Triangle Mountains" /><span class="card-id">058</span></div><div class="card"><img src="/patterns/059_hexagon_gold.png" alt="Hexagon Gold" /><span class="card-id">059</span></div><div class="card"><img src="/patterns/060_moroccan_tile.png" alt="Moroccan Tile" /><span class="card-id">060</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">051</span>
+        <span class="name-label">Black White Checker</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">052</span>
+        <span class="name-label">Red Gingham</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">053</span>
+        <span class="name-label">Art Deco Gold</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">054</span>
+        <span class="name-label">Houndstooth</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">055</span>
+        <span class="name-label">Argyle</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">056</span>
+        <span class="name-label">Retro Circles</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">057</span>
+        <span class="name-label">Minimal Stripes</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">058</span>
+        <span class="name-label">Triangle Mountains</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">059</span>
+        <span class="name-label">Hexagon Gold</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">060</span>
+        <span class="name-label">Moroccan Tile</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · GEOMETRIC</span>
+          <span class="serif italic">p.09</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            ABSTRACT <span class="header-jp">アブストラクト</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/061_core_blocks.png" alt="Core Blocks" /><span class="card-id">061</span></div><div class="card"><img src="/patterns/062_sunset_gradient.png" alt="Sunset Gradient" /><span class="card-id">062</span></div><div class="card"><img src="/patterns/063_ocean_gradient.png" alt="Ocean Gradient" /><span class="card-id">063</span></div><div class="card"><img src="/patterns/064_paint_splash.png" alt="Paint Splash" /><span class="card-id">064</span></div><div class="card"><img src="/patterns/065_organic_blobs.png" alt="Organic Blobs" /><span class="card-id">065</span></div><div class="card"><img src="/patterns/066_brush_strokes.png" alt="Brush Strokes" /><span class="card-id">066</span></div><div class="card"><img src="/patterns/067_watercolor_wash.png" alt="Watercolor Wash" /><span class="card-id">067</span></div><div class="card"><img src="/patterns/068_risograph_grain.png" alt="Risograph Grain" /><span class="card-id">068</span></div><div class="card"><img src="/patterns/069_memphis_style.png" alt="Memphis Style" /><span class="card-id">069</span></div><div class="card"><img src="/patterns/070_drip_paint.png" alt="Drip Paint" /><span class="card-id">070</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">061</span>
+        <span class="name-label">Core Blocks</span>
+        <span class="name-ref">ref: Core</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">062</span>
+        <span class="name-label">Sunset Gradient</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">063</span>
+        <span class="name-label">Ocean Gradient</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">064</span>
+        <span class="name-label">Paint Splash</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">065</span>
+        <span class="name-label">Organic Blobs</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">066</span>
+        <span class="name-label">Brush Strokes</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">067</span>
+        <span class="name-label">Watercolor Wash</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">068</span>
+        <span class="name-label">Risograph Grain</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">069</span>
+        <span class="name-label">Memphis Style</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">070</span>
+        <span class="name-label">Drip Paint</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · ABSTRACT</span>
+          <span class="serif italic">p.10</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            VINTAGE <span class="header-jp">ヴィンテージ</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns/071_la_muse_deco.png" alt="La Muse Deco" /><span class="card-id">071</span></div><div class="card"><img src="/patterns/072_victorian_damask.png" alt="Victorian Damask" /><span class="card-id">072</span></div><div class="card"><img src="/patterns/073_william_morris.png" alt="William Morris" /><span class="card-id">073</span></div><div class="card"><img src="/patterns/074_retro_70s_bloom.png" alt="Retro 70s Bloom" /><span class="card-id">074</span></div><div class="card"><img src="/patterns/075_vintage_lace.png" alt="Vintage Lace" /><span class="card-id">075</span></div><div class="card"><img src="/patterns/076_toile_de_jouy.png" alt="Toile de Jouy" /><span class="card-id">076</span></div><div class="card"><img src="/patterns/077_baroque_gold.png" alt="Baroque Gold" /><span class="card-id">077</span></div><div class="card"><img src="/patterns/078_rococo_rose.png" alt="Rococo Rose" /><span class="card-id">078</span></div><div class="card"><img src="/patterns/079_moroccan_medallion.png" alt="Moroccan Medallion" /><span class="card-id">079</span></div><div class="card"><img src="/patterns/080_persian_carpet.png" alt="Persian Carpet" /><span class="card-id">080</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">071</span>
+        <span class="name-label">La Muse Deco</span>
+        <span class="name-ref">ref: La Muse</span>
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">072</span>
+        <span class="name-label">Victorian Damask</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">073</span>
+        <span class="name-label">William Morris</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">074</span>
+        <span class="name-label">Retro 70s Bloom</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">075</span>
+        <span class="name-label">Vintage Lace</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">076</span>
+        <span class="name-label">Toile de Jouy</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">077</span>
+        <span class="name-label">Baroque Gold</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">078</span>
+        <span class="name-label">Rococo Rose</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">079</span>
+        <span class="name-label">Moroccan Medallion</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">080</span>
+        <span class="name-label">Persian Carpet</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · VINTAGE</span>
+          <span class="serif italic">p.11</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            CELESTIAL <span class="header-jp">天体</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><div class="card-placeholder"></div><span class="card-id">081</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">082</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">083</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">084</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">085</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">086</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">087</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">088</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">089</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">090</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">081</span>
+        <span class="name-label">Starry Night</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">082</span>
+        <span class="name-label">Moon Phases</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">083</span>
+        <span class="name-label">Constellations</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">084</span>
+        <span class="name-label">Galaxy Nebula</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">085</span>
+        <span class="name-label">Solar System</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">086</span>
+        <span class="name-label">Crescent Stars</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">087</span>
+        <span class="name-label">Sun & Moon</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">088</span>
+        <span class="name-label">Zodiac Glyphs</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">089</span>
+        <span class="name-label">Cosmic Ombre</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">090</span>
+        <span class="name-label">Gold Stars</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · CELESTIAL</span>
+          <span class="serif italic">p.12</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            COASTAL <span class="header-jp">コースタル</span>
+          </div>
+          <div class="header-meta">10 DESIGNS</div>
+        </div>
+        <div class="grid"><div class="card"><div class="card-placeholder"></div><span class="card-id">091</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">092</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">093</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">094</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">095</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">096</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">097</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">098</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">099</span></div><div class="card"><div class="card-placeholder"></div><span class="card-id">100</span></div></div>
+        <div class="names">
+      <div class="name-row">
+        <span class="name-id serif italic">091</span>
+        <span class="name-label">Hokusai Wave</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">092</span>
+        <span class="name-label">Palm Sunset</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">093</span>
+        <span class="name-label">Tropical Fish</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">094</span>
+        <span class="name-label">Seashells</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">095</span>
+        <span class="name-label">Mediterranean Tile</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">096</span>
+        <span class="name-label">Coral Reef</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">097</span>
+        <span class="name-label">Wave Gradient</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">098</span>
+        <span class="name-label">Beach Sunset</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">099</span>
+        <span class="name-label">Pineapple</span>
+        
+      </div>
+    
+      <div class="name-row">
+        <span class="name-id serif italic">100</span>
+        <span class="name-label">Flamingo Tropical</span>
+        
+      </div>
+    </div>
+        <div class="footer">
+          <span>COCOCASE · COASTAL</span>
+          <span class="serif italic">p.13</span>
+        </div>
+      </div>
+    
+
+  <!-- ══════════════ Original（手動） ══════════════ -->
+  
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            Original <span class="header-jp">手動デザイン</span>
+          </div>
+          <div class="header-meta">Gemini Ai · 28 FILES</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns-manual/gemini-ai/manual_001.png" alt="manual_001" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_002.png" alt="manual_002" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_003.png" alt="manual_003" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_004.png" alt="manual_004" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_005.png" alt="manual_005" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_006.png" alt="manual_006" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_007.png" alt="manual_007" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_008.png" alt="manual_008" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_009.png" alt="manual_009" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_010.png" alt="manual_010" /></div></div>
+        <div class="names"><div class="name-row"><span class="name-label">manual_001</span></div><div class="name-row"><span class="name-label">manual_002</span></div><div class="name-row"><span class="name-label">manual_003</span></div><div class="name-row"><span class="name-label">manual_004</span></div><div class="name-row"><span class="name-label">manual_005</span></div><div class="name-row"><span class="name-label">manual_006</span></div><div class="name-row"><span class="name-label">manual_007</span></div><div class="name-row"><span class="name-label">manual_008</span></div><div class="name-row"><span class="name-label">manual_009</span></div><div class="name-row"><span class="name-label">manual_010</span></div></div>
+        <div class="footer">
+          <span>COCOCASE · ORIGINAL</span>
+          <span class="serif italic">p.14</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            Original <span class="header-jp">手動デザイン</span>
+          </div>
+          <div class="header-meta">CONTINUED · 28 FILES</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns-manual/gemini-ai/manual_011.png" alt="manual_011" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_012.png" alt="manual_012" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_013.png" alt="manual_013" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_014.png" alt="manual_014" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_015.png" alt="manual_015" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_016.png" alt="manual_016" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_017.png" alt="manual_017" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_018.png" alt="manual_018" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_019.png" alt="manual_019" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_020.png" alt="manual_020" /></div></div>
+        <div class="names"><div class="name-row"><span class="name-label">manual_011</span></div><div class="name-row"><span class="name-label">manual_012</span></div><div class="name-row"><span class="name-label">manual_013</span></div><div class="name-row"><span class="name-label">manual_014</span></div><div class="name-row"><span class="name-label">manual_015</span></div><div class="name-row"><span class="name-label">manual_016</span></div><div class="name-row"><span class="name-label">manual_017</span></div><div class="name-row"><span class="name-label">manual_018</span></div><div class="name-row"><span class="name-label">manual_019</span></div><div class="name-row"><span class="name-label">manual_020</span></div></div>
+        <div class="footer">
+          <span>COCOCASE · ORIGINAL</span>
+          <span class="serif italic">p.15</span>
+        </div>
+      </div>
+    
+
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">
+            Original <span class="header-jp">手動デザイン</span>
+          </div>
+          <div class="header-meta">CONTINUED · 28 FILES</div>
+        </div>
+        <div class="grid"><div class="card"><img src="/patterns-manual/gemini-ai/manual_021.png" alt="manual_021" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_022.png" alt="manual_022" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_023.png" alt="manual_023" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_024.png" alt="manual_024" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_025.png" alt="manual_025" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_026.png" alt="manual_026" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_027.png" alt="manual_027" /></div><div class="card"><img src="/patterns-manual/gemini-ai/manual_028.png" alt="manual_028" /></div></div>
+        <div class="names"><div class="name-row"><span class="name-label">manual_021</span></div><div class="name-row"><span class="name-label">manual_022</span></div><div class="name-row"><span class="name-label">manual_023</span></div><div class="name-row"><span class="name-label">manual_024</span></div><div class="name-row"><span class="name-label">manual_025</span></div><div class="name-row"><span class="name-label">manual_026</span></div><div class="name-row"><span class="name-label">manual_027</span></div><div class="name-row"><span class="name-label">manual_028</span></div></div>
+        <div class="footer">
+          <span>COCOCASE · ORIGINAL</span>
+          <span class="serif italic">p.16</span>
+        </div>
+      </div>
+    
+
+  <!-- ══════════════ Contact ══════════════ -->
+  
+    <div class="page contact-page">
+      <div class="header">
+        <div class="header-title serif italic">Contact</div>
+        <div class="header-meta">END OF CATALOG</div>
+      </div>
+      <div class="contact-body">
+        <div class="contact-section">
+          <div class="contact-label">DESIGN</div>
+          <div class="contact-value serif">辻本</div>
+        </div>
+        <div class="contact-section">
+          <div class="contact-label">BRAND</div>
+          <div class="contact-value serif">COCOcase</div>
+        </div>
+        <div class="contact-section">
+          <div class="contact-label">PRODUCT</div>
+          <div class="contact-value">AirPods Pro 3 Case</div>
+        </div>
+        <div class="contact-divider"></div>
+        <div class="contact-section">
+          <div class="contact-label">TOOLS USED</div>
+          <div class="contact-value">
+            · Google Imagen 4 Fast<br>
+            · Google Gemini 2.5 Flash Image<br>
+            · Microsoft Designer<br>
+            · Photopea + BetterMockups
+          </div>
+        </div>
+        <div class="contact-section">
+          <div class="contact-label">REFERENCE</div>
+          <div class="contact-value">
+            · BURGA (burga.jp / burga.com)
+          </div>
+        </div>
+      </div>
+      <div class="contact-end serif italic">— end —</div>
+      <div class="footer">
+        <span>COCOCASE · AirPods Pro 3</span>
+        <span class="serif italic">p.17</span>
+      </div>
+    </div>
+  
+
+  <!-- ══════════════ ライトボックス ══════════════ -->
+  <div id="lb-overlay" class="lb-overlay" role="dialog" aria-modal="true">
+    <span class="lb-close" id="lb-close" title="閉じる (ESC)">✕</span>
+    <span class="lb-nav lb-prev" id="lb-prev" title="前 (←)">&#8249;</span>
+    <img id="lb-img" class="lb-img" src="" alt="" />
+    <div id="lb-label" class="lb-label"></div>
+    <span class="lb-nav lb-next" id="lb-next" title="次 (→)">&#8250;</span>
+    <div id="lb-counter" class="lb-counter"></div>
+  </div>
+  <script>
+  (function () {
+    // 画像を持つすべての .card を収集
+    var cards = Array.from(document.querySelectorAll('.card img'));
+    var current = 0;
+
+    var overlay = document.getElementById('lb-overlay');
+    var lbImg   = document.getElementById('lb-img');
+    var lbLabel = document.getElementById('lb-label');
+    var lbCount = document.getElementById('lb-counter');
+
+    function open(index) {
+      current = (index + cards.length) % cards.length;
+      var img = cards[current];
+      lbImg.src = img.src;
+      lbImg.alt = img.alt || '';
+      lbLabel.textContent = img.alt || '';
+      lbCount.textContent = (current + 1) + ' / ' + cards.length;
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function close() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // カードにクリックハンドラを付与
+    cards.forEach(function(img, i) {
+      img.closest('.card').addEventListener('click', function() { open(i); });
+    });
+
+    // 閉じる
+    document.getElementById('lb-close').addEventListener('click', close);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) close();
+    });
+
+    // 前後ナビ
+    document.getElementById('lb-prev').addEventListener('click', function(e) {
+      e.stopPropagation(); open(current - 1);
+    });
+    document.getElementById('lb-next').addEventListener('click', function(e) {
+      e.stopPropagation(); open(current + 1);
+    });
+
+    // キーボード操作
+    document.addEventListener('keydown', function(e) {
+      if (!overlay.classList.contains('active')) return;
+      if (e.key === 'Escape')      close();
+      if (e.key === 'ArrowLeft')   open(current - 1);
+      if (e.key === 'ArrowRight')  open(current + 1);
+    });
+  })();
+  </script>
+
+</body>
+</html>
