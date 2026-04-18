@@ -1,4 +1,8 @@
 {
+  "100": {
+    "url": "/patterns/100_flamingo_tropical.png",
+    "generatedAt": "2026-04-18T10:56:16.388Z"
+  },
   "003": {
     "url": "/patterns/003_vintage_rose.png",
     "generatedAt": "2026-04-17T11:58:57.093Z"
@@ -306,5 +310,93 @@
   "080": {
     "url": "/patterns/080_persian_carpet.png",
     "generatedAt": "2026-04-17T12:36:19.928Z"
+  },
+  "081": {
+    "url": "/patterns/081_starry_night.png",
+    "generatedAt": "2026-04-18T10:52:31.032Z"
+  },
+  "082": {
+    "url": "/patterns/082_moon_phases.png",
+    "generatedAt": "2026-04-18T10:52:43.904Z"
+  },
+  "083": {
+    "url": "/patterns/083_constellations.png",
+    "generatedAt": "2026-04-18T10:52:53.538Z"
+  },
+  "084": {
+    "url": "/patterns/084_galaxy_nebula.png",
+    "generatedAt": "2026-04-18T10:53:07.352Z"
+  },
+  "085": {
+    "url": "/patterns/085_solar_system.png",
+    "generatedAt": "2026-04-18T10:53:17.469Z"
+  },
+  "086": {
+    "url": "/patterns/086_crescent_stars.png",
+    "generatedAt": "2026-04-18T10:53:31.028Z"
+  },
+  "087": {
+    "url": "/patterns/087_sun_moon.png",
+    "generatedAt": "2026-04-18T10:53:46.090Z"
+  },
+  "088": {
+    "url": "/patterns/088_zodiac_glyphs.png",
+    "generatedAt": "2026-04-18T10:53:58.027Z"
+  },
+  "089": {
+    "url": "/patterns/089_cosmic_ombre.png",
+    "generatedAt": "2026-04-18T10:54:06.855Z"
+  },
+  "090": {
+    "url": "/patterns/090_gold_stars.png",
+    "generatedAt": "2026-04-18T10:54:18.492Z"
+  },
+  "091": {
+    "url": "/patterns/091_hokusai_wave.png",
+    "generatedAt": "2026-04-18T10:54:30.982Z"
+  },
+  "092": {
+    "url": "/patterns/092_palm_sunset.png",
+    "generatedAt": "2026-04-18T10:54:44.216Z"
+  },
+  "093": {
+    "url": "/patterns/093_tropical_fish.png",
+    "generatedAt": "2026-04-18T10:54:57.812Z"
+  },
+  "094": {
+    "url": "/patterns/094_seashells.png",
+    "generatedAt": "2026-04-18T10:55:09.612Z"
+  },
+  "095": {
+    "url": "/patterns/095_mediterranean_tile.png",
+    "generatedAt": "2026-04-18T10:55:18.604Z"
+  },
+  "096": {
+    "url": "/patterns/096_coral_reef.png",
+    "generatedAt": "2026-04-18T10:55:30.192Z"
+  },
+  "097": {
+    "url": "/patterns/097_wave_gradient.png",
+    "generatedAt": "2026-04-18T10:55:43.166Z"
+  },
+  "098": {
+    "url": "/patterns/098_beach_sunset.png",
+    "generatedAt": "2026-04-18T10:55:52.780Z"
+  },
+  "099": {
+    "url": "/patterns/099_pineapple.png",
+    "generatedAt": "2026-04-18T10:56:04.565Z"
+  },
+  "054": {
+    "url": "/patterns/054_houndstooth.png",
+    "generatedAt": "2026-04-18T10:56:55.948Z"
+  },
+  "057": {
+    "url": "/patterns/057_minimal_stripes.png",
+    "generatedAt": "2026-04-18T10:57:20.117Z"
+  },
+  "030": {
+    "url": "/patterns/030_cheetah_minimal.png",
+    "generatedAt": "2026-04-18T10:58:04.354Z"
   }
 }
