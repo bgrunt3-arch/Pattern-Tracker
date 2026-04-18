@@ -790,7 +790,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
     </div>
     <div class="cover-foot">
       <span>${dateStr}</span>
-      <span>CURATED BY 辻本</span>
+      <span>COCOCASE</span>
     </div>
   </div>
 
@@ -826,7 +826,6 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
         12のテーマに分類しており、<br>
         コレクションとしての展開を想定しております。
       </div>
-      <div class="note-signature">— 辻本</div>
     </div>
     <div class="footer">
       <span>COCOCASE</span>
