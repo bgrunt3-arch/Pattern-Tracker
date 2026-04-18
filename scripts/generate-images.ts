@@ -14,6 +14,7 @@
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { put } from "@vercel/blob";
+import sharp from "sharp";
 import * as fs from "fs";
 import * as path from "path";
 import { DESIGNS } from "../lib/designs";
@@ -26,6 +27,19 @@ const MAX_RETRIES = 2;
 const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
 const USE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
+const TRIM_THRESHOLD = 15;
+const TRIM_BG = { r: 255, g: 255, b: 255, alpha: 1 };
+
+async function trimWhiteBorder(buffer: Buffer): Promise<Buffer> {
+  try {
+    return await sharp(buffer)
+      .trim({ background: TRIM_BG, threshold: TRIM_THRESHOLD })
+      .png()
+      .toBuffer();
+  } catch {
+    return buffer;
+  }
+}
 
 const PROMPT_PREFIX =
   "Flat 2D seamless textile pattern swatch, top-down overhead view, ";
@@ -120,7 +134,8 @@ async function generateOne(
     const imgBytes = await generateImageBytes(wrapPrompt(design.prompt));
     if (!imgBytes) throw new Error("画像データが返ってきませんでした");
 
-    const buffer = Buffer.from(imgBytes, "base64");
+    const rawBuffer = Buffer.from(imgBytes, "base64");
+    const buffer = await trimWhiteBorder(rawBuffer);
     const generatedAt = new Date().toISOString();
     let url: string;
 

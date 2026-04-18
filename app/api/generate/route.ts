@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { put } from '@vercel/blob';
+import sharp from 'sharp';
 import { DESIGNS } from '@/lib/designs';
 
 export const runtime = 'nodejs';
@@ -21,6 +22,17 @@ function wrapPrompt(base: string): string {
     .replace(/,?\s*tileable\.?$/i, '')
     .replace(/,?\s*no text\.?$/i, '');
   return `${PROMPT_PREFIX}${clean}${PROMPT_SUFFIX}`;
+}
+
+async function trimWhiteBorder(buffer: Buffer): Promise<Buffer> {
+  try {
+    return await sharp(buffer)
+      .trim({ background: { r: 255, g: 255, b: 255, alpha: 1 }, threshold: 15 })
+      .png()
+      .toBuffer();
+  } catch {
+    return buffer;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -63,6 +75,8 @@ export async function POST(req: NextRequest) {
     }
 
     const generatedAt = new Date().toISOString();
+    const rawBuffer = Buffer.from(imageBytes, 'base64');
+    const buffer = await trimWhiteBorder(rawBuffer);
 
     // Vercel Blob が利用可能な場合はアップロード、なければ base64 で返す
     if (process.env.BLOB_READ_WRITE_TOKEN) {
@@ -71,7 +85,6 @@ export async function POST(req: NextRequest) {
         ? `patterns/${designId}_${slug(design.name)}.png`
         : `patterns/${designId ?? 'unknown'}_${Date.now()}.png`;
 
-      const buffer = Buffer.from(imageBytes, 'base64');
       const blob = await put(filename, buffer, {
         access: 'public',
         contentType: 'image/png',
@@ -83,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     // fallback: base64 data URL（ローカル開発用）
     return NextResponse.json({
-      imageUrl: `data:image/png;base64,${imageBytes}`,
+      imageUrl: `data:image/png;base64,${buffer.toString('base64')}`,
       designId,
       generatedAt,
     });
