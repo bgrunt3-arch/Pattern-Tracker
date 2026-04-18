@@ -16,7 +16,7 @@
 import puppeteer from "puppeteer";
 import * as fs from "fs";
 import * as path from "path";
-import { DESIGNS, THEMES } from "../lib/designs";
+import { DESIGNS, THEMES, SOURCE_LABELS } from "../lib/designs";
 
 // ===== パス =====
 const PATTERNS_DIR  = path.join(process.cwd(), "public", "patterns");
@@ -115,12 +115,13 @@ function buildThemePages(web = false): string {
     }).join("");
 
     const namesHTML = designs.map(d => {
-      const hasLink = !!d.burgaUrl;
+      const hasLink = !!d.sourceUrl;
+      const brandLabel = SOURCE_LABELS[d.source];
       const nameEl = hasLink
-        ? `<a class="name-label name-label-link" href="${d.burgaUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">BURGA ↗</span></a>`
+        ? `<a class="name-label name-label-link" href="${d.sourceUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">${brandLabel} ↗</span></a>`
         : `<span class="name-label">${d.name}</span>`;
-      const refPart = d.burgaRef !== "—"
-        ? `<span class="name-ref">ref: ${d.burgaRef}</span>`
+      const refPart = d.sourceRef !== "—"
+        ? `<span class="name-ref">ref: ${d.sourceRef}</span>`
         : "";
       return `
       <div class="name-row">

@@ -6,7 +6,7 @@ import {
   RotateCcw, ExternalLink, ChevronDown, ChevronUp,
   Search, Wand2, ImageOff, AlertCircle, X,
 } from 'lucide-react';
-import { DESIGNS, THEMES, STATUSES, type Status } from '@/lib/designs';
+import { DESIGNS, THEMES, STATUSES, SOURCE_LABELS, type Status } from '@/lib/designs';
 
 const STORAGE_KEY = 'cococase-pattern-tracker-v1';
 
@@ -128,7 +128,7 @@ export default function PatternTracker() {
       const q = searchQuery.toLowerCase();
       if (
         !d.name.toLowerCase().includes(q) &&
-        !d.burgaRef.toLowerCase().includes(q) &&
+        !d.sourceRef.toLowerCase().includes(q) &&
         !d.prompt.toLowerCase().includes(q)
       ) return false;
     }
@@ -174,12 +174,12 @@ export default function PatternTracker() {
 
   // ── CSV 書き出し ──────────────────────────────────────────────────
   const exportCSV = () => {
-    const headers = ['ID', 'Theme', 'Name', 'BURGA Ref', 'BURGA URL', 'Status', 'Has Image', 'Notes', 'Prompt'];
+    const headers = ['ID', 'Theme', 'Name', 'Source', 'Source Ref', 'Source URL', 'Status', 'Has Image', 'Notes', 'Prompt'];
     const rows = DESIGNS.map(d => {
       const st = getStatus(d.id);
       const stLabel = STATUSES.find(s => s.id === st)?.jp ?? st;
       return [
-        d.id, d.theme, d.name, d.burgaRef, d.burgaUrl,
+        d.id, d.theme, d.name, d.source, d.sourceRef, d.sourceUrl,
         stLabel,
         getImageUrl(d.id) ? '○' : '×',
         getNotes(d.id),
@@ -464,11 +464,11 @@ export default function PatternTracker() {
                       <span className="sans" style={{ fontSize: 9, letterSpacing: 1.5, color: '#8B7355', fontWeight: 600 }}>
                         {themeInfo?.label}
                       </span>
-                      {d.burgaRef !== '—' && (
+                      {d.sourceRef !== '—' && (
                         <>
                           <span style={{ color: '#C4B59A', fontSize: 10 }}>·</span>
                           <span className="sans" style={{ fontSize: 10, color: '#8B7355', fontStyle: 'italic' }}>
-                            ref: {d.burgaRef}
+                            ref: {d.sourceRef}
                           </span>
                         </>
                       )}
@@ -536,10 +536,10 @@ export default function PatternTracker() {
                     }
                   </button>
 
-                  {/* BURGA リンク */}
-                  {d.burgaUrl && (
+                  {/* ソースリンク */}
+                  {d.sourceUrl && (
                     <a
-                      href={d.burgaUrl}
+                      href={d.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn sans"
@@ -550,7 +550,7 @@ export default function PatternTracker() {
                         textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4,
                       }}
                     >
-                      <ExternalLink size={11} /> BURGA
+                      <ExternalLink size={11} /> {SOURCE_LABELS[d.source]}
                     </a>
                   )}
 
