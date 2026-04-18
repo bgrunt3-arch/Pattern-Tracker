@@ -69,9 +69,31 @@ function today(): string {
 }
 
 // ===== TOC =====
-function buildTOC(): string {
+// ===== テーマ → デザインをチャンク分割（10件/ページ） =====
+const CHUNK_SIZE = 10;
+
+function chunkDesigns<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+
+// テーマごとの開始ページ番号を計算
+function computeThemePages() {
   const themes = THEMES.filter(t => t.id !== "all");
   let pageNum = 4;
+  const result = themes.map(theme => {
+    const designs = DESIGNS.filter(d => d.theme === theme.id);
+    const chunks = chunkDesigns(designs, CHUNK_SIZE);
+    const startPage = pageNum;
+    pageNum += Math.max(1, chunks.length);
+    return { theme, designs, chunks, startPage };
+  });
+  return { themeInfo: result, nextPage: pageNum };
+}
+
+function buildTOC(): string {
+  const { themeInfo, nextPage } = computeThemePages();
 
   const rows: string[] = [
     `<div class="toc-row">
@@ -79,11 +101,10 @@ function buildTOC(): string {
       <span class="toc-range"></span>
       <span class="toc-page serif italic">p.03</span>
     </div>`,
-    ...themes.map(theme => {
-      const designs = DESIGNS.filter(d => d.theme === theme.id);
-      const first   = designs[0]?.id ?? "";
-      const last    = designs[designs.length - 1]?.id ?? "";
-      const p       = String(pageNum++).padStart(2, "0");
+    ...themeInfo.map(({ theme, designs, startPage }) => {
+      const first = designs[0]?.id ?? "";
+      const last  = designs[designs.length - 1]?.id ?? "";
+      const p     = String(startPage).padStart(2, "0");
       return `<div class="toc-row">
         <span class="toc-theme serif">${theme.label} <span class="toc-jp">${theme.jp}</span></span>
         <span class="toc-range">${first} – ${last}</span>
@@ -93,60 +114,66 @@ function buildTOC(): string {
     `<div class="toc-row">
       <span class="toc-theme serif">Original <span class="toc-jp">手動デザイン</span></span>
       <span class="toc-range"></span>
-      <span class="toc-page serif italic">p.${String(pageNum).padStart(2, "0")}</span>
+      <span class="toc-page serif italic">p.${String(nextPage).padStart(2, "0")}</span>
     </div>`,
   ];
   return rows.join("\n");
 }
 
-// ===== テーマ別ページ =====
+// ===== テーマ別ページ（10件/ページでチャンク分割） =====
 function buildThemePages(web = false): string {
-  const themes = THEMES.filter(t => t.id !== "all");
-  let pageNum  = 4;
+  const { themeInfo } = computeThemePages();
 
-  return themes.map(theme => {
-    const designs = DESIGNS.filter(d => d.theme === theme.id);
-    const p       = String(pageNum++).padStart(2, "0");
+  return themeInfo.flatMap(({ theme, designs, chunks, startPage }) => {
+    return chunks.map((chunk, ci) => {
+      const p = String(startPage + ci).padStart(2, "0");
+      const totalPages = chunks.length;
+      const pageLabel = totalPages > 1 ? ` (${ci + 1}/${totalPages})` : "";
 
-    const gridHTML = designs.map(d => {
-      const src = patternSrc(d.id, d.name, web);
-      const img = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
-      return `<div class="card">${img}<span class="card-id">${d.id}</span></div>`;
-    }).join("");
+      const gridHTML = chunk.map(d => {
+        const src = patternSrc(d.id, d.name, web);
+        const img = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
+        return `<div class="card">${img}<span class="card-id">${d.id}</span></div>`;
+      }).join("");
 
-    const namesHTML = designs.map(d => {
-      const hasLink = !!d.sourceUrl;
-      const brandLabel = SOURCE_LABELS[d.source];
-      const nameEl = hasLink
-        ? `<a class="name-label name-label-link" href="${d.sourceUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">${brandLabel} ↗</span></a>`
-        : `<span class="name-label">${d.name}</span>`;
-      const refPart = d.sourceRef !== "—"
-        ? `<span class="name-ref">ref: ${d.sourceRef}</span>`
-        : "";
+      const namesHTML = chunk.map(d => {
+        const hasLink = !!d.sourceUrl;
+        const brandLabel = SOURCE_LABELS[d.source];
+        const nameEl = hasLink
+          ? `<a class="name-label name-label-link" href="${d.sourceUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">${brandLabel} ↗</span></a>`
+          : `<span class="name-label">${d.name}</span>`;
+        const refPart = d.sourceRef !== "—"
+          ? `<span class="name-ref">ref: ${d.sourceRef}</span>`
+          : "";
+        return `
+        <div class="name-row">
+          <span class="name-id serif italic">${d.id}</span>
+          ${nameEl}
+          ${refPart}
+        </div>`;
+      }).join("");
+
+      const meta = ci === 0
+        ? `${designs.length} DESIGNS${pageLabel}`
+        : `CONTINUED${pageLabel}`;
+
       return `
-      <div class="name-row">
-        <span class="name-id serif italic">${d.id}</span>
-        ${nameEl}
-        ${refPart}
-      </div>`;
-    }).join("");
-
-    return `
-      <div class="page">
-        <div class="header">
-          <div class="header-title serif italic">
-            ${theme.label} <span class="header-jp">${theme.jp}</span>
+        <div class="page">
+          <div class="header">
+            <div class="header-title serif italic">
+              ${theme.label} <span class="header-jp">${theme.jp}</span>
+            </div>
+            <div class="header-meta">${meta}</div>
           </div>
-          <div class="header-meta">${designs.length} DESIGNS</div>
+          <div class="grid">${gridHTML}</div>
+          <div class="names">${namesHTML}</div>
+          <div class="footer">
+            <span>COCOCASE · ${theme.label}</span>
+            <span class="serif italic">p.${p}</span>
+          </div>
         </div>
-        <div class="grid">${gridHTML}</div>
-        <div class="names">${namesHTML}</div>
-        <div class="footer">
-          <span>COCOCASE · ${theme.label}</span>
-          <span class="serif italic">p.${p}</span>
-        </div>
-      </div>
-    `;
+      `;
+    });
   }).join("\n");
 }
 
@@ -317,7 +344,7 @@ function buildContactPage(pageNum: number): string {
 // ===== HTML組み立て =====
 function buildHTML(manualSections: ManualSection[], web = false): string {
   const manualFiles     = manualSections.flatMap(s => s.files);
-  const manualStartPage = 14;
+  const manualStartPage = computeThemePages().nextPage;
   const contactPage     = manualStartPage + Math.max(1, Math.ceil(manualFiles.length / 10));
   const dateStr         = today();
 
