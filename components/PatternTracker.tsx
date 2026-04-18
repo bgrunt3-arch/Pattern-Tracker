@@ -117,7 +117,7 @@ export default function PatternTracker() {
   }, [getStatus]);
 
   const completedCount   = stats.generated + stats.approved + stats.submitted;
-  const completionPercent = Math.round((completedCount / 100) * 100);
+  const completionPercent = Math.round((completedCount / DESIGNS.length) * 100);
   const generatedImages  = DESIGNS.filter(d => getImageUrl(d.id)).length;
 
   // ── フィルタ ────────────────────────────────────────────────────
@@ -264,7 +264,7 @@ export default function PatternTracker() {
           <h1 className="serif" style={{ fontSize: 34, fontWeight: 600, margin: '0 0 4px', letterSpacing: -0.5, lineHeight: 1.1 }}>
             Pattern <em style={{ color: '#D4A574' }}>Tracker</em>
           </h1>
-          <div className="sans" style={{ fontSize: 13, opacity: 0.65 }}>BURGA参考の100デザイン管理</div>
+          <div className="sans" style={{ fontSize: 13, opacity: 0.65 }}>BURGA参考の{DESIGNS.length}デザイン管理</div>
 
           {/* Progress bar */}
           <div style={{ marginTop: 22 }}>
@@ -278,7 +278,7 @@ export default function PatternTracker() {
                 )}
                 <div className="serif" style={{ fontSize: 19, fontWeight: 600 }}>
                   <span style={{ color: '#D4A574' }}>{completedCount}</span>
-                  <span style={{ opacity: 0.4, fontSize: 13 }}> / 100</span>
+                  <span style={{ opacity: 0.4, fontSize: 13 }}> / {DESIGNS.length}</span>
                 </div>
               </div>
             </div>
