@@ -130,6 +130,13 @@ function buildThemePages(web = false): string {
       const totalPages = chunks.length;
       const pageLabel = totalPages > 1 ? ` (${ci + 1}/${totalPages})` : "";
 
+      // チャンク全体で同じ商品を参照しているか判定
+      const first = chunk[0];
+      const grouped =
+        !!first &&
+        first.sourceRef !== "—" &&
+        chunk.every(d => d.sourceRef === first.sourceRef && d.sourceUrl === first.sourceUrl);
+
       const gridHTML = chunk.map(d => {
         const src = patternSrc(d.id, d.name, web);
         const img = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
@@ -137,12 +144,13 @@ function buildThemePages(web = false): string {
       }).join("");
 
       const namesHTML = chunk.map(d => {
-        const hasLink = !!d.sourceUrl;
+        // グループ化されているなら個別のリンク/refは省略
+        const hasLink = !grouped && !!d.sourceUrl;
         const brandLabel = SOURCE_LABELS[d.source];
         const nameEl = hasLink
           ? `<a class="name-label name-label-link" href="${d.sourceUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">${brandLabel} ↗</span></a>`
           : `<span class="name-label">${d.name}</span>`;
-        const refPart = d.sourceRef !== "—"
+        const refPart = !grouped && d.sourceRef !== "—"
           ? `<span class="name-ref">ref: ${d.sourceRef}</span>`
           : "";
         return `
@@ -153,9 +161,21 @@ function buildThemePages(web = false): string {
         </div>`;
       }).join("");
 
-      const meta = ci === 0
+      const countMeta = ci === 0
         ? `${designs.length} DESIGNS${pageLabel}`
         : `CONTINUED${pageLabel}`;
+
+      // グループ化チャンクは「ref: 商品名 BURGA ↗」をヘッダー右側に表示
+      let headerMeta: string;
+      if (grouped && first) {
+        const brandLabel = SOURCE_LABELS[first.source];
+        const refLink = first.sourceUrl
+          ? `<a class="header-ref" href="${first.sourceUrl}" target="_blank" rel="noopener">ref: ${first.sourceRef} <span class="name-ext">${brandLabel} ↗</span></a>`
+          : `<span class="header-ref">ref: ${first.sourceRef}</span>`;
+        headerMeta = `${refLink}<span class="header-count">${countMeta}</span>`;
+      } else {
+        headerMeta = countMeta;
+      }
 
       return `
         <div class="page">
@@ -163,7 +183,7 @@ function buildThemePages(web = false): string {
             <div class="header-title serif italic">
               ${theme.label} <span class="header-jp">${theme.jp}</span>
             </div>
-            <div class="header-meta">${meta}</div>
+            <div class="header-meta">${headerMeta}</div>
           </div>
           <div class="grid">${gridHTML}</div>
           <div class="names">${namesHTML}</div>
@@ -411,6 +431,29 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       font-size: 7.5pt;
       letter-spacing: 2pt;
       color: #8B7355;
+      display: flex;
+      align-items: baseline;
+      gap: 10pt;
+    }
+    .header-ref {
+      font-size: 9pt;
+      letter-spacing: 0.5pt;
+      color: #2B2620;
+      text-decoration: none;
+      font-style: italic;
+      font-family: 'Fraunces', 'Noto Serif JP', Georgia, serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 5pt;
+    }
+    @media screen {
+      a.header-ref:hover { color: #D4A574; }
+      a.header-ref:hover .name-ext { background: #C49060; }
+    }
+    .header-count {
+      font-size: 7pt;
+      letter-spacing: 1.5pt;
+      color: #B5A890;
     }
 
     /* ─── フッター ─── */
