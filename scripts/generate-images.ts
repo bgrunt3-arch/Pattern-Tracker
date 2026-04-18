@@ -2,48 +2,37 @@
 /**
  * COCOcase Pattern Tracker — Imagen 4 Fast バッチ画像生成スクリプト
  *
- * 使用モデル: imagen-4.0-fast-generate-001（Google Gemini API）
- * APIキー取得: https://aistudio.google.com → 「Get API key」
+ * BLOB_READ_WRITE_TOKEN が .env.local にあれば Vercel Blob に保存。
+ * なければ public/patterns/ にローカル保存（従来の動作）。
  *
  * 使い方:
  *   npm run gen:all
  *   npm run gen:floral
  *   npm run gen:range -- --from=001 --to=010
- *
- * 生成した画像は public/patterns/{id}_{slug}.png に保存されます。
  */
 
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
+import { put } from "@vercel/blob";
 import * as fs from "fs";
 import * as path from "path";
 import { DESIGNS } from "../lib/designs";
 
-// .env.local を読み込む
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
-// ===== 設定 =====
-// IMAGE_MODEL 環境変数で切替可能。未設定なら Imagen 4 Fast をデフォルト使用。
-// imagen-* → ai.models.generateImages()
-// gemini-* → ai.models.generateContent() + responseModalities: ["IMAGE"]
 const MODEL = process.env.IMAGE_MODEL || "imagen-4.0-fast-generate-001";
-const RATE_LIMIT_MS = 2000; // リクエスト間隔（無料枠なら30000=30秒が安全）
+const RATE_LIMIT_MS = 2000;
 const MAX_RETRIES = 2;
 const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
+const USE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
 
-// ===== プロンプトラッパー =====
-// 各プロンプトに自動で追加される指示。
-// 「スマホケース」や「3Dモックアップ」が生成されるのを防ぐ。
-// パターン画像（テキスタイル素材）だけを生成させる。
 const PROMPT_PREFIX =
   "Flat 2D seamless textile pattern swatch, top-down overhead view, ";
 const PROMPT_SUFFIX =
   ", pattern fills entire frame edge to edge, repeating tileable design, no phone, no phone case, no device, no mockup, no 3D object, no product, no border, no frame, no shadow, no text, no watermark, flat textile design only";
 
 function wrapPrompt(base: string): string {
-  // 元のプロンプトから "Seamless pattern of " や "tileable, no text" を取り除いて、
-  // 新しい前後指示で包み直す
   const clean = base
     .replace(/^Seamless pattern of /i, "")
     .replace(/,?\s*tileable,?\s*no text\.?$/i, "")
@@ -52,15 +41,16 @@ function wrapPrompt(base: string): string {
   return `${PROMPT_PREFIX}${clean}${PROMPT_SUFFIX}`;
 }
 
-// ===== 初期化 =====
 if (!process.env.GEMINI_API_KEY) {
   console.error("❌ GEMINI_API_KEY が .env.local に設定されていません");
-  console.error("   取得方法: https://aistudio.google.com → 「Get API key」");
   process.exit(1);
 }
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+if (!USE_BLOB) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
 
 // ===== マニフェスト =====
 type ManifestEntry = { url: string; generatedAt: string };
@@ -76,6 +66,7 @@ function loadManifest(): Manifest {
 }
 
 function saveManifest(m: Manifest) {
+  fs.mkdirSync(path.dirname(MANIFEST_PATH), { recursive: true });
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(m, null, 2), "utf-8");
 }
 
@@ -85,10 +76,9 @@ const slug = (s: string) =>
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-// ===== モデル別画像生成 =====
-async function generateImage(prompt: string): Promise<string> {
+// ===== 画像生成 =====
+async function generateImageBytes(prompt: string): Promise<string> {
   if (MODEL.startsWith("imagen")) {
-    // Imagen モデル: generateImages() を使用
     const response = await ai.models.generateImages({
       model: MODEL,
       prompt,
@@ -96,7 +86,6 @@ async function generateImage(prompt: string): Promise<string> {
     });
     return response.generatedImages?.[0]?.image?.imageBytes ?? "";
   } else {
-    // Gemini ネイティブ画像生成 (gemini-2.5-flash-image 等)
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: prompt,
@@ -114,9 +103,13 @@ async function generateOne(
   attempt = 1
 ): Promise<"ok" | "skip" | "fail"> {
   const filename = `${design.id}_${slug(design.name)}.png`;
-  const filepath = path.join(OUTPUT_DIR, filename);
 
-  if (fs.existsSync(filepath)) {
+  // スキップ判定（Blob or ローカルに既存）
+  if (manifest[design.id]) {
+    console.log(`⏭️  ${design.id} ${design.name} (既存・スキップ)`);
+    return "skip";
+  }
+  if (!USE_BLOB && fs.existsSync(path.join(OUTPUT_DIR, filename))) {
     console.log(`⏭️  ${design.id} ${design.name} (既存・スキップ)`);
     return "skip";
   }
@@ -124,29 +117,39 @@ async function generateOne(
   try {
     process.stdout.write(`🎨 ${design.id} ${design.name}... `);
 
-    const wrappedPrompt = wrapPrompt(design.prompt);
-    const imgBytes = await generateImage(wrappedPrompt);
+    const imgBytes = await generateImageBytes(wrapPrompt(design.prompt));
     if (!imgBytes) throw new Error("画像データが返ってきませんでした");
 
-    fs.writeFileSync(filepath, Buffer.from(imgBytes, "base64"));
+    const buffer = Buffer.from(imgBytes, "base64");
+    const generatedAt = new Date().toISOString();
+    let url: string;
 
-    // マニフェスト更新
-    manifest[design.id] = {
-      url: `/patterns/${filename}`,
-      generatedAt: new Date().toISOString(),
-    };
+    if (USE_BLOB) {
+      // Vercel Blob に保存
+      const blob = await put(`patterns/${filename}`, buffer, {
+        access: "public",
+        contentType: "image/png",
+        addRandomSuffix: false,
+      });
+      url = blob.url;
+      console.log(`✅ (Blob)`);
+    } else {
+      // ローカルに保存
+      fs.writeFileSync(path.join(OUTPUT_DIR, filename), buffer);
+      url = `/patterns/${filename}`;
+      console.log(`✅ (local)`);
+    }
+
+    manifest[design.id] = { url, generatedAt };
     saveManifest(manifest);
 
-    console.log(`✅`);
     return "ok";
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     console.log(`❌ ${msg}`);
     if (attempt < MAX_RETRIES) {
       const wait = 5000 * attempt;
-      console.log(
-        `   ↳ ${wait / 1000}秒待機後にリトライ (${attempt + 1}/${MAX_RETRIES})`
-      );
+      console.log(`   ↳ ${wait / 1000}秒後にリトライ (${attempt + 1}/${MAX_RETRIES})`);
       await sleep(wait);
       return generateOne(design, manifest, attempt + 1);
     }
@@ -158,17 +161,18 @@ async function generateOne(
 async function main() {
   const args = process.argv.slice(2);
   const themeArg = args.find(a => a.startsWith("--theme="))?.split("=")[1];
-  const fromArg = args.find(a => a.startsWith("--from="))?.split("=")[1];
-  const toArg = args.find(a => a.startsWith("--to="))?.split("=")[1];
+  const fromArg  = args.find(a => a.startsWith("--from="))?.split("=")[1];
+  const toArg    = args.find(a => a.startsWith("--to="))?.split("=")[1];
 
   let list = [...DESIGNS];
   if (themeArg) list = list.filter(d => d.theme === themeArg);
-  if (fromArg) list = list.filter(d => parseInt(d.id) >= parseInt(fromArg));
-  if (toArg) list = list.filter(d => parseInt(d.id) <= parseInt(toArg));
+  if (fromArg)  list = list.filter(d => parseInt(d.id) >= parseInt(fromArg));
+  if (toArg)    list = list.filter(d => parseInt(d.id) <= parseInt(toArg));
 
-  console.log(`\n🚀 ${list.length}枚を生成開始 (モデル: ${MODEL})\n`);
+  console.log(`\n🚀 ${list.length}枚を生成開始 (モデル: ${MODEL})`);
+  console.log(`📦 保存先: ${USE_BLOB ? "Vercel Blob" : "public/patterns/ (ローカル)"}\n`);
+
   const startTime = Date.now();
-
   const manifest = loadManifest();
   const results = { ok: 0, skip: 0, fail: 0, failed: [] as string[] };
 
@@ -177,11 +181,7 @@ async function main() {
     const result = await generateOne(design, manifest);
     results[result]++;
     if (result === "fail") results.failed.push(`${design.id} ${design.name}`);
-
-    // 次のリクエストまで待機（最後は不要、スキップ時は不要）
-    if (i < list.length - 1 && result !== "skip") {
-      await sleep(RATE_LIMIT_MS);
-    }
+    if (i < list.length - 1 && result !== "skip") await sleep(RATE_LIMIT_MS);
   }
 
   const elapsed = Math.round((Date.now() - startTime) / 1000);
@@ -193,14 +193,10 @@ async function main() {
   if (results.failed.length > 0) {
     console.log(`\n失敗した項目:`);
     results.failed.forEach(f => console.log(`   - ${f}`));
-    console.log(
-      `\n💡 もう一度 npm run gen:all を実行すると失敗分だけ再試行します`
-    );
+    console.log(`\n💡 もう一度実行すると失敗分だけ再試行します`);
   }
-
-  if (results.ok > 0) {
-    console.log(`\n📁 保存先: ${OUTPUT_DIR}`);
-    console.log(`📋 マニフェスト: ${MANIFEST_PATH}`);
+  if (USE_BLOB && results.ok > 0) {
+    console.log(`\n📋 manifest.json を更新しました → git commit & push してください`);
   }
 }
 
