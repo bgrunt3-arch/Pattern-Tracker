@@ -18,7 +18,8 @@
     "gen:celestial": "tsx scripts/generate-images.ts --theme=celestial",
     "gen:coastal": "tsx scripts/generate-images.ts --theme=coastal",
     "gen:range": "tsx scripts/generate-images.ts",
-    "catalog": "tsx scripts/generate-catalog.ts"
+    "catalog": "tsx scripts/generate-catalog.ts",
+    "trim": "tsx scripts/trim-patterns.ts"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
@@ -27,7 +28,8 @@
     "next": "16.2.4",
     "puppeteer": "^24.41.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sharp": "^0.34.5"
   },
   "overrides": {
     "node-domexception": "file:./shims/node-domexception"
