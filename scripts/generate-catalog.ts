@@ -334,14 +334,14 @@ function buildMockupPreviewPages(startPage: number, web = false): string {
     return { file, label: `pos ${n}` };
   }).filter(({ file }) => fs.existsSync(file));
 
-  const chunks = [allItems.slice(0, 6), allItems.slice(6, 12)].filter(c => c.length > 0);
+  const chunks = chunkDesigns(allItems, 12);
 
   return chunks.map((chunk, ci) => {
     const p = String(startPage + ci).padStart(2, "0");
     const isFirst = ci === 0;
     const meta = isFirst
-      ? `モックアップ例 · 011 Vanilla Sand (1/${chunks.length})`
-      : `CONTINUED (2/${chunks.length})`;
+      ? `モックアップ例 · 011 Vanilla Sand`
+      : `CONTINUED (${ci + 1}/${chunks.length})`;
 
     const gridHTML = chunk.map(({ file, label }) => {
       let src: string | null = null;
@@ -434,7 +434,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
     return path.join(MOCKUPS_DIR, `pos${n}.png`);
   }).filter(f => fs.existsSync(f)).length;
   const mockupStartPage  = manualStartPage + manualPageCount;
-  const mockupPageCount  = mockupItemCount > 0 ? Math.ceil(mockupItemCount / 6) : 0;
+  const mockupPageCount  = mockupItemCount > 0 ? Math.ceil(mockupItemCount / 12) : 0;
   const contactPage      = mockupStartPage + mockupPageCount;
   const dateStr          = today();
 
