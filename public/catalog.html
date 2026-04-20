@@ -409,9 +409,34 @@
       letter-spacing: 0;
     }
 
+    /* ─── モックアップバッジ ─── */
+    .mockup-badge {
+      position: absolute;
+      bottom: 3.5pt;
+      right: 3.5pt;
+      background: #D4A574;
+      color: #fff;
+      font-size: 6.5pt;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5pt;
+      padding: 2pt 5pt;
+      border-radius: 3pt;
+      text-decoration: none;
+      line-height: 1.5;
+      z-index: 2;
+      transition: background 0.15s;
+    }
+    @media screen {
+      .mockup-badge:hover { background: #B8855A; }
+    }
+    @media print {
+      .mockup-badge { display: none; }
+    }
+
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
     @media screen {
       .card { cursor: zoom-in; }
+      .mockup-card { cursor: zoom-in; }
     }
     .lb-overlay {
       display: none;
@@ -694,7 +719,7 @@
             </div>
             <div class="header-meta">10 DESIGNS</div>
           </div>
-          <div class="grid"><div class="card"><img src="/patterns/011_vanilla_sand.png" alt="Vanilla Sand" /><span class="card-id">011</span></div><div class="card"><img src="/patterns/012_golden_coral.png" alt="Golden Coral" /><span class="card-id">012</span></div><div class="card"><img src="/patterns/013_black_onyx.png" alt="Black Onyx" /><span class="card-id">013</span></div><div class="card"><img src="/patterns/014_rose_quartz.png" alt="Rose Quartz" /><span class="card-id">014</span></div><div class="card"><img src="/patterns/015_malachite.png" alt="Malachite" /><span class="card-id">015</span></div><div class="card"><img src="/patterns/016_navy_royale.png" alt="Navy Royale" /><span class="card-id">016</span></div><div class="card"><img src="/patterns/017_carrara_classic.png" alt="Carrara Classic" /><span class="card-id">017</span></div><div class="card"><img src="/patterns/018_terracotta.png" alt="Terracotta" /><span class="card-id">018</span></div><div class="card"><img src="/patterns/019_emerald_jade.png" alt="Emerald Jade" /><span class="card-id">019</span></div><div class="card"><img src="/patterns/020_iridescent_pearl.png" alt="Iridescent Pearl" /><span class="card-id">020</span></div></div>
+          <div class="grid"><div class="card"><img src="/patterns/011_vanilla_sand.png" alt="Vanilla Sand" /><span class="card-id">011</span><a class="mockup-badge" href="#mockup-preview" title="モックアップを見る">▶ mockup</a></div><div class="card"><img src="/patterns/012_golden_coral.png" alt="Golden Coral" /><span class="card-id">012</span></div><div class="card"><img src="/patterns/013_black_onyx.png" alt="Black Onyx" /><span class="card-id">013</span></div><div class="card"><img src="/patterns/014_rose_quartz.png" alt="Rose Quartz" /><span class="card-id">014</span></div><div class="card"><img src="/patterns/015_malachite.png" alt="Malachite" /><span class="card-id">015</span></div><div class="card"><img src="/patterns/016_navy_royale.png" alt="Navy Royale" /><span class="card-id">016</span></div><div class="card"><img src="/patterns/017_carrara_classic.png" alt="Carrara Classic" /><span class="card-id">017</span></div><div class="card"><img src="/patterns/018_terracotta.png" alt="Terracotta" /><span class="card-id">018</span></div><div class="card"><img src="/patterns/019_emerald_jade.png" alt="Emerald Jade" /><span class="card-id">019</span></div><div class="card"><img src="/patterns/020_iridescent_pearl.png" alt="Iridescent Pearl" /><span class="card-id">020</span></div></div>
           <div class="names">
         <div class="name-row">
           <span class="name-id serif italic">011</span>
@@ -1993,7 +2018,7 @@
 
   <!-- ══════════════ Mockup Preview ══════════════ -->
   
-      <div class="page">
+      <div class="page" id="mockup-preview">
         <div class="header">
           <div class="header-title serif italic">Mockup Preview</div>
           <div class="header-meta">モックアップ例 · 011 Vanilla Sand (1/2)</div>
@@ -2073,8 +2098,8 @@
   </div>
   <script>
   (function () {
-    // 画像を持つすべての .card を収集
-    var cards = Array.from(document.querySelectorAll('.card img'));
+    // 画像を持つすべての .card / .mockup-card を収集
+    var cards = Array.from(document.querySelectorAll('.card img, .mockup-card img'));
     var current = 0;
 
     var overlay = document.getElementById('lb-overlay');
@@ -2100,7 +2125,7 @@
 
     // カードにクリックハンドラを付与
     cards.forEach(function(img, i) {
-      img.closest('.card').addEventListener('click', function() { open(i); });
+      img.closest('.card, .mockup-card').addEventListener('click', function() { open(i); });
     });
 
     // 閉じる

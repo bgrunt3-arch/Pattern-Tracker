@@ -146,7 +146,10 @@ function buildThemePages(web = false): string {
       const gridHTML = chunk.map(d => {
         const src = patternSrc(d.id, d.name, web);
         const img = src ? `<img src="${src}" alt="${d.name}" />` : `<div class="card-placeholder"></div>`;
-        return `<div class="card">${img}<span class="card-id">${d.id}</span></div>`;
+        const mockupBadge = d.id === "011"
+          ? `<a class="mockup-badge" href="#mockup-preview" title="モックアップを見る">▶ mockup</a>`
+          : "";
+        return `<div class="card">${img}<span class="card-id">${d.id}</span>${mockupBadge}</div>`;
       }).join("");
 
       const namesHTML = chunk.map(d => {
@@ -358,8 +361,10 @@ function buildMockupPreviewPages(startPage: number, web = false): string {
       ? `<div class="mockup-desc">ケース形状のイメージを12アングルで表示しています。他のデザインも同様に展開可能です。</div>`
       : "";
 
+    const pageId = isFirst ? ` id="mockup-preview"` : "";
+
     return `
-      <div class="page">
+      <div class="page"${pageId}>
         <div class="header">
           <div class="header-title serif italic">Mockup Preview</div>
           <div class="header-meta">${meta}</div>
@@ -844,9 +849,34 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       letter-spacing: 0;
     }
 
+    /* ─── モックアップバッジ ─── */
+    .mockup-badge {
+      position: absolute;
+      bottom: 3.5pt;
+      right: 3.5pt;
+      background: #D4A574;
+      color: #fff;
+      font-size: 6.5pt;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5pt;
+      padding: 2pt 5pt;
+      border-radius: 3pt;
+      text-decoration: none;
+      line-height: 1.5;
+      z-index: 2;
+      transition: background 0.15s;
+    }
+    @media screen {
+      .mockup-badge:hover { background: #B8855A; }
+    }
+    @media print {
+      .mockup-badge { display: none; }
+    }
+
     /* ─── ライトボックス（HTMLビューア用・PDF印刷時は非表示） ─── */
     @media screen {
       .card { cursor: zoom-in; }
+      .mockup-card { cursor: zoom-in; }
     }
     .lb-overlay {
       display: none;
@@ -1003,8 +1033,8 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
   </div>
   <script>
   (function () {
-    // 画像を持つすべての .card を収集
-    var cards = Array.from(document.querySelectorAll('.card img'));
+    // 画像を持つすべての .card / .mockup-card を収集
+    var cards = Array.from(document.querySelectorAll('.card img, .mockup-card img'));
     var current = 0;
 
     var overlay = document.getElementById('lb-overlay');
@@ -1030,7 +1060,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
 
     // カードにクリックハンドラを付与
     cards.forEach(function(img, i) {
-      img.closest('.card').addEventListener('click', function() { open(i); });
+      img.closest('.card, .mockup-card').addEventListener('click', function() { open(i); });
     });
 
     // 閉じる
