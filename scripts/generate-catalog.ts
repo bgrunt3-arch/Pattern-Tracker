@@ -664,12 +664,12 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
     .grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(2, 1fr);
       gap: 5pt;
-      margin-bottom: 10pt;
-      flex-shrink: 0;
+      margin-bottom: 8pt;
+      flex: 1;
     }
     .card {
-      aspect-ratio: 1 / 1;
       background: #EDE5D5;
       border: 0.5pt solid #D4C5A9;
       overflow: hidden;
@@ -704,7 +704,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 2pt 14pt;
-      flex: 1;
+      flex-shrink: 0;
     }
     .name-row {
       display: flex;
