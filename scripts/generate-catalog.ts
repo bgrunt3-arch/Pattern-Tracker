@@ -21,6 +21,7 @@ import { DESIGNS, THEMES, SOURCE_LABELS } from "../lib/designs";
 // ===== パス =====
 const PATTERNS_DIR  = path.join(process.cwd(), "public", "patterns");
 const MANUAL_DIR    = path.join(process.cwd(), "public", "patterns-manual");
+const MOCKUPS_DIR   = path.join(process.cwd(), "public", "mockups", "011_vanilla_sand");
 const OUT_DIR       = path.join(process.cwd(), "out");
 
 // ===== ヘルパー =====
@@ -92,7 +93,7 @@ function computeThemePages() {
   return { themeInfo: result, nextPage: pageNum };
 }
 
-function buildTOC(): string {
+function buildTOC(mockupStartPage: number): string {
   const { themeInfo, nextPage } = computeThemePages();
 
   const rows: string[] = [
@@ -115,6 +116,11 @@ function buildTOC(): string {
       <span class="toc-theme serif">Original <span class="toc-jp">手動デザイン</span></span>
       <span class="toc-range"></span>
       <span class="toc-page serif italic">p.${String(nextPage).padStart(2, "0")}</span>
+    </div>`,
+    `<div class="toc-row">
+      <span class="toc-theme serif">Mockup Preview <span class="toc-jp">モックアップ</span></span>
+      <span class="toc-range">011 Vanilla Sand</span>
+      <span class="toc-page serif italic">p.${String(mockupStartPage).padStart(2, "0")}</span>
     </div>`,
   ];
   return rows.join("\n");
@@ -317,6 +323,58 @@ function buildManualPage(sections: ManualSection[], startPage: number, web = fal
   }).join("\n");
 }
 
+// ===== モックアッププレビューページ =====
+function buildMockupPreviewPages(startPage: number, web = false): string {
+  const allItems = Array.from({ length: 12 }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    const file = path.join(MOCKUPS_DIR, `pos${n}.png`);
+    return { file, label: `pos ${n}` };
+  }).filter(({ file }) => fs.existsSync(file));
+
+  const chunks = [allItems.slice(0, 6), allItems.slice(6, 12)].filter(c => c.length > 0);
+
+  return chunks.map((chunk, ci) => {
+    const p = String(startPage + ci).padStart(2, "0");
+    const isFirst = ci === 0;
+    const meta = isFirst
+      ? `モックアップ例 · 011 Vanilla Sand (1/${chunks.length})`
+      : `CONTINUED (2/${chunks.length})`;
+
+    const gridHTML = chunk.map(({ file, label }) => {
+      let src: string | null = null;
+      if (web) {
+        const rel = file.split(/[\/\\]public[\/\\]/)[1];
+        src = rel ? `/${rel.replace(/\\/g, "/")}` : null;
+      } else {
+        src = toDataUrl(file);
+      }
+      const img = src
+        ? `<img src="${src}" alt="${label}" />`
+        : `<div class="card-placeholder"></div>`;
+      return `<div class="mockup-card">${img}<span class="mockup-label serif italic">${label}</span></div>`;
+    }).join("");
+
+    const descHTML = isFirst
+      ? `<div class="mockup-desc">ケース形状のイメージを12アングルで表示しています。他のデザインも同様に展開可能です。</div>`
+      : "";
+
+    return `
+      <div class="page">
+        <div class="header">
+          <div class="header-title serif italic">Mockup Preview</div>
+          <div class="header-meta">${meta}</div>
+        </div>
+        ${descHTML}
+        <div class="mockup-grid">${gridHTML}</div>
+        <div class="footer">
+          <span>COCOCASE · MOCKUP PREVIEW</span>
+          <span class="serif italic">p.${p}</span>
+        </div>
+      </div>
+    `;
+  }).join("\n");
+}
+
 // ===== Contactページ =====
 function buildContactPage(pageNum: number): string {
   const p = String(pageNum).padStart(2, "0");
@@ -363,10 +421,17 @@ function buildContactPage(pageNum: number): string {
 
 // ===== HTML組み立て =====
 function buildHTML(manualSections: ManualSection[], web = false): string {
-  const manualFiles     = manualSections.flatMap(s => s.files);
-  const manualStartPage = computeThemePages().nextPage;
-  const contactPage     = manualStartPage + Math.max(1, Math.ceil(manualFiles.length / 10));
-  const dateStr         = today();
+  const manualFiles      = manualSections.flatMap(s => s.files);
+  const manualStartPage  = computeThemePages().nextPage;
+  const manualPageCount  = Math.max(1, Math.ceil(manualFiles.length / 10));
+  const mockupItemCount  = Array.from({ length: 12 }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return path.join(MOCKUPS_DIR, `pos${n}.png`);
+  }).filter(f => fs.existsSync(f)).length;
+  const mockupStartPage  = manualStartPage + manualPageCount;
+  const mockupPageCount  = mockupItemCount > 0 ? Math.ceil(mockupItemCount / 6) : 0;
+  const contactPage      = mockupStartPage + mockupPageCount;
+  const dateStr          = today();
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -708,6 +773,45 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       font-style: italic;
     }
 
+    /* ─── モックアッププレビュー ─── */
+    .mockup-desc {
+      font-size: 9pt;
+      color: #8B7355;
+      line-height: 1.8;
+      margin-bottom: 12pt;
+      flex-shrink: 0;
+    }
+    .mockup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10pt;
+      flex: 1;
+    }
+    .mockup-card {
+      background: #EDE5D5;
+      border: 0.5pt solid #D4C5A9;
+      box-shadow: 0 1pt 4pt rgba(43,38,32,0.10);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .mockup-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: contain;
+      display: block;
+      background: #F5EFE4;
+    }
+    .mockup-label {
+      display: block;
+      text-align: center;
+      font-size: 8pt;
+      color: #D4A574;
+      padding: 4pt 0;
+      background: #EDE5D5;
+      letter-spacing: 0.5pt;
+    }
+
     /* ─── BURGAリンク（名前リスト） ─── */
     a.name-label-link {
       color: #2B2620;
@@ -844,7 +948,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       <div class="header-meta">CONTENTS</div>
     </div>
     <div class="toc">
-      ${buildTOC()}
+      ${buildTOC(mockupStartPage)}
     </div>
     <div class="footer">
       <span>COCOCASE</span>
@@ -881,6 +985,9 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
 
   <!-- ══════════════ Original（手動） ══════════════ -->
   ${buildManualPage(manualSections, manualStartPage, web)}
+
+  <!-- ══════════════ Mockup Preview ══════════════ -->
+  ${buildMockupPreviewPages(mockupStartPage, web)}
 
   <!-- ══════════════ Contact ══════════════ -->
   ${buildContactPage(contactPage)}
