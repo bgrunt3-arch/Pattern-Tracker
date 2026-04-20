@@ -789,9 +789,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
     .mockup-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      align-content: start;
       gap: 10pt;
-      flex: 1;
     }
     .mockup-card {
       background: #EDE5D5;
