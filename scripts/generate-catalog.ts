@@ -21,7 +21,8 @@ import { DESIGNS, THEMES, SOURCE_LABELS } from "../lib/designs";
 // ===== パス =====
 const PATTERNS_DIR  = path.join(process.cwd(), "public", "patterns");
 const MANUAL_DIR    = path.join(process.cwd(), "public", "patterns-manual");
-const MOCKUPS_DIR   = path.join(process.cwd(), "public", "mockups", "011_vanilla_sand");
+const MOCKUPS_011   = path.join(process.cwd(), "public", "mockups", "011_vanilla_sand");
+const MOCKUPS_021   = path.join(process.cwd(), "public", "mockups", "021_celestial_cow");
 const OUT_DIR       = path.join(process.cwd(), "out");
 
 // ===== ヘルパー =====
@@ -119,7 +120,7 @@ function buildTOC(mockupStartPage: number): string {
     </div>`,
     `<div class="toc-row">
       <span class="toc-theme serif">Mockup Preview <span class="toc-jp">モックアップ</span></span>
-      <span class="toc-range">011 Vanilla Sand</span>
+      <span class="toc-range">011 · 021</span>
       <span class="toc-page serif italic">p.${String(mockupStartPage).padStart(2, "0")}</span>
     </div>`,
   ];
@@ -328,42 +329,51 @@ function buildManualPage(sections: ManualSection[], startPage: number, web = fal
 
 // ===== モックアッププレビューページ =====
 function buildMockupPreviewPages(startPage: number, web = false): string {
-  const allItems = Array.from({ length: 12 }, (_, i) => {
-    const n = String(i + 1).padStart(2, "0");
-    const file = path.join(MOCKUPS_DIR, `pos${n}.png`);
-    return { file, label: `pos ${n}` };
-  }).filter(({ file }) => fs.existsSync(file));
+  const designs = [
+    { dir: MOCKUPS_011, title: "011 Vanilla Sand" },
+    { dir: MOCKUPS_021, title: "021 Celestial Cow" },
+  ];
 
-  const chunks = chunkDesigns(allItems, 12);
+  const pages: string[] = [];
+  let pageOffset = 0;
 
-  return chunks.map((chunk, ci) => {
-    const p = String(startPage + ci).padStart(2, "0");
-    const isFirst = ci === 0;
-    const meta = isFirst
-      ? `モックアップ例 · 011 Vanilla Sand`
-      : `CONTINUED (${ci + 1}/${chunks.length})`;
+  designs.forEach((design, di) => {
+    const items = Array.from({ length: 12 }, (_, i) => {
+      const n = String(i + 1).padStart(2, "0");
+      const file = path.join(design.dir, `pos${n}.png`);
+      return { file, label: `pos ${n}` };
+    }).filter(({ file }) => fs.existsSync(file));
 
-    const gridHTML = chunk.map(({ file, label }) => {
-      let src: string | null = null;
-      if (web) {
-        const rel = file.split(/[\/\\]public[\/\\]/)[1];
-        src = rel ? `/${rel.replace(/\\/g, "/")}` : null;
-      } else {
-        src = toDataUrl(file);
-      }
-      const img = src
-        ? `<img src="${src}" alt="${label}" />`
-        : `<div class="card-placeholder"></div>`;
-      return `<div class="mockup-card">${img}<span class="mockup-label serif italic">${label}</span></div>`;
-    }).join("");
+    const chunks = chunkDesigns(items, 12);
 
-    const descHTML = isFirst
-      ? `<div class="mockup-desc">ケース形状のイメージを12アングルで表示しています。他のデザインも同様に展開可能です。</div>`
-      : "";
+    chunks.forEach((chunk, ci) => {
+      const p = String(startPage + pageOffset).padStart(2, "0");
+      const isFirstPage = di === 0 && ci === 0;
+      const meta = ci === 0
+        ? `モックアップ例 · ${design.title}`
+        : `${design.title} (${ci + 1}/${chunks.length})`;
 
-    const pageId = isFirst ? ` id="mockup-preview"` : "";
+      const gridHTML = chunk.map(({ file, label }) => {
+        let src: string | null = null;
+        if (web) {
+          const rel = file.split(/[\/\\]public[\/\\]/)[1];
+          src = rel ? `/${rel.replace(/\\/g, "/")}` : null;
+        } else {
+          src = toDataUrl(file);
+        }
+        const img = src
+          ? `<img src="${src}" alt="${label}" />`
+          : `<div class="card-placeholder"></div>`;
+        return `<div class="mockup-card">${img}<span class="mockup-label serif italic">${label}</span></div>`;
+      }).join("");
 
-    return `
+      const descHTML = isFirstPage
+        ? `<div class="mockup-desc">ケース形状のイメージを2デザインで展示しています。他のデザインも同様に展開可能です。</div>`
+        : "";
+
+      const pageId = isFirstPage ? ` id="mockup-preview"` : "";
+
+      pages.push(`
       <div class="page"${pageId}>
         <div class="header">
           <div class="header-title serif italic">Mockup Preview</div>
@@ -376,8 +386,12 @@ function buildMockupPreviewPages(startPage: number, web = false): string {
           <span class="serif italic">p.${p}</span>
         </div>
       </div>
-    `;
-  }).join("\n");
+    `);
+      pageOffset++;
+    });
+  });
+
+  return pages.join("\n");
 }
 
 // ===== Contactページ =====
@@ -429,12 +443,15 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
   const manualFiles      = manualSections.flatMap(s => s.files);
   const manualStartPage  = computeThemePages().nextPage;
   const manualPageCount  = Math.max(1, Math.ceil(manualFiles.length / 10));
-  const mockupItemCount  = Array.from({ length: 12 }, (_, i) => {
+  const countMockups = (dir: string) => Array.from({ length: 12 }, (_, i) => {
     const n = String(i + 1).padStart(2, "0");
-    return path.join(MOCKUPS_DIR, `pos${n}.png`);
+    return path.join(dir, `pos${n}.png`);
   }).filter(f => fs.existsSync(f)).length;
   const mockupStartPage  = manualStartPage + manualPageCount;
-  const mockupPageCount  = mockupItemCount > 0 ? Math.ceil(mockupItemCount / 12) : 0;
+  const mockupPageCount  = [MOCKUPS_011, MOCKUPS_021].reduce((acc, dir) => {
+    const cnt = countMockups(dir);
+    return acc + (cnt > 0 ? Math.ceil(cnt / 12) : 0);
+  }, 0);
   const contactPage      = mockupStartPage + mockupPageCount;
   const dateStr          = today();
 
