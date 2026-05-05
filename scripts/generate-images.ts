@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * COCOcase Pattern Tracker — Imagen 4 Fast バッチ画像生成スクリプト
+ * COCOcase Pattern Tracker — Imagen 4 バッチ画像生成スクリプト
  *
  * BLOB_READ_WRITE_TOKEN が .env.local にあれば Vercel Blob に保存。
  * なければ public/patterns/ にローカル保存（従来の動作）。
@@ -8,7 +8,11 @@
  * 使い方:
  *   npm run gen:all
  *   npm run gen:floral
- *   npm run gen:range -- --from=001 --to=010
+ *   npm run gen:range -- --from=201 --to=450
+ *
+ * .env.local に必要な変数:
+ *   GEMINI_API_KEY=...
+ *   IMAGE_MODEL=imagen-4.0-fast-generate-001   # 省略時: imagen-4.0-fast-generate-001
  */
 
 import dotenv from "dotenv";
@@ -21,8 +25,8 @@ import { DESIGNS } from "../lib/designs";
 
 dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
-const MODEL = process.env.IMAGE_MODEL || "imagen-4.0-fast-generate-001";
-const RATE_LIMIT_MS = 2000;
+const MODEL = process.env.IMAGE_MODEL || "gemini-2.5-flash-image";
+const RATE_LIMIT_MS = parseInt(process.env.RATE_LIMIT_MS || "2000");
 const MAX_RETRIES = 2;
 const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
@@ -100,13 +104,14 @@ async function generateImageBytes(prompt: string): Promise<string> {
     });
     return response.generatedImages?.[0]?.image?.imageBytes ?? "";
   } else {
+    // gemini-2.5-flash-image-preview など
     const response = await ai.models.generateContent({
       model: MODEL,
       contents: prompt,
-      config: { responseModalities: ["IMAGE"] },
+      config: { responseModalities: ["TEXT", "IMAGE"] },
     });
     const parts = response.candidates?.[0]?.content?.parts ?? [];
-    return parts.find(p => p.inlineData)?.inlineData?.data ?? "";
+    return parts.find((p: { inlineData?: { data?: string } }) => p.inlineData)?.inlineData?.data ?? "";
   }
 }
 
@@ -118,7 +123,6 @@ async function generateOne(
 ): Promise<"ok" | "skip" | "fail"> {
   const filename = `${design.id}_${slug(design.name)}.png`;
 
-  // スキップ判定（Blob or ローカルに既存）
   if (manifest[design.id]) {
     console.log(`⏭️  ${design.id} ${design.name} (既存・スキップ)`);
     return "skip";
@@ -140,7 +144,6 @@ async function generateOne(
     let url: string;
 
     if (USE_BLOB) {
-      // Vercel Blob に保存
       const blob = await put(`patterns/${filename}`, buffer, {
         access: "public",
         contentType: "image/png",
@@ -149,7 +152,6 @@ async function generateOne(
       url = blob.url;
       console.log(`✅ (Blob)`);
     } else {
-      // ローカルに保存
       fs.writeFileSync(path.join(OUTPUT_DIR, filename), buffer);
       url = `/patterns/${filename}`;
       console.log(`✅ (local)`);
@@ -185,7 +187,8 @@ async function main() {
   if (toArg)    list = list.filter(d => parseInt(d.id) <= parseInt(toArg));
 
   console.log(`\n🚀 ${list.length}枚を生成開始 (モデル: ${MODEL})`);
-  console.log(`📦 保存先: ${USE_BLOB ? "Vercel Blob" : "public/patterns/ (ローカル)"}\n`);
+  console.log(`📦 保存先: ${USE_BLOB ? "Vercel Blob" : "public/patterns/ (ローカル)"}`);
+  console.log(`⏱  レート制限: ${RATE_LIMIT_MS / 1000}秒/枚\n`);
 
   const startTime = Date.now();
   const manifest = loadManifest();
