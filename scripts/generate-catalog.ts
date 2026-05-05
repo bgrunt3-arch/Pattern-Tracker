@@ -44,12 +44,13 @@ function patternDataUrl(id: string, name: string): string | null {
   return toDataUrl(path.join(PATTERNS_DIR, `${id}_${slugName(name)}.png`));
 }
 
-// web=true のとき /patterns/... の URL を返す（base64 不使用・軽量）
+// web=true のとき patterns/... の相対URL を返す（base64 不使用・軽量）
+// 先頭の / を付けないことで file:// でも http:// でも動作する
 function patternSrc(id: string, name: string, web: boolean): string | null {
   if (web) {
     const filename = `${id}_${slugName(name)}.png`;
     if (!fs.existsSync(path.join(PATTERNS_DIR, filename))) return null;
-    return `/patterns/${filename}`;
+    return `patterns/${filename}`;
   }
   return patternDataUrl(id, name);
 }
@@ -58,9 +59,9 @@ function patternSrc(id: string, name: string, web: boolean): string | null {
 function manualSrc(filePath: string, web: boolean): string | null {
   if (web) {
     if (!fs.existsSync(filePath)) return null;
-    // /Users/.../public/patterns-manual/... → /patterns-manual/...
+    // /Users/.../public/patterns-manual/... → patterns-manual/...
     const rel = filePath.split(/[\/\\]public[\/\\]/)[1];
-    return rel ? `/${rel.replace(/\\/g, "/")}` : null;
+    return rel ? rel.replace(/\\/g, "/") : null;
   }
   return toDataUrl(filePath);
 }
@@ -334,7 +335,7 @@ function buildManualPage(sections: ManualSection[], startPage: number, web = fal
 function mockupSrc(file: string, web: boolean): string | null {
   if (web) {
     const rel = file.split(/[\/\\]public[\/\\]/)[1];
-    return rel ? `/${rel.replace(/\\/g, "/")}` : null;
+    return rel ? rel.replace(/\\/g, "/") : null;
   }
   return toDataUrl(file);
 }
@@ -1225,14 +1226,10 @@ async function generateCatalog() {
   }
 
   // Web用HTML生成（画像URL参照・軽量）— Vercelデプロイ用に先に生成
-  const webHtml     = buildHTML(manualSections, true);
-  const publicHtml  = path.join(process.cwd(), "public", "catalog.html");
+  // Web用HTML生成（画像URL参照・軽量）
+  const webHtml    = buildHTML(manualSections, true);
+  const publicHtml = path.join(process.cwd(), "public", "catalog.html");
   fs.writeFileSync(publicHtml, webHtml, "utf-8");
-
-  // HTML生成（PDF用・base64埋め込み）
-  const html    = buildHTML(manualSections, false);
-  const tmpHtml = path.join(process.cwd(), ".tmp-catalog.html");
-  fs.writeFileSync(tmpHtml, html, "utf-8");
 
   // PDF・ローカルHTML 出力先
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -1240,11 +1237,40 @@ async function generateCatalog() {
   const outPath  = path.join(OUT_DIR, `cococase-catalog-${date}.pdf`);
   const htmlPath = path.join(OUT_DIR, `cococase-catalog-${date}.html`);
 
-  // ローカル閲覧用HTML保存
-  fs.copyFileSync(tmpHtml, htmlPath);
+  // ローカルHTMLもweb版で保存
+  fs.copyFileSync(publicHtml, htmlPath);
+
+  // ローカルHTTPサーバーを起動して画像を提供（base64埋め込み不要）
+  const http = await import("http");
+  const { createReadStream, statSync } = await import("fs");
+  const mimeTypes: Record<string, string> = {
+    ".html": "text/html",
+    ".png":  "image/png",
+    ".jpg":  "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".css":  "text/css",
+    ".js":   "application/javascript",
+    ".woff2":"font/woff2",
+  };
+  const publicDir = path.join(process.cwd(), "public");
+  const server = http.createServer((req, res) => {
+    const urlPath = decodeURIComponent(req.url ?? "/").split("?")[0];
+    const filePath = path.join(publicDir, urlPath === "/" ? "catalog.html" : urlPath);
+    const ext = path.extname(filePath).toLowerCase();
+    try {
+      statSync(filePath);
+      res.writeHead(200, { "Content-Type": mimeTypes[ext] ?? "application/octet-stream" });
+      createReadStream(filePath).pipe(res);
+    } catch {
+      res.writeHead(404);
+      res.end("Not found");
+    }
+  });
+  await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+  const port = (server.address() as { port: number }).port;
 
   // Puppeteer で PDF 化
-  console.log("   Puppeteer 起動中...");
+  console.log(`   Puppeteer 起動中... (ローカルサーバー: ${port})`);
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -1252,15 +1278,25 @@ async function generateCatalog() {
 
   try {
     const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(180000);
+    page.setDefaultTimeout(180000);
 
-    // Google Fonts 読み込みを含めて待機
-    await page.goto(`file://${tmpHtml}`, {
-      waitUntil: "networkidle0",
-      timeout: 60000,
+    await page.goto(`http://127.0.0.1:${port}/catalog.html`, {
+      waitUntil: "load",
+      timeout: 180000,
     });
 
+    // 全画像レンダリング完了待ち
+    await page.evaluate(() =>
+      Promise.all(
+        Array.from(document.images)
+          .filter(img => !img.complete)
+          .map(img => new Promise(r => { img.onload = img.onerror = r; }))
+      )
+    );
+
     // フォントレンダリング安定待ち
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 2000));
 
     await page.pdf({
       path: outPath,
@@ -1275,7 +1311,7 @@ async function generateCatalog() {
     console.log(`   Web用HTML:  ${publicHtml}`);
   } finally {
     await browser.close();
-    fs.unlinkSync(tmpHtml);
+    server.close();
   }
 }
 
