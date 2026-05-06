@@ -1,4 +1,4 @@
-import { put, list } from '@vercel/blob';
+import { put, get } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 const BLOB_PATHNAME = 'reviews/reviews.json';
@@ -6,13 +6,10 @@ const BLOB_PATHNAME = 'reviews/reviews.json';
 // GET — 現在のレビューデータを返す
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: 'reviews/' });
-    const blob = blobs.find(b => b.pathname === BLOB_PATHNAME);
-    if (!blob) return NextResponse.json({});
-
-    const res = await fetch(blob.url, { cache: 'no-store' });
-    const data = await res.json();
-    return NextResponse.json(data);
+    const result = await get(BLOB_PATHNAME, { access: 'private' });
+    if (!result) return NextResponse.json({});
+    const text = await new Response(result.stream).text();
+    return NextResponse.json(JSON.parse(text));
   } catch {
     return NextResponse.json({});
   }
@@ -23,9 +20,10 @@ export async function PUT(req: Request) {
   try {
     const body = await req.json();
     await put(BLOB_PATHNAME, JSON.stringify(body), {
-      access: 'public',
+      access: 'private',
       contentType: 'application/json',
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -146,11 +146,11 @@ export default function ReviewClient() {
         </div>
 
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          {/* 統計 */}
+          {/* 統計（カタログへリンク） */}
           <div style={{ display: 'flex', gap: 12 }}>
-            <Stat label="採用" value={adoptedCount}  color="#4A7C59" />
-            <Stat label="保留" value={pendingCount}  color="#8B7355" />
-            <Stat label="不採用" value={rejectedCount} color="#B85C5C" />
+            <Stat label="採用" value={adoptedCount}  color="#4A7C59"  href="/catalog?review=adopted" />
+            <Stat label="保留" value={pendingCount}  color="#8B7355"  href="/catalog?review=pending" />
+            <Stat label="不採用" value={rejectedCount} color="#B85C5C" href="/catalog?review=rejected" />
           </div>
           {/* 同期インジケーター */}
           <SyncDot state={sync} />
@@ -313,12 +313,12 @@ export default function ReviewClient() {
 
 // ─── parts ───────────────────────────────────────────────────────────────────
 
-function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+function Stat({ label, value, color, href }: { label: string; value: number; color: string; href: string }) {
   return (
-    <div style={{ textAlign: 'center' }}>
+    <a href={href} style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>
       <div style={{ fontSize: 18, fontWeight: 600, color, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: 9, color: '#8B7355', letterSpacing: '0.08em', marginTop: 2 }}>{label}</div>
-    </div>
+    </a>
   );
 }
 

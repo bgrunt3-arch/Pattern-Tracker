@@ -41,6 +41,15 @@ export default function CatalogClient() {
   const [reviews, setReviews] = useState<ReviewMap>({});
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
 
+  // URLパラメータからフィルター初期値を読む
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rv = params.get('review');
+    if (rv === 'adopted' || rv === 'rejected' || rv === 'pending') {
+      setReviewFilter(rv);
+    }
+  }, []);
+
   useEffect(() => {
     fetch('/api/reviews', { cache: 'no-store' })
       .then(r => r.json())
