@@ -7,12 +7,13 @@ import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 type Decision = 'adopted' | 'rejected';
 type ReviewMap = Record<string, Decision>;
 
-const MOCKUP_COUNTS: Record<string, number> = {
-  "001": 2, "002": 2, "010": 2, "011": 12, "019": 2, "021": 12,
-  "031": 2, "051": 2, "052": 2, "057": 2, "058": 2, "061": 2, "085": 2, "171": 2,
+// 旧来の特殊モックアップ（12枚などを持つデザイン）
+const EXTRA_MOCKUP_COUNTS: Record<string, number> = {
+  "011": 12, "021": 12,
 };
 
-function mockupCount(id: string) { return MOCKUP_COUNTS[id] ?? 0; }
+// 全デザインが pos01/pos02 を持つ前提。特殊なものだけ上書き
+function mockupCount(id: string) { return EXTRA_MOCKUP_COUNTS[id] ?? 2; }
 
 function slug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -86,11 +87,8 @@ export default function CatalogClient() {
   }, []);
 
   const openModal = (design: Design) => {
-    if (mockupCount(design.id) > 0) {
-      setModal({ design, pos: 1, mode: 'mockup' });
-    } else {
-      setModal({ design, pos: 0, mode: 'pattern' });
-    }
+    // 全デザインがmockup(pos01/pos02)を持つ前提でmockupモードから開く
+    setModal({ design, pos: 1, mode: 'mockup' });
   };
 
   const prevPos = () =>
@@ -239,7 +237,6 @@ export default function CatalogClient() {
           <DesignCard
             key={design.id}
             design={design}
-            hasMockup={mockupCount(design.id) > 0}
             review={reviews[design.id]}
             onReview={(d) => handleReview(design.id, d)}
             onClick={() => openModal(design)}
@@ -362,17 +359,30 @@ export default function CatalogClient() {
 
 // ─── card ─────────────────────────────────────────────────────────────────────
 
-function DesignCard({ design, hasMockup, review, onReview, onClick }: {
+// サムネイル表示ステージ: 0=mockup pos01, 1=pattern, 2=placeholder
+type ImgStage = 0 | 1 | 2;
+
+function DesignCard({ design, review, onReview, onClick }: {
   design: Design;
-  hasMockup: boolean;
   review?: Decision;
   onReview: (d: Decision | null) => void;
   onClick: () => void;
 }) {
-  const [imgError, setImgError] = useState(false);
+  const [imgStage, setImgStage] = useState<ImgStage>(0);
   const [hovered, setHovered] = useState(false);
 
   const reviewColor = review === 'adopted' ? '#4A7C59' : review === 'rejected' ? '#B85C5C' : undefined;
+
+  // ステージに応じた src
+  const imgSrc = imgStage === 0
+    ? mockupSrc(design, 1)   // pos01.png
+    : imgStage === 1
+    ? patternSrc(design)     // パターン（フォールバック）
+    : null;
+
+  const handleImgError = () => {
+    setImgStage(s => (s < 2 ? (s + 1) as ImgStage : 2));
+  };
 
   return (
     <div
@@ -392,13 +402,14 @@ function DesignCard({ design, hasMockup, review, onReview, onClick }: {
       }}
     >
       {/* image */}
-      <div style={{ aspectRatio: '1', background: '#E0D6C8', position: 'relative', overflow: 'hidden' }}>
-        {!imgError ? (
+      <div style={{ aspectRatio: imgStage === 0 ? '5/6' : '1', background: '#E0D6C8', position: 'relative', overflow: 'hidden' }}>
+        {imgSrc ? (
           <img
-            src={patternSrc(design)}
+            key={`${design.id}-${imgStage}`}
+            src={imgSrc}
             alt={design.name}
             loading="lazy"
-            onError={() => setImgError(true)}
+            onError={handleImgError}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
@@ -410,17 +421,6 @@ function DesignCard({ design, hasMockup, review, onReview, onClick }: {
           }}>
             <span style={{ fontSize: 28, lineHeight: 1 }}>◻</span>
             <span style={{ fontSize: 11, letterSpacing: '0.06em' }}>{design.id}</span>
-          </div>
-        )}
-        {hasMockup && (
-          <div style={{
-            position: 'absolute', top: 7, right: 7,
-            background: 'rgba(43,38,32,0.72)',
-            color: '#F5EFE4',
-            fontSize: 9, letterSpacing: '0.08em',
-            padding: '2px 6px', borderRadius: 4,
-          }}>
-            MOCKUP
           </div>
         )}
         {review && (
