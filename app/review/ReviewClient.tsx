@@ -176,7 +176,7 @@ export default function ReviewClient() {
           border: '1px solid #C4B59A', borderRadius: 999,
           background: 'transparent', color: '#8B7355', fontSize: 11, cursor: 'pointer',
         }}>
-          ↩ 戻す
+          戻す
         </button>
       </div>
 
@@ -288,9 +288,10 @@ export default function ReviewClient() {
               <button onClick={undoLast} style={{
                 width: 40, height: 40, borderRadius: '50%',
                 border: '1px solid #C4B59A', background: 'transparent',
-                color: '#8B7355', fontSize: 16, cursor: 'pointer',
+                color: '#8B7355', fontSize: 11, letterSpacing: '0.04em',
+                cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>↩</button>
+              }}>戻す</button>
               <ActionBtn label="YES" icon="✓" color="#4A7C59" onClick={() => decide('adopted')} />
             </div>
 
