@@ -325,21 +325,30 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
 function ActionBtn({ label, icon, color, onClick }: {
   label: string; icon: string; color: string; onClick: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
+
+  const handlePress = () => {
+    setPressed(true);
+    setTimeout(() => setPressed(false), 200);
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      onClick={handlePress}
       style={{
         width: 72, height: 72, borderRadius: '50%',
         border: `2px solid ${color}`,
-        background: hovered ? color : 'transparent',
-        color: hovered ? '#fff' : color,
+        background: pressed ? color : 'transparent',
+        color: pressed ? '#fff' : color,
         fontSize: 28, cursor: 'pointer',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 0.15s',
-        boxShadow: hovered ? `0 4px 16px ${color}44` : 'none',
+        transition: 'background 0.15s, color 0.15s, box-shadow 0.15s',
+        boxShadow: pressed ? `0 4px 16px ${color}44` : 'none',
+        WebkitTapHighlightColor: 'transparent',
       }}
     >
       <span style={{ lineHeight: 1 }}>{icon}</span>
