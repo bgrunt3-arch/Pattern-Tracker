@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { DESIGNS, THEMES, SOURCE_LABELS, type Design } from '@/lib/designs';
 import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const STORAGE_KEY = 'cococase_review';
 type Decision = 'adopted' | 'rejected';
 type ReviewMap = Record<string, Decision>;
 
@@ -43,9 +42,10 @@ export default function CatalogClient() {
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
 
   useEffect(() => {
-    try {
-      setReviews(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
-    } catch { /* ignore */ }
+    fetch('/api/reviews', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(setReviews)
+      .catch(() => {/* ignore */});
   }, []);
 
   const filtered = useMemo(() => {

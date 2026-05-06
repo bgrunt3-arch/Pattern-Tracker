@@ -5,8 +5,7 @@ import { DESIGNS, type Design } from '@/lib/designs';
 
 type Decision = 'adopted' | 'rejected';
 type ReviewMap = Record<string, Decision>;
-
-const STORAGE_KEY = 'cococase_review';
+type SyncState = 'idle' | 'loading' | 'saving' | 'error';
 
 function slug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -16,17 +15,19 @@ function patternSrc(d: Design) {
   return `/patterns/${d.id}_${slug(d.name)}.png`;
 }
 
-function loadReviews(): ReviewMap {
-  if (typeof window === 'undefined') return {};
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  } catch {
-    return {};
-  }
+async function fetchReviews(): Promise<ReviewMap> {
+  const res = await fetch('/api/reviews', { cache: 'no-store' });
+  if (!res.ok) throw new Error('fetch failed');
+  return res.json();
 }
 
-function saveReviews(map: ReviewMap) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+async function saveReviews(map: ReviewMap): Promise<void> {
+  const res = await fetch('/api/reviews', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(map),
+  });
+  if (!res.ok) throw new Error('save failed');
 }
 
 // ─── main ────────────────────────────────────────────────────────────────────
@@ -34,14 +35,18 @@ function saveReviews(map: ReviewMap) {
 export default function ReviewClient() {
   const [reviews, setReviews] = useState<ReviewMap>({});
   const [index, setIndex] = useState(0);
-  const [filter, setFilter] = useState<'all' | 'pending'>('pending');
+  const [filter, setFilter] = useState<'pending' | 'all'>('pending');
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
   const [imgError, setImgError] = useState(false);
+  const [sync, setSync] = useState<SyncState>('loading');
   const touchStartX = useRef<number | null>(null);
 
-  // ロード
+  // 初期ロード
   useEffect(() => {
-    setReviews(loadReviews());
+    setSync('loading');
+    fetchReviews()
+      .then(data => { setReviews(data); setSync('idle'); })
+      .catch(() => setSync('error'));
   }, []);
 
   // 対象リスト
@@ -49,58 +54,65 @@ export default function ReviewClient() {
     ? DESIGNS.filter(d => !reviews[d.id])
     : DESIGNS;
 
-  const total = list.length;
-  const reviewed = filter === 'pending'
-    ? DESIGNS.filter(d => reviews[d.id]).length
-    : Object.keys(reviews).length;
-
   const current = list[index] ?? null;
+
+  const adoptedCount  = Object.values(reviews).filter(v => v === 'adopted').length;
+  const rejectedCount = Object.values(reviews).filter(v => v === 'rejected').length;
+  const pendingCount  = DESIGNS.length - adoptedCount - rejectedCount;
 
   // 決定処理
   const decide = useCallback((decision: Decision) => {
-    if (!current) return;
+    if (!current || swipeDir) return;
     const dir = decision === 'adopted' ? 'right' : 'left';
     setSwipeDir(dir);
-    setTimeout(() => {
-      setReviews(prev => {
-        const next = { ...prev, [current.id]: decision };
-        saveReviews(next);
-        return next;
-      });
+
+    setTimeout(async () => {
+      const next = { ...reviews, [current.id]: decision };
+      setReviews(next);
       setSwipeDir(null);
       setImgError(false);
-      setIndex(i => {
-        // pendingモードでは同インデックスに次のカードが来る
-        if (filter === 'pending') return i;
-        return Math.min(i + 1, list.length - 1);
-      });
+      if (filter !== 'pending') setIndex(i => Math.min(i + 1, list.length - 1));
+
+      // 保存
+      setSync('saving');
+      try {
+        await saveReviews(next);
+        setSync('idle');
+      } catch {
+        setSync('error');
+      }
     }, 280);
-  }, [current, filter, list.length]);
+  }, [current, swipeDir, reviews, filter, list.length]);
+
+  // 元に戻す
+  const undoLast = useCallback(async () => {
+    const keys = Object.keys(reviews);
+    if (!keys.length) return;
+    const last = keys[keys.length - 1];
+    const next = { ...reviews };
+    delete next[last];
+    setReviews(next);
+    if (filter !== 'pending') setIndex(i => Math.max(i - 1, 0));
+
+    setSync('saving');
+    try {
+      await saveReviews(next);
+      setSync('idle');
+    } catch {
+      setSync('error');
+    }
+  }, [reviews, filter]);
 
   // キーボード
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') decide('adopted');
-      if (e.key === 'ArrowLeft') decide('rejected');
+      if (e.key === 'ArrowLeft')  decide('rejected');
       if (e.key === 'ArrowUp' || e.key === 'Backspace') undoLast();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [decide]);
-
-  // 元に戻す
-  const undoLast = useCallback(() => {
-    setReviews(prev => {
-      const keys = Object.keys(prev);
-      if (!keys.length) return prev;
-      const last = keys[keys.length - 1];
-      const next = { ...prev };
-      delete next[last];
-      saveReviews(next);
-      return next;
-    });
-    setIndex(i => Math.max(i - 1, 0));
-  }, []);
+  }, [decide, undoLast]);
 
   // タッチ
   const onTouchStart = (e: React.TouchEvent) => {
@@ -109,16 +121,9 @@ export default function ReviewClient() {
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(dx) > 60) {
-      decide(dx > 0 ? 'adopted' : 'rejected');
-    }
+    if (Math.abs(dx) > 60) decide(dx > 0 ? 'adopted' : 'rejected');
     touchStartX.current = null;
   };
-
-  // 統計
-  const adoptedCount = Object.values(reviews).filter(v => v === 'adopted').length;
-  const rejectedCount = Object.values(reviews).filter(v => v === 'rejected').length;
-  const pendingCount = DESIGNS.length - adoptedCount - rejectedCount;
 
   // ── render ──────────────────────────────────────────────────────────────────
 
@@ -136,28 +141,27 @@ export default function ReviewClient() {
             Review
           </h1>
           <p style={{ fontSize: 11, color: '#8B7355', margin: '2px 0 0', letterSpacing: '0.08em' }}>
-            ← NOPE &nbsp;·&nbsp; YES →
+            ← NOPE · YES →
           </p>
         </div>
 
-        {/* 統計 */}
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Stat label="採用" value={adoptedCount} color="#4A7C59" />
-          <Stat label="保留" value={pendingCount} color="#8B7355" />
-          <Stat label="不採用" value={rejectedCount} color="#B85C5C" />
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          {/* 統計 */}
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Stat label="採用" value={adoptedCount}  color="#4A7C59" />
+            <Stat label="保留" value={pendingCount}  color="#8B7355" />
+            <Stat label="不採用" value={rejectedCount} color="#B85C5C" />
+          </div>
+          {/* 同期インジケーター */}
+          <SyncDot state={sync} />
         </div>
       </header>
 
       {/* ── フィルター ── */}
-      <div style={{
-        padding: '8px 20px',
-        borderBottom: '1px solid #D4C5A9',
-        display: 'flex', gap: 6, alignItems: 'center',
-      }}>
+      <div style={{ padding: '8px 20px', borderBottom: '1px solid #D4C5A9', display: 'flex', gap: 6, alignItems: 'center' }}>
         {(['pending', 'all'] as const).map(f => (
           <button key={f} onClick={() => { setFilter(f); setIndex(0); setImgError(false); }} style={{
-            padding: '3px 12px',
-            border: '1px solid',
+            padding: '3px 12px', border: '1px solid',
             borderColor: filter === f ? '#2B2620' : '#C4B59A',
             borderRadius: 999,
             background: filter === f ? '#2B2620' : 'transparent',
@@ -168,13 +172,9 @@ export default function ReviewClient() {
           </button>
         ))}
         <button onClick={undoLast} style={{
-          marginLeft: 'auto',
-          padding: '3px 12px',
-          border: '1px solid #C4B59A',
-          borderRadius: 999,
-          background: 'transparent',
-          color: '#8B7355',
-          fontSize: 11, cursor: 'pointer',
+          marginLeft: 'auto', padding: '3px 12px',
+          border: '1px solid #C4B59A', borderRadius: 999,
+          background: 'transparent', color: '#8B7355', fontSize: 11, cursor: 'pointer',
         }}>
           ↩ 戻す
         </button>
@@ -183,8 +183,12 @@ export default function ReviewClient() {
       {/* ── メイン ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 16px', gap: 20 }}>
 
-        {/* 完了 */}
-        {!current ? (
+        {sync === 'loading' ? (
+          <div style={{ textAlign: 'center', color: '#8B7355' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>⟳</div>
+            <p style={{ fontSize: 13 }}>読み込み中...</p>
+          </div>
+        ) : !current ? (
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
             <p style={{ fontFamily: 'var(--font-fraunces)', fontSize: 22, marginBottom: 4 }}>
@@ -204,12 +208,12 @@ export default function ReviewClient() {
             {/* プログレス */}
             <div style={{ width: '100%', maxWidth: 420 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#8B7355', marginBottom: 4 }}>
-                <span>{filter === 'pending' ? `残り ${total}` : `${index + 1} / ${total}`}</span>
+                <span>{filter === 'pending' ? `残り ${list.length}` : `${index + 1} / ${list.length}`}</span>
                 <span>{current.id} · {current.theme.toUpperCase()}</span>
               </div>
               {filter !== 'pending' && (
                 <div style={{ height: 3, background: '#D4C5A9', borderRadius: 2 }}>
-                  <div style={{ height: '100%', borderRadius: 2, background: '#2B2620', width: `${((index + 1) / total) * 100}%`, transition: 'width 0.2s' }} />
+                  <div style={{ height: '100%', borderRadius: 2, background: '#2B2620', width: `${((index + 1) / list.length) * 100}%`, transition: 'width 0.2s' }} />
                 </div>
               )}
             </div>
@@ -220,10 +224,8 @@ export default function ReviewClient() {
               onTouchEnd={onTouchEnd}
               style={{
                 width: '100%', maxWidth: 420,
-                background: '#FDF8F0',
-                border: '1px solid #D4C5A9',
-                borderRadius: 16,
-                overflow: 'hidden',
+                background: '#FDF8F0', border: '1px solid #D4C5A9',
+                borderRadius: 16, overflow: 'hidden',
                 boxShadow: '0 8px 32px rgba(43,38,32,0.12)',
                 transform: swipeDir === 'left'
                   ? 'translateX(-120%) rotate(-12deg)'
@@ -234,7 +236,6 @@ export default function ReviewClient() {
                 userSelect: 'none',
               }}
             >
-              {/* 画像 */}
               <div style={{ position: 'relative', aspectRatio: '1', background: '#E0D6C8' }}>
                 {!imgError ? (
                   <img
@@ -250,8 +251,6 @@ export default function ReviewClient() {
                     <span style={{ fontSize: 11 }}>画像なし</span>
                   </div>
                 )}
-
-                {/* 既存ステータスバッジ */}
                 {reviews[current.id] && (
                   <div style={{
                     position: 'absolute', top: 10, left: 10,
@@ -262,14 +261,10 @@ export default function ReviewClient() {
                     {reviews[current.id] === 'adopted' ? '✓ 採用' : '✗ 不採用'}
                   </div>
                 )}
-
-                {/* スワイプ方向オーバーレイ */}
                 {swipeDir && (
                   <div style={{
                     position: 'absolute', inset: 0,
-                    background: swipeDir === 'right'
-                      ? 'rgba(74,124,89,0.35)'
-                      : 'rgba(184,92,92,0.35)',
+                    background: swipeDir === 'right' ? 'rgba(74,124,89,0.35)' : 'rgba(184,92,92,0.35)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 64, fontWeight: 700,
                   }}>
@@ -277,8 +272,6 @@ export default function ReviewClient() {
                   </div>
                 )}
               </div>
-
-              {/* 情報 */}
               <div style={{ padding: '14px 16px' }}>
                 <div style={{ fontFamily: 'var(--font-fraunces)', fontSize: 20, fontWeight: 400, marginBottom: 2 }}>
                   {current.name}
@@ -308,7 +301,7 @@ export default function ReviewClient() {
         )}
       </div>
 
-      {/* ── フッター：カタログへ ── */}
+      {/* フッター */}
       <div style={{ padding: '12px 20px', borderTop: '1px solid #D4C5A9', textAlign: 'center' }}>
         <a href="/catalog" style={{ fontSize: 12, color: '#8B7355', textDecoration: 'none', letterSpacing: '0.08em' }}>
           ← カタログへ戻る
@@ -345,12 +338,23 @@ function ActionBtn({ label, icon, color, onClick }: {
         color: hovered ? '#fff' : color,
         fontSize: 28, cursor: 'pointer',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: 0, transition: 'all 0.15s',
+        transition: 'all 0.15s',
         boxShadow: hovered ? `0 4px 16px ${color}44` : 'none',
       }}
     >
       <span style={{ lineHeight: 1 }}>{icon}</span>
       <span style={{ fontSize: 9, letterSpacing: '0.1em', marginTop: 2 }}>{label}</span>
     </button>
+  );
+}
+
+function SyncDot({ state }: { state: SyncState }) {
+  const color = state === 'idle' ? '#4A7C59' : state === 'saving' || state === 'loading' ? '#C4A55A' : '#B85C5C';
+  const label = state === 'idle' ? '同期済み' : state === 'saving' ? '保存中...' : state === 'loading' ? '読込中...' : 'エラー';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+      <div style={{ width: 7, height: 7, borderRadius: '50%', background: color, transition: 'background 0.3s' }} />
+      <span style={{ fontSize: 10, color: '#8B7355' }}>{label}</span>
+    </div>
   );
 }
