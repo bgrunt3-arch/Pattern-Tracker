@@ -1,8 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DESIGNS, THEMES, SOURCE_LABELS, type Design } from '@/lib/designs';
 import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const STORAGE_KEY = 'cococase_review';
+type Decision = 'adopted' | 'rejected';
+type ReviewMap = Record<string, Decision>;
 
 const MOCKUP_COUNTS: Record<string, number> = {
   "001": 2, "002": 2, "010": 2, "011": 12, "019": 2, "021": 12,
@@ -35,16 +39,28 @@ export default function CatalogClient() {
   const [theme, setTheme] = useState('all');
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [reviews, setReviews] = useState<ReviewMap>({});
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
+
+  useEffect(() => {
+    try {
+      setReviews(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
+    } catch { /* ignore */ }
+  }, []);
 
   const filtered = useMemo(() => {
     let list = DESIGNS;
     if (theme !== 'all') list = list.filter(d => d.theme === theme);
+    if (reviewFilter !== 'all') {
+      if (reviewFilter === 'pending') list = list.filter(d => !reviews[d.id]);
+      else list = list.filter(d => reviews[d.id] === reviewFilter);
+    }
     const q = search.trim().toLowerCase();
     if (q) list = list.filter(d =>
       d.name.toLowerCase().includes(q) || d.id.includes(q) || d.theme.includes(q)
     );
     return list;
-  }, [theme, search]);
+  }, [theme, search, reviews, reviewFilter]);
 
   const openModal = (design: Design) => {
     if (mockupCount(design.id) > 0) {
@@ -65,21 +81,34 @@ export default function CatalogClient() {
 
       {/* ── ヘッダー ── */}
       <header style={{
-        padding: '28px 32px 20px',
+        padding: '20px 16px 14px',
         borderBottom: '1px solid #C4B59A',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
       }}>
-        <h1 style={{
-          fontFamily: 'var(--font-fraunces)',
-          fontSize: 36,
-          fontWeight: 400,
-          letterSpacing: '0.02em',
-          margin: 0,
+        <div>
+          <h1 style={{
+            fontFamily: 'var(--font-fraunces)',
+            fontSize: 30,
+            fontWeight: 400,
+            letterSpacing: '0.02em',
+            margin: 0,
+          }}>
+            COCOcase
+          </h1>
+          <p style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.12em', marginTop: 3 }}>
+            AIRPODS PRO 3 CASE — {DESIGNS.length} DESIGNS
+          </p>
+        </div>
+        <a href="/review" style={{
+          padding: '7px 14px',
+          background: '#2B2620', color: '#F5EFE4',
+          border: 'none', borderRadius: 999,
+          fontSize: 11, letterSpacing: '0.08em',
+          textDecoration: 'none', whiteSpace: 'nowrap',
+          display: 'flex', alignItems: 'center', gap: 5,
         }}>
-          COCOcase
-        </h1>
-        <p style={{ fontSize: 12, color: '#8B7355', letterSpacing: '0.12em', marginTop: 4 }}>
-          AIRPODS PRO 3 CASE — {DESIGNS.length} DESIGNS
-        </p>
+          ✓✗ REVIEW
+        </a>
       </header>
 
       {/* ── フィルター ── */}
@@ -117,7 +146,7 @@ export default function CatalogClient() {
             {filtered.length} designs
           </span>
         </div>
-        {/* テーマフィルター — 横スクロール1行 */}
+        {/* テーマ + レビューフィルター — 横スクロール1行 */}
         <div style={{
           overflowX: 'auto',
           WebkitOverflowScrolling: 'touch',
@@ -126,6 +155,31 @@ export default function CatalogClient() {
           gap: 5,
           padding: '0 16px 8px',
         }}>
+          {/* レビューフィルター */}
+          {([
+            { id: 'all', label: 'ALL', color: undefined },
+            { id: 'adopted', label: '✓ 採用', color: '#4A7C59' },
+            { id: 'pending', label: '– 未', color: '#8B7355' },
+            { id: 'rejected', label: '✗ 不採用', color: '#B85C5C' },
+          ] as const).map(rf => (
+            <button
+              key={rf.id}
+              onClick={() => setReviewFilter(rf.id)}
+              style={{
+                padding: '3px 10px',
+                border: '1px solid',
+                borderColor: reviewFilter === rf.id ? (rf.color || '#2B2620') : '#C4B59A',
+                borderRadius: 999,
+                background: reviewFilter === rf.id ? (rf.color || '#2B2620') : 'transparent',
+                color: reviewFilter === rf.id ? '#F5EFE4' : (rf.color || '#6B5A44'),
+                fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
+              }}
+            >
+              {rf.label}
+            </button>
+          ))}
+          <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
           {THEMES.map(t => (
             <button
               key={t.id}
@@ -153,16 +207,17 @@ export default function CatalogClient() {
 
       {/* ── グリッド ── */}
       <main style={{
-        padding: '28px 32px 64px',
+        padding: '16px 16px 64px',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
-        gap: 18,
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+        gap: 12,
       }}>
         {filtered.map(design => (
           <DesignCard
             key={design.id}
             design={design}
             hasMockup={mockupCount(design.id) > 0}
+            review={reviews[design.id]}
             onClick={() => openModal(design)}
           />
         ))}
@@ -283,13 +338,16 @@ export default function CatalogClient() {
 
 // ─── card ─────────────────────────────────────────────────────────────────────
 
-function DesignCard({ design, hasMockup, onClick }: {
+function DesignCard({ design, hasMockup, review, onClick }: {
   design: Design;
   hasMockup: boolean;
+  review?: Decision;
   onClick: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
   const [hovered, setHovered] = useState(false);
+
+  const reviewColor = review === 'adopted' ? '#4A7C59' : review === 'rejected' ? '#B85C5C' : undefined;
 
   return (
     <div
@@ -298,13 +356,14 @@ function DesignCard({ design, hasMockup, onClick }: {
       onMouseLeave={() => setHovered(false)}
       style={{
         background: '#FDF8F0',
-        border: '1px solid #D4C5A9',
+        border: `1px solid ${reviewColor ?? '#D4C5A9'}`,
         borderRadius: 8,
         overflow: 'hidden',
         cursor: 'pointer',
         transform: hovered ? 'translateY(-3px)' : 'none',
         boxShadow: hovered ? '0 8px 24px rgba(43,38,32,0.13)' : '0 1px 4px rgba(43,38,32,0.06)',
         transition: 'transform 0.15s, box-shadow 0.15s',
+        opacity: review === 'rejected' ? 0.6 : 1,
       }}
     >
       {/* image */}
@@ -337,6 +396,16 @@ function DesignCard({ design, hasMockup, onClick }: {
             padding: '2px 6px', borderRadius: 4,
           }}>
             MOCKUP
+          </div>
+        )}
+        {review && (
+          <div style={{
+            position: 'absolute', top: 7, left: 7,
+            background: review === 'adopted' ? '#4A7C59' : '#B85C5C',
+            color: '#fff',
+            fontSize: 10, padding: '2px 6px', borderRadius: 4,
+          }}>
+            {review === 'adopted' ? '✓' : '✗'}
           </div>
         )}
       </div>
