@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DESIGNS, THEMES, SOURCE_LABELS, type Design } from '@/lib/designs';
 import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -61,6 +61,20 @@ export default function CatalogClient() {
     );
     return list;
   }, [theme, search, reviews, reviewFilter]);
+
+  const handleReview = useCallback(async (id: string, decision: Decision | null) => {
+    setReviews(prev => {
+      const next = { ...prev };
+      if (decision === null) delete next[id];
+      else next[id] = decision;
+      fetch('/api/reviews', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+      return next;
+    });
+  }, []);
 
   const openModal = (design: Design) => {
     if (mockupCount(design.id) > 0) {
@@ -218,6 +232,7 @@ export default function CatalogClient() {
             design={design}
             hasMockup={mockupCount(design.id) > 0}
             review={reviews[design.id]}
+            onReview={(d) => handleReview(design.id, d)}
             onClick={() => openModal(design)}
           />
         ))}
@@ -338,10 +353,11 @@ export default function CatalogClient() {
 
 // ─── card ─────────────────────────────────────────────────────────────────────
 
-function DesignCard({ design, hasMockup, review, onClick }: {
+function DesignCard({ design, hasMockup, review, onReview, onClick }: {
   design: Design;
   hasMockup: boolean;
   review?: Decision;
+  onReview: (d: Decision | null) => void;
   onClick: () => void;
 }) {
   const [imgError, setImgError] = useState(false);
@@ -411,11 +427,11 @@ function DesignCard({ design, hasMockup, review, onClick }: {
       </div>
 
       {/* info */}
-      <div style={{ padding: '9px 11px 11px' }}>
+      <div style={{ padding: '9px 11px 10px' }}>
         <div style={{ fontSize: 10, color: '#8B7355', letterSpacing: '0.08em', marginBottom: 2 }}>
           {design.id} · {design.theme.toUpperCase()}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.3, marginBottom: 5 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.3, marginBottom: 6 }}>
           {design.name}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -436,6 +452,65 @@ function DesignCard({ design, hasMockup, review, onClick }: {
             >
               <ExternalLink size={11} />
             </a>
+          )}
+        </div>
+
+        {/* review buttons */}
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{ display: 'flex', gap: 4, marginTop: 8 }}
+        >
+          {review ? (
+            /* decided — show badge, tap to clear */
+            <button
+              onClick={() => onReview(null)}
+              style={{
+                flex: 1,
+                padding: '4px 0',
+                border: `1px solid ${review === 'adopted' ? '#4A7C59' : '#B85C5C'}`,
+                borderRadius: 6,
+                background: review === 'adopted' ? 'rgba(74,124,89,0.12)' : 'rgba(184,92,92,0.12)',
+                color: review === 'adopted' ? '#4A7C59' : '#B85C5C',
+                fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
+                transition: 'opacity 0.12s',
+              }}
+            >
+              {review === 'adopted' ? '✓ 採用済み · 解除' : '✗ 不採用済み · 解除'}
+            </button>
+          ) : (
+            /* undecided — show ✗ / ✓ */
+            <>
+              <button
+                onClick={() => onReview('rejected')}
+                style={{
+                  flex: 1,
+                  padding: '4px 0',
+                  border: '1px solid #B85C5C',
+                  borderRadius: 6,
+                  background: 'transparent',
+                  color: '#B85C5C',
+                  fontSize: 13, cursor: 'pointer',
+                  transition: 'background 0.12s, color 0.12s',
+                }}
+              >
+                ✗
+              </button>
+              <button
+                onClick={() => onReview('adopted')}
+                style={{
+                  flex: 1,
+                  padding: '4px 0',
+                  border: '1px solid #4A7C59',
+                  borderRadius: 6,
+                  background: 'transparent',
+                  color: '#4A7C59',
+                  fontSize: 13, cursor: 'pointer',
+                  transition: 'background 0.12s, color 0.12s',
+                }}
+              >
+                ✓
+              </button>
+            </>
           )}
         </div>
       </div>
