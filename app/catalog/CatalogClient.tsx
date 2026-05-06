@@ -87,13 +87,45 @@ export default function CatalogClient() {
         position: 'sticky', top: 0, zIndex: 20,
         background: '#F5EFE4',
         borderBottom: '1px solid #D4C5A9',
-        padding: '10px 32px',
-        display: 'flex',
-        gap: 10,
-        alignItems: 'center',
-        flexWrap: 'wrap',
       }}>
-        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', flex: 1 }}>
+        {/* 検索 + カウント行 */}
+        <div style={{
+          padding: '8px 16px',
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              padding: '5px 12px',
+              border: '1px solid #C4B59A',
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.4)',
+              color: '#2B2620',
+              fontSize: 12,
+              outline: 'none',
+              flex: 1,
+              maxWidth: 200,
+            }}
+          />
+          <span style={{ fontSize: 11, color: '#8B7355', whiteSpace: 'nowrap' }}>
+            {filtered.length} designs
+          </span>
+        </div>
+        {/* テーマフィルター — 横スクロール1行 */}
+        <div style={{
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          display: 'flex',
+          gap: 5,
+          padding: '0 16px 8px',
+        }}>
           {THEMES.map(t => (
             <button
               key={t.id}
@@ -109,6 +141,7 @@ export default function CatalogClient() {
                 letterSpacing: '0.07em',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
                 transition: 'all 0.12s',
               }}
             >
@@ -116,25 +149,6 @@ export default function CatalogClient() {
             </button>
           ))}
         </div>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            padding: '4px 12px',
-            border: '1px solid #C4B59A',
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.4)',
-            color: '#2B2620',
-            fontSize: 12,
-            outline: 'none',
-            width: 140,
-          }}
-        />
-        <span style={{ fontSize: 11, color: '#8B7355', whiteSpace: 'nowrap' }}>
-          {filtered.length} designs
-        </span>
       </div>
 
       {/* ── グリッド ── */}
