@@ -11,7 +11,8 @@
  */
 
 import { config } from 'dotenv';
-config({ path: '.env.local' });
+const isProd = process.argv.includes('--prod');
+config({ path: isProd ? '.env.production.local' : '.env.local' });
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
@@ -55,10 +56,12 @@ async function main() {
 
   const targets: { localPath: string; key: string }[] = [];
   for (const dir of dirs) {
-    for (const file of ['pos01.png', 'pos02.png']) {
+    // ディレクトリ内の pos*.png を全て対象に
+    const files = fs.readdirSync(path.join(MOCKUPS_DIR, dir))
+      .filter(f => /^pos\d+\.png$/.test(f))
+      .sort();
+    for (const file of files) {
       const localPath = path.join(MOCKUPS_DIR, dir, file);
-      if (!fs.existsSync(localPath)) continue;
-      // .jpg として保存
       const jpgFile = file.replace('.png', '.jpg');
       targets.push({ localPath, key: `mockups/${dir}/${jpgFile}` });
     }
