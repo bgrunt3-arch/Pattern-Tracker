@@ -9,7 +9,7 @@ type ReviewMap = Record<string, Decision>;
 
 // 旧来の特殊モックアップ（12枚などを持つデザイン）
 const EXTRA_MOCKUP_COUNTS: Record<string, number> = {
-  "011": 13, "021": 13,
+  "011": 12, "021": 12,
 };
 
 // pos02 を持つデザイン（手動キュレーション分のみ）

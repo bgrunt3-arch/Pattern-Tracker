@@ -1,6 +1,6 @@
 {
   "access": "private",
-  "generatedAt": "2026-05-07T13:23:07.583Z",
+  "generatedAt": "2026-05-07T13:24:41.065Z",
   "urls": {
     "mockups/001_sakura_pink/pos01.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/001_sakura_pink/pos01.jpg",
     "mockups/001_sakura_pink/pos02.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/001_sakura_pink/pos02.jpg",
@@ -619,8 +619,6 @@
     "mockups/605_aquarius_celestial/pos01.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/605_aquarius_celestial/pos01.jpg",
     "mockups/011_vanilla_sand/pos01.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos01.jpg",
     "mockups/011_vanilla_sand/pos02.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos02.jpg",
-    "mockups/021_celestial_cow/pos01.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos01.jpg",
-    "mockups/021_celestial_cow/pos02.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos02.jpg",
     "mockups/011_vanilla_sand/pos03.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos03.jpg",
     "mockups/011_vanilla_sand/pos04.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos04.jpg",
     "mockups/011_vanilla_sand/pos05.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos05.jpg",
@@ -631,7 +629,8 @@
     "mockups/011_vanilla_sand/pos10.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos10.jpg",
     "mockups/011_vanilla_sand/pos11.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos11.jpg",
     "mockups/011_vanilla_sand/pos12.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos12.jpg",
-    "mockups/011_vanilla_sand/pos13.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/011_vanilla_sand/pos13.jpg",
+    "mockups/021_celestial_cow/pos01.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos01.jpg",
+    "mockups/021_celestial_cow/pos02.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos02.jpg",
     "mockups/021_celestial_cow/pos03.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos03.jpg",
     "mockups/021_celestial_cow/pos04.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos04.jpg",
     "mockups/021_celestial_cow/pos05.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos05.jpg",
@@ -641,7 +640,6 @@
     "mockups/021_celestial_cow/pos09.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos09.jpg",
     "mockups/021_celestial_cow/pos10.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos10.jpg",
     "mockups/021_celestial_cow/pos11.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos11.jpg",
-    "mockups/021_celestial_cow/pos12.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos12.jpg",
-    "mockups/021_celestial_cow/pos13.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos13.jpg"
+    "mockups/021_celestial_cow/pos12.jpg": "https://1wfyi3d4aac76c9u.private.blob.vercel-storage.com/mockups/021_celestial_cow/pos12.jpg"
   }
 }
