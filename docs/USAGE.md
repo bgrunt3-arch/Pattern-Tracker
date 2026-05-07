@@ -131,53 +131,19 @@ AirPods Pro 3 ケース 605 デザインの採用・不採用を判定するア�
 
 モックアップは「白背景 + 3D の連続的な陰影」というグラデーション主体のため、JPEG 圧縮の劣化が目立ちにくく、実用上は 85% でも PNG とほぼ区別できない。
 
-### 高画質化の選択肢
+### 高画質化の方法
 
-#### 選択肢 1: JPEG の品質を上げる（最も簡単・無料）
-
-`scripts/upload-mockups-to-blob.ts` の品質設定を変更し、再アップロードする。
-
-```typescript
-const JPEG_QUALITY = 85;  // → 95 や 100 に変更
-```
-
-**手順:**
-1. 上記ファイルを編集
-2. `npx tsx scripts/clear-blob-mockups.ts --prod` で本番 Blob をクリア
-3. `rm public/mockup-urls.json` で manifest をリセット
-4. `npx tsx scripts/upload-mockups-to-blob.ts --prod` で再アップロード
-5. Vercel が自動で反映
-
-**目安:**
-- 品質 95% → 240 MB（推奨）
-- 品質 100% → 480 MB（PNG とほぼ等価）
-
-どちらも Hobby プランの 1 GB 内に収まる。
-
-#### 選択肢 2: Vercel Blob を Pro プランへ（PNG をそのまま配信）
+**Vercel Blob を Pro プランへアップグレードして PNG をそのまま配信する**
 
 - 月額 **$10**（約 1,500 円）で 1 TB
 - PNG 17.9 GB がそのまま入るので**無圧縮配信が可能**
-- Pro 化したあと、`scripts/upload-mockups-to-blob.ts` の JPEG 変換処理を外し、PNG のままアップロードする実装に変更する
 
-#### 選択肢 3: 別ストレージ（Cloudflare R2 / AWS S3）+ PNG
-
-- **Cloudflare R2**: 10 GB 無料（毎月）
-- **AWS S3**: 5 GB 無料（最初の 12 ヶ月）
-
-PNG をそのまま配信したい場合の最も安価な方法。実装には：
-
-1. R2 / S3 アカウント作成 + バケット作成
-2. アクセストークン取得
-3. `scripts/upload-mockups-to-blob.ts` を S3 互換 API に書き換え
-4. `app/api/mockup/[...path]/route.ts` を R2 / S3 から取得するように変更
-
-切替工数は **1〜2 時間**。
-
-### 推奨
-
-カタログ表示用の画質としては **JPEG 95% への変更** で必要十分。
-クライアント納品物として原寸 PNG が必要な場合のみ、選択肢 2 か 3 を検討。
+**手順:**
+1. Vercel Dashboard → Settings → Billing → Pro プランへアップグレード
+2. `scripts/upload-mockups-to-blob.ts` の JPEG 変換処理を外し、PNG のままアップロードする実装に変更
+3. `npx tsx scripts/clear-blob-mockups.ts --prod` で既存の JPEG をクリア
+4. `npx tsx scripts/upload-mockups-to-blob.ts --prod` で PNG を再アップロード
+5. Vercel が自動で反映
 
 ---
 
