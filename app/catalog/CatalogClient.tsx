@@ -12,8 +12,17 @@ const EXTRA_MOCKUP_COUNTS: Record<string, number> = {
   "011": 12, "021": 12,
 };
 
-// 全デザインが pos01/pos02 を持つ前提。特殊なものだけ上書き
-function mockupCount(id: string) { return EXTRA_MOCKUP_COUNTS[id] ?? 2; }
+// pos02 を持つデザイン（手動キュレーション分のみ）
+const HAS_POS02 = new Set([
+  "001", "002", "010", "011", "019", "021", "031",
+  "051", "052", "057", "058", "061", "085", "171",
+]);
+
+// pos01 のみのデザインは 1 を返す
+function mockupCount(id: string) {
+  if (EXTRA_MOCKUP_COUNTS[id]) return EXTRA_MOCKUP_COUNTS[id];
+  return HAS_POS02.has(id) ? 2 : 1;
+}
 
 function slug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
