@@ -24,6 +24,11 @@ function mockupCount(id: string) {
   return HAS_POS02.has(id) ? 2 : 1;
 }
 
+// モーダルの総ページ数（モックアップ + パターン1枚）
+function totalPages(id: string) {
+  return mockupCount(id) + 1;
+}
+
 function slug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
@@ -38,8 +43,7 @@ function mockupSrc(d: Design, pos: number) {
 
 interface ModalState {
   design: Design;
-  pos: number;
-  mode: 'mockup' | 'pattern';
+  pos: number;  // 1..mockupCount = モックアップ, mockupCount+1 = パターン
 }
 
 // ─── main ────────────────────────────────────────────────────────────────────
@@ -96,15 +100,14 @@ export default function CatalogClient() {
   }, []);
 
   const openModal = (design: Design) => {
-    // 全デザインがmockup(pos01/pos02)を持つ前提でmockupモードから開く
-    setModal({ design, pos: 1, mode: 'mockup' });
+    setModal({ design, pos: 1 });
   };
 
   const prevPos = () =>
-    setModal(m => m ? { ...m, pos: m.pos <= 1 ? mockupCount(m.design.id) : m.pos - 1 } : null);
+    setModal(m => m ? { ...m, pos: m.pos <= 1 ? totalPages(m.design.id) : m.pos - 1 } : null);
 
   const nextPos = () =>
-    setModal(m => m ? { ...m, pos: m.pos >= mockupCount(m.design.id) ? 1 : m.pos + 1 } : null);
+    setModal(m => m ? { ...m, pos: m.pos >= totalPages(m.design.id) ? 1 : m.pos + 1 } : null);
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5EFE4', color: '#2B2620' }}>
@@ -300,40 +303,36 @@ export default function CatalogClient() {
             {/* modal image */}
             <div style={{ position: 'relative', aspectRatio: '1', background: '#E0D6C8', overflow: 'hidden' }}>
               <img
-                src={modal.mode === 'mockup'
+                src={modal.pos <= mockupCount(modal.design.id)
                   ? mockupSrc(modal.design, modal.pos)
                   : patternSrc(modal.design)
                 }
                 alt={modal.design.name}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
-              {modal.mode === 'mockup' && (
-                <>
-                  <button onClick={prevPos} style={navBtnStyle('left')}>
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button onClick={nextPos} style={navBtnStyle('right')}>
-                    <ChevronRight size={16} />
-                  </button>
-                  <div style={{
-                    position: 'absolute', bottom: 10, left: 0, right: 0,
-                    display: 'flex', justifyContent: 'center', gap: 4,
-                  }}>
-                    {Array.from({ length: mockupCount(modal.design.id) }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setModal(m => m ? { ...m, pos: i + 1 } : null)}
-                        style={{
-                          width: 6, height: 6, borderRadius: '50%', border: 'none',
-                          background: modal.pos === i + 1 ? '#2B2620' : 'rgba(43,38,32,0.28)',
-                          cursor: 'pointer', padding: 0,
-                          transition: 'background 0.12s',
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
+              <button onClick={prevPos} style={navBtnStyle('left')}>
+                <ChevronLeft size={16} />
+              </button>
+              <button onClick={nextPos} style={navBtnStyle('right')}>
+                <ChevronRight size={16} />
+              </button>
+              <div style={{
+                position: 'absolute', bottom: 10, left: 0, right: 0,
+                display: 'flex', justifyContent: 'center', gap: 4,
+              }}>
+                {Array.from({ length: totalPages(modal.design.id) }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setModal(m => m ? { ...m, pos: i + 1 } : null)}
+                    style={{
+                      width: 6, height: 6, borderRadius: '50%', border: 'none',
+                      background: modal.pos === i + 1 ? '#2B2620' : 'rgba(43,38,32,0.28)',
+                      cursor: 'pointer', padding: 0,
+                      transition: 'background 0.12s',
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* modal footer */}
@@ -342,7 +341,9 @@ export default function CatalogClient() {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <span style={{ fontSize: 11, color: '#8B7355' }}>
-                {modal.mode === 'mockup' ? `${modal.pos} / ${mockupCount(modal.design.id)}` : 'パターン'}
+                {modal.pos > mockupCount(modal.design.id)
+                  ? `${modal.pos} / ${totalPages(modal.design.id)} · パターン`
+                  : `${modal.pos} / ${totalPages(modal.design.id)}`}
               </span>
               {modal.design.sourceUrl && (
                 <a
