@@ -24,7 +24,7 @@ function patternSrc(d: Design) {
 }
 
 function mockupSrc(d: Design, pos: number) {
-  return `/mockups/${d.id}_${slug(d.name)}/pos${pos.toString().padStart(2, "0")}.png`;
+  return `/api/mockup/${d.id}_${slug(d.name)}/pos${pos.toString().padStart(2, "0")}.jpg`;
 }
 
 interface ModalState {
