@@ -32,7 +32,7 @@ export async function GET(
         status : 200,
         headers: {
           'Content-Type'  : 'image/jpeg',
-          'Cache-Control' : 'public, max-age=31536000, immutable',
+          'Cache-Control' : 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400',
         },
       });
     }
@@ -46,7 +46,7 @@ export async function GET(
       status : 200,
       headers: {
         'Content-Type'  : result.blob?.contentType ?? 'image/jpeg',
-        'Cache-Control' : 'public, max-age=31536000, immutable',
+        'Cache-Control' : 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400',
       },
     });
   } catch (e) {
