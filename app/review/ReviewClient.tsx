@@ -15,6 +15,10 @@ function patternSrc(d: Design) {
   return `/patterns/${d.id}_${slug(d.name)}.png`;
 }
 
+function mockupSrc(d: Design) {
+  return `/api/mockup/${d.id}_${slug(d.name)}/pos01.jpg`;
+}
+
 async function fetchReviews(): Promise<ReviewMap> {
   const res = await fetch('/api/reviews', { cache: 'no-store' });
   if (!res.ok) throw new Error('fetch failed');
@@ -37,7 +41,8 @@ export default function ReviewClient() {
   const [index, setIndex] = useState(0);
   const [filter, setFilter] = useState<'pending' | 'all'>('pending');
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
-  const [imgError, setImgError] = useState(false);
+  // imgStage: 0 = mockup, 1 = pattern, 2 = placeholder
+  const [imgStage, setImgStage] = useState<0 | 1 | 2>(0);
   const [sync, setSync] = useState<SyncState>('loading');
   const touchStartX = useRef<number | null>(null);
 
@@ -56,6 +61,9 @@ export default function ReviewClient() {
 
   const current = list[index] ?? null;
 
+  // デザインが変わったら画像ステージをリセット
+  useEffect(() => { setImgStage(0); }, [current?.id]);
+
   const adoptedCount  = Object.values(reviews).filter(v => v === 'adopted').length;
   const rejectedCount = Object.values(reviews).filter(v => v === 'rejected').length;
   const pendingCount  = DESIGNS.length - adoptedCount - rejectedCount;
@@ -70,7 +78,7 @@ export default function ReviewClient() {
       const next = { ...reviews, [current.id]: decision };
       setReviews(next);
       setSwipeDir(null);
-      setImgError(false);
+      setImgStage(0);
       if (filter !== 'pending') setIndex(i => Math.min(i + 1, list.length - 1));
 
       // 保存
@@ -160,7 +168,7 @@ export default function ReviewClient() {
       {/* ── フィルター ── */}
       <div style={{ padding: '8px 20px', borderBottom: '1px solid #D4C5A9', display: 'flex', gap: 6, alignItems: 'center' }}>
         {(['pending', 'all'] as const).map(f => (
-          <button key={f} onClick={() => { setFilter(f); setIndex(0); setImgError(false); }} style={{
+          <button key={f} onClick={() => { setFilter(f); setIndex(0); setImgStage(0); }} style={{
             padding: '3px 12px', border: '1px solid',
             borderColor: filter === f ? '#2B2620' : '#C4B59A',
             borderRadius: 999,
@@ -237,12 +245,12 @@ export default function ReviewClient() {
               }}
             >
               <div style={{ position: 'relative', aspectRatio: '1', background: '#E0D6C8' }}>
-                {!imgError ? (
+                {imgStage < 2 ? (
                   <img
-                    key={current.id}
-                    src={patternSrc(current)}
+                    key={`${current.id}-${imgStage}`}
+                    src={imgStage === 0 ? mockupSrc(current) : patternSrc(current)}
                     alt={current.name}
-                    onError={() => setImgError(true)}
+                    onError={() => setImgStage(s => (s < 2 ? ((s + 1) as 0 | 1 | 2) : s))}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 ) : (
