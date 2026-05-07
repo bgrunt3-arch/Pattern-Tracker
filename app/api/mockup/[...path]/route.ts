@@ -45,7 +45,7 @@ export async function GET(
     return new NextResponse(result.stream as unknown as ReadableStream, {
       status : 200,
       headers: {
-        'Content-Type'  : result.contentType ?? 'image/jpeg',
+        'Content-Type'  : result.blob?.contentType ?? 'image/jpeg',
         'Cache-Control' : 'public, max-age=31536000, immutable',
       },
     });
