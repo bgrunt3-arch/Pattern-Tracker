@@ -12,8 +12,8 @@ const EXTRA_MOCKUP_COUNTS: Record<string, number> = {
   "011": 12, "021": 12,
 };
 
-// POS1タブでのデフォルトサムネイル位置（省略時は1）
-const THUMB_POS: Record<string, number> = {
+// POS2タブでのサムネイル位置オーバーライド（省略時は pos02）
+const POS2_THUMB: Record<string, number> = {
   "011": 5, "021": 5,
 };
 
@@ -275,7 +275,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             onClick={() => openModal(design)}
             viewPos={viewPos}
             hasPos02={pos02Set.has(design.id)}
-            thumbPos={THUMB_POS[design.id] ?? 1}
+            pos2Thumb={POS2_THUMB[design.id]}
           />
         ))}
       </main>
@@ -396,14 +396,14 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
 // サムネイル表示ステージ: 0=mockup pos01, 1=pattern, 2=placeholder
 type ImgStage = 0 | 1 | 2;
 
-function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, thumbPos }: {
+function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2Thumb }: {
   design: Design;
   review?: Decision;
   onReview: (d: Decision | null) => void;
   onClick: () => void;
   viewPos: 1 | 2 | 3;
   hasPos02: boolean;
-  thumbPos: number;
+  pos2Thumb?: number;
 }) {
   const [imgStage, setImgStage] = useState<ImgStage>(0);
   const [hovered, setHovered] = useState(false);
@@ -411,7 +411,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, thum
   const reviewColor = review === 'adopted' ? '#4A7C59' : review === 'rejected' ? '#B85C5C' : undefined;
 
   const isTextile = viewPos === 3;
-  const effectivePos = viewPos === 2 && hasPos02 ? 2 : thumbPos;
+  const effectivePos = viewPos === 2 ? (pos2Thumb ?? (hasPos02 ? 2 : 1)) : 1;
 
   useEffect(() => { setImgStage(0); }, [effectivePos, isTextile]);
 
