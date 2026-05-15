@@ -44,3 +44,4 @@ next-env.d.ts
 # Mockup images: stored in Vercel Blob, not committed
 public/mockups/
 !public/mockups/.gitkeep
+public/mockup-thumbs/
