@@ -48,7 +48,7 @@ function mockupDir(d: (typeof DESIGNS)[0]) {
 }
 
 function hasExistingMockup(d: (typeof DESIGNS)[0]) {
-  return fs.existsSync(path.join(mockupDir(d), 'pos01.png'));
+  return POSITIONS.every(pos => fs.existsSync(path.join(mockupDir(d), pos.out)));
 }
 
 // ── Photopea スクリプト ───────────────────────────────────────────────────────

@@ -7,27 +7,10 @@ import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 type Decision = 'adopted' | 'rejected';
 type ReviewMap = Record<string, Decision>;
 
-// 旧来の特殊モックアップ（12枚などを持つデザイン）
+// 特殊モックアップ（12枚レイアウト）
 const EXTRA_MOCKUP_COUNTS: Record<string, number> = {
   "011": 12, "021": 12,
 };
-
-// pos02 を持つデザイン（手動キュレーション分のみ）
-const HAS_POS02 = new Set([
-  "001", "002", "010", "011", "019", "021", "031",
-  "051", "052", "057", "058", "061", "085", "171",
-]);
-
-// pos01 のみのデザインは 1 を返す
-function mockupCount(id: string) {
-  if (EXTRA_MOCKUP_COUNTS[id]) return EXTRA_MOCKUP_COUNTS[id];
-  return HAS_POS02.has(id) ? 2 : 1;
-}
-
-// モーダルの総ページ数（モックアップ + パターン1枚）
-function totalPages(id: string) {
-  return mockupCount(id) + 1;
-}
 
 function slug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -48,7 +31,16 @@ interface ModalState {
 
 // ─── main ────────────────────────────────────────────────────────────────────
 
-export default function CatalogClient() {
+export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: string[] }) {
+  const pos02Set = useMemo(() => new Set(pos02Designs), [pos02Designs]);
+
+  const mockupCount = (id: string) => {
+    if (EXTRA_MOCKUP_COUNTS[id]) return EXTRA_MOCKUP_COUNTS[id];
+    return pos02Set.has(id) ? 2 : 1;
+  };
+
+  const totalPages = (id: string) => mockupCount(id) + 1;
+
   const [theme, setTheme] = useState('all');
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState<ModalState | null>(null);
