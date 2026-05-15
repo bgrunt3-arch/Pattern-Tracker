@@ -40,14 +40,14 @@ export async function GET(
 
   // ② バンドル済み URL マップから Blob URL を引いてプロキシ
   const blobUrl = URL_MAP[blobKey];
-  if (!blobUrl) return new NextResponse('not found', { status: 404 });
+  if (!blobUrl) return new NextResponse(`key-not-found:${blobKey}:keys=${Object.keys(URL_MAP).length}`, { status: 404 });
 
   try {
     const token = process.env.BLOB_READ_WRITE_TOKEN;
     const res = await fetch(blobUrl, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-    if (!res.ok) return new NextResponse('not found', { status: 404 });
+    if (!res.ok) return new NextResponse(`blob-fetch-failed:${res.status}:token=${!!token}:url=${blobUrl.slice(0,60)}`, { status: 404 });
     return new NextResponse(res.body as ReadableStream, {
       status : 200,
       headers: {
@@ -57,6 +57,6 @@ export async function GET(
     });
   } catch (e) {
     console.error('mockup proxy error:', e);
-    return new NextResponse('not found', { status: 404 });
+    return new NextResponse(`fetch-exception:${String(e).slice(0,100)}`, { status: 404 });
   }
 }
