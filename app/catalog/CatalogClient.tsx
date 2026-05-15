@@ -46,6 +46,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
   const [modal, setModal] = useState<ModalState | null>(null);
   const [reviews, setReviews] = useState<ReviewMap>({});
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
+  const [viewPos, setViewPos] = useState<1 | 2>(1);
 
   // URLパラメータからフィルター初期値を読む
   useEffect(() => {
@@ -205,6 +206,28 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             </button>
           ))}
           <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
+          {([
+            { id: 1, label: 'POS1' },
+            { id: 2, label: 'POS2' },
+          ] as const).map(p => (
+            <button
+              key={p.id}
+              onClick={() => setViewPos(p.id)}
+              style={{
+                padding: '3px 10px',
+                border: '1px solid',
+                borderColor: viewPos === p.id ? '#2B2620' : '#C4B59A',
+                borderRadius: 999,
+                background: viewPos === p.id ? '#2B2620' : 'transparent',
+                color: viewPos === p.id ? '#F5EFE4' : '#6B5A44',
+                fontSize: 10, letterSpacing: '0.08em', cursor: 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
+          <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
           {THEMES.map(t => (
             <button
               key={t.id}
@@ -244,6 +267,8 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             review={reviews[design.id]}
             onReview={(d) => handleReview(design.id, d)}
             onClick={() => openModal(design)}
+            viewPos={viewPos}
+            hasPos02={pos02Set.has(design.id)}
           />
         ))}
       </main>
@@ -364,20 +389,26 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
 // サムネイル表示ステージ: 0=mockup pos01, 1=pattern, 2=placeholder
 type ImgStage = 0 | 1 | 2;
 
-function DesignCard({ design, review, onReview, onClick }: {
+function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02 }: {
   design: Design;
   review?: Decision;
   onReview: (d: Decision | null) => void;
   onClick: () => void;
+  viewPos: 1 | 2;
+  hasPos02: boolean;
 }) {
   const [imgStage, setImgStage] = useState<ImgStage>(0);
   const [hovered, setHovered] = useState(false);
 
   const reviewColor = review === 'adopted' ? '#4A7C59' : review === 'rejected' ? '#B85C5C' : undefined;
 
+  const effectivePos = viewPos === 2 && hasPos02 ? 2 : 1;
+
+  useEffect(() => { setImgStage(0); }, [effectivePos]);
+
   // ステージに応じた src
   const imgSrc = imgStage === 0
-    ? mockupSrc(design, 1)   // pos01.png
+    ? mockupSrc(design, effectivePos)
     : imgStage === 1
     ? patternSrc(design)     // パターン（フォールバック）
     : null;
