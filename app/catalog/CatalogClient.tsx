@@ -46,7 +46,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
   const [modal, setModal] = useState<ModalState | null>(null);
   const [reviews, setReviews] = useState<ReviewMap>({});
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
-  const [viewPos, setViewPos] = useState<1 | 2>(1);
+  const [viewPos, setViewPos] = useState<1 | 2 | 3>(1);
 
   // URLパラメータからフィルター初期値を読む
   useEffect(() => {
@@ -209,6 +209,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           {([
             { id: 1, label: 'POS1' },
             { id: 2, label: 'POS2' },
+            { id: 3, label: 'TEXTILE' },
           ] as const).map(p => (
             <button
               key={p.id}
@@ -394,7 +395,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02 }: {
   review?: Decision;
   onReview: (d: Decision | null) => void;
   onClick: () => void;
-  viewPos: 1 | 2;
+  viewPos: 1 | 2 | 3;
   hasPos02: boolean;
 }) {
   const [imgStage, setImgStage] = useState<ImgStage>(0);
@@ -402,12 +403,15 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02 }: {
 
   const reviewColor = review === 'adopted' ? '#4A7C59' : review === 'rejected' ? '#B85C5C' : undefined;
 
+  const isTextile = viewPos === 3;
   const effectivePos = viewPos === 2 && hasPos02 ? 2 : 1;
 
-  useEffect(() => { setImgStage(0); }, [effectivePos]);
+  useEffect(() => { setImgStage(0); }, [effectivePos, isTextile]);
 
   // ステージに応じた src
-  const imgSrc = imgStage === 0
+  const imgSrc = isTextile
+    ? patternSrc(design)
+    : imgStage === 0
     ? mockupSrc(design, effectivePos)
     : imgStage === 1
     ? patternSrc(design)     // パターン（フォールバック）
@@ -435,7 +439,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02 }: {
       }}
     >
       {/* image */}
-      <div style={{ aspectRatio: imgStage === 0 ? '5/6' : '1', background: '#E0D6C8', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: !isTextile && imgStage === 0 ? '5/6' : '1', background: '#E0D6C8', position: 'relative', overflow: 'hidden' }}>
         {imgSrc ? (
           <img
             key={`${design.id}-${imgStage}`}
