@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const BLOB_ACCESS = (process.env.BLOB_ACCESS ?? 'public') as 'public' | 'private';
+const BLOB_ACCESS = (process.env.BLOB_ACCESS ?? 'private') as 'public' | 'private';
 
 export async function GET(
   _req: Request,
