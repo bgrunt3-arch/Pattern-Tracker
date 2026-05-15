@@ -6,21 +6,9 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import mockupUrlData from '../../../../public/mockup-urls.json';
 
-let urlMapCache: Record<string, string> | null = null;
-
-function getUrlMap(): Record<string, string> {
-  if (!urlMapCache) {
-    try {
-      const jsonPath = path.join(process.cwd(), 'public/mockup-urls.json');
-      const raw = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-      urlMapCache = raw.urls ?? {};
-    } catch {
-      urlMapCache = {};
-    }
-  }
-  return urlMapCache!;
-}
+const URL_MAP = mockupUrlData.urls as Record<string, string>;
 
 export async function GET(
   _req: Request,
@@ -50,8 +38,8 @@ export async function GET(
     }
   }
 
-  // ② mockup-urls.json から Blob URL を引いてプロキシ
-  const blobUrl = getUrlMap()[blobKey];
+  // ② バンドル済み URL マップから Blob URL を引いてプロキシ
+  const blobUrl = URL_MAP[blobKey];
   if (!blobUrl) return new NextResponse('not found', { status: 404 });
 
   try {
