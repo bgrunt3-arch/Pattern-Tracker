@@ -12,16 +12,22 @@ inputFile.open("r");
 var json = inputFile.read();
 inputFile.close();
 
-var designs = eval("(" + json + ")");
-
+var inputData   = eval("(" + json + ")");
+var designs     = inputData.designs || inputData;
 var PSD_DIR     = "/Users/tsuji/Downloads/Airpods Pro Case Mockup 12 in 1/";
-var MOCKUPS_DIR = "/Users/tsuji/cococase-app/public/mockups/";
+var MOCKUPS_DIR = inputData.mockupsDir || "/Users/tsuji/cococase-app/public/mockups";
+if (MOCKUPS_DIR.charAt(MOCKUPS_DIR.length - 1) !== "/") MOCKUPS_DIR += "/";
 
 var POSITIONS = [
   {
     psd:         "airpods-pro-pos1[2d smart object].psd",
     out:         "pos01.png",
     patternsDir: "/tmp/patterns-pos01/"
+  },
+  {
+    psd:         "airpods-pro-pos2[2d smart object].psd",
+    out:         "pos02.png",
+    patternsDir: "/tmp/patterns-pos02/"
   }
 ];
 
@@ -67,6 +73,27 @@ for (var p = 0; p < POSITIONS.length; p++) {
   // PSD を開く（チャンク内で1回だけ）
   app.open(psdFile);
   var templateDoc = app.activeDocument;
+
+  // pos02: "Change Background Color" レイヤーをグレー(225,225,225)に変更
+  // DONOTSAVECHANGES で閉じるので PSD は汚れない
+  if (pos.out === "pos02.png") {
+    var bgColorLayer = findLayer(templateDoc, "Change Background Color");
+    if (bgColorLayer) {
+      templateDoc.activeLayer = bgColorLayer;
+      var setDesc = new ActionDescriptor();
+      var setRef = new ActionReference();
+      setRef.putEnumerated(stringIDToTypeID("contentLayer"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+      setDesc.putReference(charIDToTypeID("null"), setRef);
+      var contentDesc = new ActionDescriptor();
+      var colorDesc = new ActionDescriptor();
+      colorDesc.putDouble(charIDToTypeID("Rd  "), 225.0);
+      colorDesc.putDouble(charIDToTypeID("Grn "), 225.0);
+      colorDesc.putDouble(charIDToTypeID("Bl  "), 225.0);
+      contentDesc.putObject(charIDToTypeID("Clr "), charIDToTypeID("RGBC"), colorDesc);
+      setDesc.putObject(charIDToTypeID("T   "), stringIDToTypeID("solidColorLayer"), contentDesc);
+      executeAction(stringIDToTypeID("set"), setDesc, DialogModes.NO);
+    }
+  }
 
   // 外 SmartObject を特定
   var outerSO = findLayer(templateDoc, "Double Click to Add Your Texture Here");

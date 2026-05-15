@@ -20,7 +20,7 @@ const PATTERNS_DIR = path.join(process.cwd(), 'public/patterns');
 
 const TARGETS = [
   { name: 'pos01', w: 2500, h: 2500, outDir: '/tmp/patterns-pos01' },
-  { name: 'pos02', w: 1748, h: 2480, outDir: '/tmp/patterns-pos02' },
+  { name: 'pos02', w: 2500, h: 2500, outDir: '/tmp/patterns-pos02' },
 ];
 
 function slug(name: string) {

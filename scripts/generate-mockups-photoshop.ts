@@ -25,8 +25,10 @@ const JSX_SCRIPT  = path.join(process.cwd(), 'scripts/apply-textures.jsx');
 const JSON_INPUT  = '/tmp/cococase-designs.json';
 const LOG_FILE    = '/tmp/cococase-progress.log';
 
-const CHUNK_SIZE = 1;
+const CHUNK_SIZE = 50;
 const isTest     = process.argv.includes('--test');
+const countArg   = process.argv.find(a => a.startsWith('--count='));
+const limitCount = countArg ? parseInt(countArg.split('=')[1], 10) : null;
 
 // ── ヘルパー ─────────────────────────────────────────────────────────────────
 
@@ -35,7 +37,9 @@ function slug(name: string) {
 }
 
 function hasMockup(d: (typeof DESIGNS)[0]) {
-  return fs.existsSync(path.join(MOCKUPS_DIR, `${d.id}_${slug(d.name)}`, 'pos01.png'));
+  const dir = path.join(MOCKUPS_DIR, `${d.id}_${slug(d.name)}`);
+  return fs.existsSync(path.join(dir, 'pos01.png')) &&
+         fs.existsSync(path.join(dir, 'pos02.png'));
 }
 
 function killPhotoshop() {
@@ -58,8 +62,8 @@ function diskFreeGB(): number {
 }
 
 function runChunk(chunk: { id: string; name: string }[]): { ok: number; err: number } {
-  // JSON 入力ファイル生成
-  fs.writeFileSync(JSON_INPUT, JSON.stringify(chunk));
+  // JSON 入力ファイル生成（mockupsDir を含めて JSX と共有）
+  fs.writeFileSync(JSON_INPUT, JSON.stringify({ designs: chunk, mockupsDir: MOCKUPS_DIR }));
 
   // ログリセット
   fs.writeFileSync(LOG_FILE, '');
@@ -104,13 +108,16 @@ function runChunk(chunk: { id: string; name: string }[]): { ok: number; err: num
 
 // ── メイン ───────────────────────────────────────────────────────────────────
 
-async function main() {
+function main() {
   let todo = DESIGNS.filter(d => !hasMockup(d));
   const skipped = DESIGNS.length - todo.length;
 
   if (isTest) {
     todo = todo.slice(0, 1);
     console.log(`\n[TEST MODE] 1枚だけ生成します: ${todo[0].id} ${todo[0].name}\n`);
+  } else if (limitCount) {
+    todo = todo.slice(0, limitCount);
+    console.log(`\n[COUNT MODE] ${limitCount}枚だけ生成します\n`);
   } else {
     console.log(`\n対象: ${todo.length} / ${DESIGNS.length}  (スキップ: ${skipped})`);
     console.log(`チャンク: ${CHUNK_SIZE} デザインごとに Photoshop 再起動\n`);
@@ -152,7 +159,7 @@ async function main() {
     // ── 重複検証: チャンク内で全 mockup のハッシュがユニークか確認 ─────────
     const hashes = new Map<string, string>();
     for (const d of chunk) {
-      const file = path.join(MOCKUPS_DIR, `${d.id}_${slug(d.name)}`, 'pos01.png');
+      const file = path.join(MOCKUPS_DIR, `${d.id}_${slug(d.name)}`, 'pos02.png');
       if (!fs.existsSync(file)) continue;
       const stat = fs.statSync(file);
       if (Date.now() - stat.mtimeMs > 60_000) continue;
@@ -182,4 +189,4 @@ async function main() {
   console.log(`✗ エラー: ${totalErr}`);
 }
 
-main().catch(console.error);
+main();
