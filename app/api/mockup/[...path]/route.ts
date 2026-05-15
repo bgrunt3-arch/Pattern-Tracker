@@ -3,12 +3,10 @@
 // ローカル開発時は public/mockups/*.png を JPEG 変換して返す。
 
 import { NextResponse } from 'next/server';
+import { get } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import mockupUrlData from '../../../../public/mockup-urls.json';
-
-const URL_MAP = mockupUrlData.urls as Record<string, string>;
 
 export async function GET(
   _req: Request,
@@ -38,25 +36,20 @@ export async function GET(
     }
   }
 
-  // ② バンドル済み URL マップから Blob URL を引いてプロキシ
-  const blobUrl = URL_MAP[blobKey];
-  if (!blobUrl) return new NextResponse(`key-not-found:${blobKey}:keys=${Object.keys(URL_MAP).length}`, { status: 404 });
-
+  // ② @vercel/blob SDK 経由で取得（private ストア対応）
   try {
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    const res = await fetch(blobUrl, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (!res.ok) return new NextResponse(`blob-fetch-failed:${res.status}:token=${!!token}:url=${blobUrl.slice(0,60)}`, { status: 404 });
-    return new NextResponse(res.body as ReadableStream, {
+    const token = process.env.BLOB_READ_WRITE_TOKEN!;
+    const result = await get(blobKey, { access: 'private', token });
+    if (!result) return new NextResponse(`sdk-null:${blobKey}`, { status: 404 });
+    return new NextResponse(result.stream as unknown as ReadableStream, {
       status : 200,
       headers: {
-        'Content-Type'  : res.headers.get('content-type') ?? 'image/jpeg',
+        'Content-Type'  : result.blob.contentType ?? 'image/jpeg',
         'Cache-Control' : 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400',
       },
     });
-  } catch (e) {
-    console.error('mockup proxy error:', e);
-    return new NextResponse(`fetch-exception:${String(e).slice(0,100)}`, { status: 404 });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return new NextResponse(`sdk-error:${msg.slice(0, 120)}`, { status: 404 });
   }
 }
