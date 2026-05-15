@@ -3,12 +3,24 @@
 // ローカル開発時は public/mockups/*.png を JPEG 変換して返す。
 
 import { NextResponse } from 'next/server';
-import { get } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const BLOB_ACCESS = (process.env.BLOB_ACCESS ?? 'private') as 'public' | 'private';
+let urlMapCache: Record<string, string> | null = null;
+
+function getUrlMap(): Record<string, string> {
+  if (!urlMapCache) {
+    try {
+      const jsonPath = path.join(process.cwd(), 'public/mockup-urls.json');
+      const raw = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+      urlMapCache = raw.urls ?? {};
+    } catch {
+      urlMapCache = {};
+    }
+  }
+  return urlMapCache!;
+}
 
 export async function GET(
   _req: Request,
@@ -38,14 +50,20 @@ export async function GET(
     }
   }
 
-  // ② Vercel Blob から取得
+  // ② mockup-urls.json から Blob URL を引いてプロキシ
+  const blobUrl = getUrlMap()[blobKey];
+  if (!blobUrl) return new NextResponse('not found', { status: 404 });
+
   try {
-    const result = await get(blobKey, { access: BLOB_ACCESS });
-    if (!result) return new NextResponse('not found', { status: 404 });
-    return new NextResponse(result.stream as unknown as ReadableStream, {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    const res = await fetch(blobUrl, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) return new NextResponse('not found', { status: 404 });
+    return new NextResponse(res.body as ReadableStream, {
       status : 200,
       headers: {
-        'Content-Type'  : result.blob?.contentType ?? 'image/jpeg',
+        'Content-Type'  : res.headers.get('content-type') ?? 'image/jpeg',
         'Cache-Control' : 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400',
       },
     });
