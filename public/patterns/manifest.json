@@ -1403,6 +1403,30 @@
     "url": "/patterns/450_lisboa_green.png",
     "generatedAt": "2026-05-03T15:59:34.115Z"
   },
+  "501": {
+    "url": "/patterns/501_aurora.png",
+    "generatedAt": "2026-05-15T16:32:51.291Z"
+  },
+  "502": {
+    "url": "/patterns/502_abyss.png",
+    "generatedAt": "2026-05-15T16:33:01.091Z"
+  },
+  "503": {
+    "url": "/patterns/503_academy.png",
+    "generatedAt": "2026-05-15T16:33:14.533Z"
+  },
+  "504": {
+    "url": "/patterns/504_al_fresco.png",
+    "generatedAt": "2026-05-15T16:33:25.207Z"
+  },
+  "505": {
+    "url": "/patterns/505_alchemist.png",
+    "generatedAt": "2026-05-15T16:33:34.277Z"
+  },
+  "606": {
+    "url": "/patterns/606_pipeline_test_sample.png",
+    "generatedAt": "2026-05-27T17:04:11.339Z"
+  },
   "003": {
     "url": "/patterns/003_vintage_rose.png",
     "generatedAt": "2026-04-17T11:58:57.093Z"
@@ -1414,10 +1438,6 @@
   "016": {
     "url": "/patterns/016_navy_royale.png",
     "generatedAt": "2026-04-17T12:00:36.265Z"
-  },
-  "001": {
-    "url": "/patterns/001_sakura_pink.png",
-    "generatedAt": "2026-04-17T12:20:26.728Z"
   },
   "002": {
     "url": "/patterns/002_lush_meadow.png",
@@ -1798,5 +1818,9 @@
   "030": {
     "url": "/patterns/030_cheetah_minimal.png",
     "generatedAt": "2026-04-18T10:58:04.354Z"
+  },
+  "001": {
+    "url": "/patterns/001_sakura_pink.png",
+    "generatedAt": "2026-05-27T16:19:33.862Z"
   }
 }

@@ -1240,6 +1240,14 @@ async function generateCatalog() {
   // ローカルHTMLもweb版で保存
   fs.copyFileSync(publicHtml, htmlPath);
 
+  // --no-pdf フラグで PDF 生成をスキップ（pipeline 用）
+  if (process.argv.includes("--no-pdf")) {
+    console.log(`\n✨ HTML 出力のみ完了 (--no-pdf)`);
+    console.log(`   Web用HTML:  ${publicHtml}`);
+    console.log(`   ローカルHTML: ${htmlPath}`);
+    return;
+  }
+
   // ローカルHTTPサーバーを起動して画像を提供（base64埋め込み不要）
   const http = await import("http");
   const { createReadStream, statSync } = await import("fs");

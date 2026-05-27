@@ -30,7 +30,9 @@ const RATE_LIMIT_MS = parseInt(process.env.RATE_LIMIT_MS || "2000");
 const MAX_RETRIES = 2;
 const OUTPUT_DIR = path.join(process.cwd(), "public", "patterns");
 const MANIFEST_PATH = path.join(OUTPUT_DIR, "manifest.json");
-const USE_BLOB = !!process.env.BLOB_READ_WRITE_TOKEN;
+// Blob は明示的に BLOB_ENABLED=1 が設定されたときだけ使う（Vercel Blob suspended 対策）。
+// 設定されていてもネットワーク／ストア停止時はローカルにフォールバックする。
+const USE_BLOB = process.env.BLOB_ENABLED === "1" && !!process.env.BLOB_READ_WRITE_TOKEN;
 const TRIM_THRESHOLD = 15;
 const TRIM_BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
@@ -143,19 +145,29 @@ async function generateOne(
     const generatedAt = new Date().toISOString();
     let url: string;
 
+    let saved: "blob" | "local" | "local (fallback)" = USE_BLOB ? "blob" : "local";
+
     if (USE_BLOB) {
-      const blob = await put(`patterns/${filename}`, buffer, {
-        access: "public",
-        contentType: "image/png",
-        addRandomSuffix: false,
-      });
-      url = blob.url;
-      console.log(`✅ (Blob)`);
+      try {
+        const blob = await put(`patterns/${filename}`, buffer, {
+          access: "public",
+          contentType: "image/png",
+          addRandomSuffix: false,
+        });
+        url = blob.url;
+      } catch (e) {
+        const m = e instanceof Error ? e.message : String(e);
+        console.log(`⚠️  Blob put failed (${m.slice(0, 60)}), saving locally`);
+        fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+        fs.writeFileSync(path.join(OUTPUT_DIR, filename), buffer);
+        url = `/patterns/${filename}`;
+        saved = "local (fallback)";
+      }
     } else {
       fs.writeFileSync(path.join(OUTPUT_DIR, filename), buffer);
       url = `/patterns/${filename}`;
-      console.log(`✅ (local)`);
     }
+    console.log(`✅ (${saved})`);
 
     manifest[design.id] = { url, generatedAt };
     saveManifest(manifest);
@@ -180,18 +192,34 @@ async function main() {
   const themeArg = args.find(a => a.startsWith("--theme="))?.split("=")[1];
   const fromArg  = args.find(a => a.startsWith("--from="))?.split("=")[1];
   const toArg    = args.find(a => a.startsWith("--to="))?.split("=")[1];
+  const isTest   = args.includes("--test");
 
   let list = [...DESIGNS];
   if (themeArg) list = list.filter(d => d.theme === themeArg);
   if (fromArg)  list = list.filter(d => parseInt(d.id) >= parseInt(fromArg));
   if (toArg)    list = list.filter(d => parseInt(d.id) <= parseInt(toArg));
 
+  const manifest = loadManifest();
+
+  if (isTest) {
+    list = list.filter(d => {
+      if (manifest[d.id]) return false;
+      const filename = `${d.id}_${slug(d.name)}.png`;
+      if (!USE_BLOB && fs.existsSync(path.join(OUTPUT_DIR, filename))) return false;
+      return true;
+    }).slice(0, 1);
+    if (list.length === 0) {
+      console.log("\n[TEST MODE] 未生成のデザインがありません。テスト終了。");
+      return;
+    }
+    console.log(`\n[TEST MODE] 未生成1枚を生成します: ${list[0].id} ${list[0].name}`);
+  }
+
   console.log(`\n🚀 ${list.length}枚を生成開始 (モデル: ${MODEL})`);
   console.log(`📦 保存先: ${USE_BLOB ? "Vercel Blob" : "public/patterns/ (ローカル)"}`);
   console.log(`⏱  レート制限: ${RATE_LIMIT_MS / 1000}秒/枚\n`);
 
   const startTime = Date.now();
-  const manifest = loadManifest();
   const results = { ok: 0, skip: 0, fail: 0, failed: [] as string[] };
 
   for (let i = 0; i < list.length; i++) {

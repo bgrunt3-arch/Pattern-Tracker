@@ -14,7 +14,7 @@ inputFile.close();
 
 var inputData   = eval("(" + json + ")");
 var designs     = inputData.designs || inputData;
-var PSD_DIR     = "/Users/tsuji/Downloads/Airpods Pro Case Mockup 12 in 1/";
+var PSD_DIR     = inputData.psdDir || "/Volumes/PSScratch/UserData/Downloads/Airpods Pro Case Mockup 12 in 1/";
 var MOCKUPS_DIR = inputData.mockupsDir || "/Users/tsuji/cococase-app/public/mockups";
 if (MOCKUPS_DIR.charAt(MOCKUPS_DIR.length - 1) !== "/") MOCKUPS_DIR += "/";
 

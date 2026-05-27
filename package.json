@@ -18,7 +18,13 @@
     "gen:celestial": "tsx scripts/generate-images.ts --theme=celestial",
     "gen:coastal": "tsx scripts/generate-images.ts --theme=coastal",
     "gen:range": "tsx scripts/generate-images.ts",
+    "tile": "tsx scripts/tile-patterns.ts",
+    "mockups": "tsx scripts/generate-mockups-photoshop.ts",
+    "thumbs": "tsx scripts/generate-thumbs.ts",
+    "urls": "tsx scripts/update-mockup-urls.ts",
     "catalog": "tsx scripts/generate-catalog.ts",
+    "pipeline": "npm run gen:all && npm run tile && npm run mockups && npm run thumbs && npm run urls && tsx scripts/generate-catalog.ts --no-pdf",
+    "pipeline:test": "tsx scripts/generate-images.ts --test && tsx scripts/tile-patterns.ts && tsx scripts/generate-mockups-photoshop.ts --test && tsx scripts/generate-thumbs.ts && tsx scripts/update-mockup-urls.ts && tsx scripts/generate-catalog.ts --no-pdf",
     "trim": "tsx scripts/trim-patterns.ts"
   },
   "dependencies": {

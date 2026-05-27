@@ -864,4 +864,7 @@ export const DESIGNS: Design[] = [
   { id: "603", theme: "celestial", source: "burga", sourceRef: "Aquarius", sourceUrl: "https://burga.jp/products/aquarius-airpods-pro-case", name: "Aquarius Blush",    prompt: "Seamless pattern of soft pink water waves and Aquarius star map with moon and zodiac constellation details, romantic astrological illustration on pale blush background, dreamy and cosmic, tileable, no text" },
   { id: "604", theme: "celestial", source: "burga", sourceRef: "Aquarius", sourceUrl: "https://burga.jp/products/aquarius-airpods-pro-case", name: "Aquarius Noir",     prompt: "Seamless pattern of dark Aquarius constellation glowing on deep black with flowing water wave motifs and zodiac glyph, dramatic astrological illustration, mysterious and celestial, tileable, no text" },
   { id: "605", theme: "celestial", source: "burga", sourceRef: "Aquarius", sourceUrl: "https://burga.jp/products/aquarius-airpods-pro-case", name: "Aquarius Celestial", prompt: "Seamless pattern of ethereal watercolor Aquarius constellation with flowing water streams and celestial star clusters in soft indigo and silver, dreamy astrological illustration on pale lavender background, fluid and cosmic, tileable, no text" },
+
+  // Pipeline test sample (606)
+  { id: "606", theme: "abstract", source: "original", sourceRef: "—", sourceUrl: "", name: "Pipeline Test Sample", prompt: "Seamless pattern of soft watercolor abstract brushstrokes in mint green and dusty pink, gestural marks scattered on warm cream background, modern and calm, tileable, no text" },
 ];

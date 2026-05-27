@@ -114,6 +114,10 @@ function main() {
 
   if (isTest) {
     todo = todo.slice(0, 1);
+    if (todo.length === 0) {
+      console.log('\n[TEST MODE] 未生成のデザインがありません。テスト終了。');
+      return;
+    }
     console.log(`\n[TEST MODE] 1枚だけ生成します: ${todo[0].id} ${todo[0].name}\n`);
   } else if (limitCount) {
     todo = todo.slice(0, limitCount);
