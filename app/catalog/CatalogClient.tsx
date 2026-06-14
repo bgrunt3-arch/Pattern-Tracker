@@ -108,7 +108,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
     setModal(m => m ? { ...m, pos: m.pos >= totalPages(m.design.id) ? 1 : m.pos + 1 } : null);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5EFE4', color: '#2B2620' }}>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#2B2620' }}>
 
       {/* ── ヘッダー ── */}
       <header style={{
@@ -145,7 +145,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
       {/* ── フィルター ── */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 20,
-        background: '#F5EFE4',
+        background: '#FFFFFF',
         borderBottom: '1px solid #D4C5A9',
       }}>
         {/* 検索 + カウント行 */}
@@ -294,7 +294,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: '#F5EFE4',
+              background: '#FFFFFF',
               borderRadius: 12,
               maxWidth: 480,
               width: '100%',

@@ -136,7 +136,7 @@ export default function ReviewClient() {
   // ── render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5EFE4', color: '#2B2620', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#2B2620', display: 'flex', flexDirection: 'column' }}>
 
       {/* ── ヘッダー ── */}
       <header style={{

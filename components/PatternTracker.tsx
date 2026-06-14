@@ -223,7 +223,7 @@ export default function PatternTracker() {
   // ── ローディング ─────────────────────────────────────────────────
   if (!loaded) {
     return (
-      <div style={{ minHeight: '100vh', background: '#F5EFE4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="serif" style={{ fontSize: 18, fontStyle: 'italic', color: '#8B7355' }}>Loading…</div>
       </div>
     );
@@ -231,7 +231,7 @@ export default function PatternTracker() {
 
   // ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#F5EFE4', color: '#2B2620', fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", paddingBottom: 48 }}>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#2B2620', fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", paddingBottom: 48 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
@@ -349,7 +349,7 @@ export default function PatternTracker() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="sans"
-                style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: 12, border: '1px solid #D4C5A9', borderRadius: 6, background: '#F5EFE4', color: '#2B2620', outline: 'none' }}
+                style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: 12, border: '1px solid #D4C5A9', borderRadius: 6, background: '#FFFFFF', color: '#2B2620', outline: 'none' }}
               />
             </div>
             <button
@@ -571,7 +571,7 @@ export default function PatternTracker() {
 
               {/* ── Expanded ── */}
               {isExpanded && (
-                <div className="fade-in" style={{ background: '#F5EFE4', padding: '14px 14px', borderTop: `1px solid ${info.border}` }}>
+                <div className="fade-in" style={{ background: '#FFFFFF', padding: '14px 14px', borderTop: `1px solid ${info.border}` }}>
 
                   {/* 生成画像 */}
                   {imageUrl && (
