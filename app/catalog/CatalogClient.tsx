@@ -39,7 +39,7 @@ interface ModalState {
 
 // ─── main ────────────────────────────────────────────────────────────────────
 
-export default function CatalogClient({ pos02Designs = [], reviewMode = false }: { pos02Designs?: string[]; reviewMode?: boolean }) {
+export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: string[] }) {
   const pos02Set = useMemo(() => new Set(pos02Designs), [pos02Designs]);
 
   const mockupCount = (id: string) => {
@@ -56,15 +56,14 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
   const [viewPos, setViewPos] = useState<1 | 2 | 3>(1);
 
-  // URLパラメータからフィルター初期値を読む（社内レビューモードのみ）
+  // URLパラメータからフィルター初期値を読む
   useEffect(() => {
-    if (!reviewMode) return;
     const params = new URLSearchParams(window.location.search);
     const rv = params.get('review');
     if (rv === 'adopted' || rv === 'rejected' || rv === 'pending') {
       setReviewFilter(rv);
     }
-  }, [reviewMode]);
+  }, []);
 
   useEffect(() => {
     fetch('/api/reviews', { cache: 'no-store' })
@@ -75,10 +74,8 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
 
   const filtered = useMemo(() => {
     let list = DESIGNS;
-    // 卸先ビューは採用済みのみ表示
-    if (!reviewMode) list = list.filter(d => reviews[d.id] === 'adopted');
     if (theme !== 'all') list = list.filter(d => d.theme === theme);
-    if (reviewMode && reviewFilter !== 'all') {
+    if (reviewFilter !== 'all') {
       if (reviewFilter === 'pending') list = list.filter(d => !reviews[d.id]);
       else list = list.filter(d => reviews[d.id] === reviewFilter);
     }
@@ -88,7 +85,7 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
       d.theme.includes(q) || (THEME_JP[d.theme] ?? '').includes(q)
     );
     return list;
-  }, [theme, search, reviews, reviewFilter, reviewMode]);
+  }, [theme, search, reviews, reviewFilter]);
 
   const handleReview = useCallback(async (id: string, decision: Decision | null) => {
     setReviews(prev => {
@@ -118,32 +115,6 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
 
   return (
     <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#2B2620' }}>
-
-      {/* ── 社内レビューモードのバー ── */}
-      {reviewMode && (
-        <div style={{
-          background: '#2B2620', color: '#F5EFE4',
-          padding: '6px 16px', fontSize: 11,
-          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
-        }}>
-          <span style={{ letterSpacing: '0.06em' }}>社内レビューモード</span>
-          <span style={{ opacity: 0.6 }}>採用/不採用を編集できます（卸先ビューには採用のみ表示）</span>
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              marginLeft: 'auto',
-              padding: '3px 12px', borderRadius: 999,
-              border: '1px solid #6B5A44', background: '#3A3530',
-              color: '#F5EFE4', textDecoration: 'none', whiteSpace: 'nowrap',
-              fontSize: 11,
-            }}
-          >
-            卸先ビューをプレビュー ↗
-          </a>
-        </div>
-      )}
 
       {/* ── ヘッダー ── */}
       <header style={{
@@ -205,33 +176,31 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
           gap: 5,
           padding: '0 16px 8px',
         }}>
-          {/* レビューフィルター（社内レビューモードのみ） */}
-          {reviewMode && (<>
-            {([
-              { id: 'all', label: 'ALL', color: undefined },
-              { id: 'adopted', label: '✓ 採用', color: '#4A7C59' },
-              { id: 'pending', label: '– 未', color: '#8B7355' },
-              { id: 'rejected', label: '✗ 不採用', color: '#B85C5C' },
-            ] as const).map(rf => (
-              <button
-                key={rf.id}
-                onClick={() => setReviewFilter(rf.id)}
-                style={{
-                  padding: '3px 10px',
-                  border: '1px solid',
-                  borderColor: reviewFilter === rf.id ? (rf.color || '#2B2620') : '#C4B59A',
-                  borderRadius: 999,
-                  background: reviewFilter === rf.id ? (rf.color || '#2B2620') : 'transparent',
-                  color: reviewFilter === rf.id ? '#F5EFE4' : (rf.color || '#6B5A44'),
-                  fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
-                  whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
-                }}
-              >
-                {rf.label}
-              </button>
-            ))}
-            <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
-          </>)}
+          {/* レビューフィルター */}
+          {([
+            { id: 'all', label: 'ALL', color: undefined },
+            { id: 'adopted', label: '✓ 採用', color: '#4A7C59' },
+            { id: 'pending', label: '– 未', color: '#8B7355' },
+            { id: 'rejected', label: '✗ 不採用', color: '#B85C5C' },
+          ] as const).map(rf => (
+            <button
+              key={rf.id}
+              onClick={() => setReviewFilter(rf.id)}
+              style={{
+                padding: '3px 10px',
+                border: '1px solid',
+                borderColor: reviewFilter === rf.id ? (rf.color || '#2B2620') : '#C4B59A',
+                borderRadius: 999,
+                background: reviewFilter === rf.id ? (rf.color || '#2B2620') : 'transparent',
+                color: reviewFilter === rf.id ? '#F5EFE4' : (rf.color || '#6B5A44'),
+                fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
+                whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
+              }}
+            >
+              {rf.label}
+            </button>
+          ))}
+          <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
           {([
             { id: 1, label: '蓋開き' },
             { id: 2, label: '蓋閉じ' },
@@ -283,7 +252,7 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
       {/* ── グリッド ── */}
       {filtered.length === 0 ? (
         <div style={{ padding: '60px 16px', textAlign: 'center', color: '#8B7355', fontSize: 13 }}>
-          {reviewMode ? '該当するデザインがありません' : '採用済みのデザインがまだありません'}
+          該当するデザインがありません
         </div>
       ) : (
       <main style={{
@@ -297,7 +266,6 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
             key={design.id}
             design={design}
             review={reviews[design.id]}
-            reviewMode={reviewMode}
             onReview={(d) => handleReview(design.id, d)}
             onClick={() => openModal(design)}
             viewPos={viewPos}
@@ -424,10 +392,9 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
 // サムネイル表示ステージ: 0=mockup pos01, 1=pattern, 2=placeholder
 type ImgStage = 0 | 1 | 2;
 
-function DesignCard({ design, review, reviewMode, onReview, onClick, viewPos, hasPos02, pos2Thumb }: {
+function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2Thumb }: {
   design: Design;
   review?: Decision;
-  reviewMode: boolean;
   onReview: (d: Decision | null) => void;
   onClick: () => void;
   viewPos: 1 | 2 | 3;
@@ -496,7 +463,7 @@ function DesignCard({ design, review, reviewMode, onReview, onClick, viewPos, ha
             <span style={{ fontSize: 11, letterSpacing: '0.06em' }}>{design.id}</span>
           </div>
         )}
-        {reviewMode && review && (
+        {review && (
           <div style={{
             position: 'absolute', top: 7, left: 7,
             background: review === 'adopted' ? '#4A7C59' : '#B85C5C',
@@ -516,8 +483,7 @@ function DesignCard({ design, review, reviewMode, onReview, onClick, viewPos, ha
         <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.3, marginBottom: 6 }}>
           {design.name}
         </div>
-        {/* review buttons（社内レビューモードのみ） */}
-        {reviewMode && (
+        {/* review buttons */}
         <div
           onClick={e => e.stopPropagation()}
           style={{ display: 'flex', gap: 4, marginTop: 8 }}
@@ -575,7 +541,6 @@ function DesignCard({ design, review, reviewMode, onReview, onClick, viewPos, ha
             </>
           )}
         </div>
-        )}
       </div>
     </div>
   );
