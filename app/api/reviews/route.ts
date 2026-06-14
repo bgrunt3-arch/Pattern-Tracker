@@ -1,33 +1,47 @@
-import { put, get } from '@vercel/blob';
+import { Redis } from '@upstash/redis';
 import { NextResponse } from 'next/server';
 
-const BLOB_PATHNAME = 'reviews/reviews.json';
-// Vercel本番はpublicストア、ローカルdev環境はprivateストア
-// .env.local に BLOB_ACCESS=private を設定するとローカルでも動く
-const BLOB_ACCESS = (process.env.BLOB_ACCESS ?? 'public') as 'public' | 'private';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-// GET — 現在のレビューデータを返す
+// 採用/不採用データは全ユーザー共有のため Upstash Redis(KV) に単一キーで保存する。
+// Vercel Marketplace で Upstash を接続すると KV_REST_API_URL/TOKEN（または
+// UPSTASH_REDIS_REST_URL/TOKEN）が自動注入される。両命名に対応。
+const KEY = 'cococase:reviews';
+
+function getRedis(): Redis | null {
+  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  return new Redis({ url, token });
+}
+
+type ReviewMap = Record<string, 'adopted' | 'rejected'>;
+
+// GET — 現在の採用/不採用データを返す（未設定時は空）
 export async function GET() {
+  const redis = getRedis();
+  if (!redis) return NextResponse.json({});
   try {
-    const result = await get(BLOB_PATHNAME, { access: BLOB_ACCESS });
-    if (!result) return NextResponse.json({});
-    const text = await new Response(result.stream).text();
-    return NextResponse.json(JSON.parse(text));
+    const data = await redis.get<ReviewMap>(KEY);
+    return NextResponse.json(data ?? {});
   } catch {
     return NextResponse.json({});
   }
 }
 
-// PUT — レビューデータを上書き保存
+// PUT — 採用/不採用データを上書き保存（全マップ）
 export async function PUT(req: Request) {
+  const redis = getRedis();
+  if (!redis) {
+    return NextResponse.json(
+      { error: 'storage not configured: connect Upstash Redis (KV) in Vercel' },
+      { status: 503 },
+    );
+  }
   try {
-    const body = await req.json();
-    await put(BLOB_PATHNAME, JSON.stringify(body), {
-      access: BLOB_ACCESS,
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
+    const body = (await req.json()) as ReviewMap;
+    await redis.set(KEY, body);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
