@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { DESIGNS, THEMES, SOURCE_LABELS, type Design } from '@/lib/designs';
+import { DESIGNS, THEMES, type Design } from '@/lib/designs';
 import { ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Decision = 'adopted' | 'rejected';
@@ -304,7 +304,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             }}>
               <div>
                 <div style={{ fontSize: 10, color: '#8B7355', letterSpacing: '0.1em', marginBottom: 2 }}>
-                  {modal.design.id} · {modal.design.theme.toUpperCase()}{modal.design.source !== 'burga' ? ` · ${SOURCE_LABELS[modal.design.source]}` : ''}
+                  {modal.design.id} · {modal.design.theme.toUpperCase()}
                 </div>
                 <div style={{ fontFamily: 'var(--font-fraunces)', fontSize: 22, fontWeight: 400 }}>
                   {modal.design.name}
@@ -481,29 +481,6 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
         <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.3, marginBottom: 6 }}>
           {design.name}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {design.source !== 'burga' && (
-            <span style={{
-              fontSize: 10, color: '#8B7355',
-              background: '#EDE5D8', borderRadius: 4, padding: '1px 6px',
-              letterSpacing: '0.05em',
-            }}>
-              {SOURCE_LABELS[design.source]}
-            </span>
-          )}
-          {design.sourceUrl && design.source !== 'burga' && (
-            <a
-              href={design.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              style={{ color: '#B0A090', display: 'flex', alignItems: 'center' }}
-            >
-              <ExternalLink size={11} />
-            </a>
-          )}
-        </div>
-
         {/* review buttons */}
         <div
           onClick={e => e.stopPropagation()}
