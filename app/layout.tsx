@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
+import { M_PLUS_Rounded_1c } from 'next/font/google';
 import './globals.css';
 
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', display: 'swap' });
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+// ロゴ（丸みのある親しみやすい雰囲気）に合わせた丸ゴシック
+const rounded = M_PLUS_Rounded_1c({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-rounded',
+  display: 'swap',
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: 'COCOcase',
@@ -25,12 +31,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: '#F5EFE6',
+  themeColor: '#3DA9F4',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="ja" className={rounded.variable}>
       <body>{children}</body>
     </html>
   );

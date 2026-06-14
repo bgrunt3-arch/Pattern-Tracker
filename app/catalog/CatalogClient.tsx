@@ -114,19 +114,19 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
     setModal(m => m ? { ...m, pos: m.pos >= totalPages(m.design.id) ? 1 : m.pos + 1 } : null);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#2B2620' }}>
+    <div style={{ minHeight: '100vh', background: '#FFFFFF', color: '#23303A' }}>
 
       {/* ── ヘッダー ── */}
       <header style={{
         padding: '20px 16px 14px',
-        borderBottom: '1px solid #C4B59A',
+        borderBottom: '1px solid #D5E2EC',
         display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
       }}>
         <div>
           <h1 style={{ margin: 0, lineHeight: 0 }}>
             <img src="/logo.png" alt="COCO case" style={{ height: 28, width: 'auto', display: 'block' }} />
           </h1>
-          <p style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.12em', marginTop: 10 }}>
+          <p style={{ fontSize: 11, color: '#7A8A99', letterSpacing: '0.12em', marginTop: 10 }}>
             AIRPODS PRO 3 CASE — {DESIGNS.length} DESIGNS
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
       <div style={{
         position: 'sticky', top: 0, zIndex: 20,
         background: '#FFFFFF',
-        borderBottom: '1px solid #D4C5A9',
+        borderBottom: '1px solid #D5E2EC',
       }}>
         {/* 検索 + カウント行 */}
         <div style={{
@@ -153,17 +153,17 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             onChange={e => setSearch(e.target.value)}
             style={{
               padding: '5px 12px',
-              border: '1px solid #C4B59A',
+              border: '1px solid #D5E2EC',
               borderRadius: 999,
               background: 'rgba(255,255,255,0.4)',
-              color: '#2B2620',
+              color: '#23303A',
               fontSize: 12,
               outline: 'none',
               flex: 1,
               maxWidth: 200,
             }}
           />
-          <span style={{ fontSize: 11, color: '#8B7355', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 11, color: '#7A8A99', whiteSpace: 'nowrap' }}>
             {filtered.length} designs
           </span>
         </div>
@@ -180,7 +180,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           {([
             { id: 'all', label: 'ALL', color: undefined },
             { id: 'adopted', label: '✓ 採用', color: '#4A7C59' },
-            { id: 'pending', label: '– 未', color: '#8B7355' },
+            { id: 'pending', label: '– 未', color: '#7A8A99' },
             { id: 'rejected', label: '✗ 不採用', color: '#B85C5C' },
           ] as const).map(rf => (
             <button
@@ -189,10 +189,10 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               style={{
                 padding: '3px 10px',
                 border: '1px solid',
-                borderColor: reviewFilter === rf.id ? (rf.color || '#2B2620') : '#C4B59A',
+                borderColor: reviewFilter === rf.id ? (rf.color || '#3DA9F4') : '#D5E2EC',
                 borderRadius: 999,
-                background: reviewFilter === rf.id ? (rf.color || '#2B2620') : 'transparent',
-                color: reviewFilter === rf.id ? '#F5EFE4' : (rf.color || '#6B5A44'),
+                background: reviewFilter === rf.id ? (rf.color || '#3DA9F4') : 'transparent',
+                color: reviewFilter === rf.id ? '#FFFFFF' : (rf.color || '#5E6E7C'),
                 fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
                 whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
               }}
@@ -200,7 +200,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               {rf.label}
             </button>
           ))}
-          <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
+          <div style={{ width: 1, background: '#D5E2EC', margin: '2px 4px', flexShrink: 0 }} />
           {([
             { id: 1, label: '蓋開き' },
             { id: 2, label: '蓋閉じ' },
@@ -212,10 +212,10 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               style={{
                 padding: '3px 10px',
                 border: '1px solid',
-                borderColor: viewPos === p.id ? '#2B2620' : '#C4B59A',
+                borderColor: viewPos === p.id ? '#3DA9F4' : '#D5E2EC',
                 borderRadius: 999,
-                background: viewPos === p.id ? '#2B2620' : 'transparent',
-                color: viewPos === p.id ? '#F5EFE4' : '#6B5A44',
+                background: viewPos === p.id ? '#3DA9F4' : 'transparent',
+                color: viewPos === p.id ? '#FFFFFF' : '#5E6E7C',
                 fontSize: 10, letterSpacing: '0.08em', cursor: 'pointer',
                 whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.12s',
               }}
@@ -223,7 +223,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               {p.label}
             </button>
           ))}
-          <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
+          <div style={{ width: 1, background: '#D5E2EC', margin: '2px 4px', flexShrink: 0 }} />
           {THEMES.map(t => (
             <button
               key={t.id}
@@ -231,10 +231,10 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               style={{
                 padding: '3px 11px',
                 border: '1px solid',
-                borderColor: theme === t.id ? '#2B2620' : '#C4B59A',
+                borderColor: theme === t.id ? '#3DA9F4' : '#D5E2EC',
                 borderRadius: 999,
-                background: theme === t.id ? '#2B2620' : 'transparent',
-                color: theme === t.id ? '#F5EFE4' : '#6B5A44',
+                background: theme === t.id ? '#3DA9F4' : 'transparent',
+                color: theme === t.id ? '#FFFFFF' : '#5E6E7C',
                 fontSize: 11,
                 letterSpacing: '0.07em',
                 cursor: 'pointer',
@@ -251,7 +251,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
 
       {/* ── グリッド ── */}
       {filtered.length === 0 ? (
-        <div style={{ padding: '60px 16px', textAlign: 'center', color: '#8B7355', fontSize: 13 }}>
+        <div style={{ padding: '60px 16px', textAlign: 'center', color: '#7A8A99', fontSize: 13 }}>
           該当するデザインがありません
         </div>
       ) : (
@@ -301,27 +301,27 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             {/* modal header */}
             <div style={{
               padding: '14px 18px',
-              borderBottom: '1px solid #D4C5A9',
+              borderBottom: '1px solid #D5E2EC',
               display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
             }}>
               <div>
-                <div style={{ fontSize: 10, color: '#8B7355', letterSpacing: '0.1em', marginBottom: 2 }}>
+                <div style={{ fontSize: 10, color: '#7A8A99', letterSpacing: '0.1em', marginBottom: 2 }}>
                   {modal.design.id} · {THEME_JP[modal.design.theme] ?? modal.design.theme}
                 </div>
-                <div style={{ fontFamily: 'var(--font-fraunces)', fontSize: 22, fontWeight: 400 }}>
+                <div style={{ fontFamily: 'var(--font-rounded)', fontSize: 22, fontWeight: 400 }}>
                   {modal.design.name}
                 </div>
               </div>
               <button
                 onClick={() => setModal(null)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B7355', padding: 4, marginTop: -2 }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A8A99', padding: 4, marginTop: -2 }}
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* modal image */}
-            <div style={{ position: 'relative', aspectRatio: '1', background: '#E0D6C8', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', aspectRatio: '1', background: '#EEF3F7', overflow: 'hidden' }}>
               <img
                 src={modal.pos <= mockupCount(modal.design.id)
                   ? mockupSrc(modal.design, modal.pos)
@@ -346,7 +346,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
                     onClick={() => setModal(m => m ? { ...m, pos: i + 1 } : null)}
                     style={{
                       width: 6, height: 6, borderRadius: '50%', border: 'none',
-                      background: modal.pos === i + 1 ? '#2B2620' : 'rgba(43,38,32,0.28)',
+                      background: modal.pos === i + 1 ? '#3DA9F4' : 'rgba(43,38,32,0.28)',
                       cursor: 'pointer', padding: 0,
                       transition: 'background 0.12s',
                     }}
@@ -360,7 +360,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
               padding: '12px 18px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
-              <span style={{ fontSize: 11, color: '#8B7355' }}>
+              <span style={{ fontSize: 11, color: '#7A8A99' }}>
                 {modal.pos > mockupCount(modal.design.id)
                   ? `${modal.pos} / ${totalPages(modal.design.id)} · パターン`
                   : `${modal.pos} / ${totalPages(modal.design.id)}`}
@@ -372,7 +372,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
                   rel="noopener noreferrer"
                   style={{
                     display: 'flex', alignItems: 'center', gap: 4,
-                    fontSize: 11, color: '#8B7355', textDecoration: 'none',
+                    fontSize: 11, color: '#7A8A99', textDecoration: 'none',
                     letterSpacing: '0.06em',
                   }}
                 >
@@ -431,7 +431,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
       onMouseLeave={() => setHovered(false)}
       style={{
         background: '#FFFFFF',
-        border: `1px solid ${reviewColor ?? '#D4C5A9'}`,
+        border: `1px solid ${reviewColor ?? '#D5E2EC'}`,
         borderRadius: 8,
         overflow: 'hidden',
         cursor: 'pointer',
@@ -442,7 +442,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
       }}
     >
       {/* image */}
-      <div style={{ aspectRatio: !isTextile && imgStage === 0 ? '5/6' : '1', background: '#E0D6C8', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: !isTextile && imgStage === 0 ? '5/6' : '1', background: '#EEF3F7', position: 'relative', overflow: 'hidden' }}>
         {imgSrc ? (
           <img
             key={`${design.id}-${imgStage}`}
@@ -457,7 +457,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
             width: '100%', height: '100%',
             display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
-            color: '#C4B59A', gap: 6,
+            color: '#D5E2EC', gap: 6,
           }}>
             <span style={{ fontSize: 28, lineHeight: 1 }}>◻</span>
             <span style={{ fontSize: 11, letterSpacing: '0.06em' }}>{design.id}</span>
@@ -477,7 +477,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
 
       {/* info */}
       <div style={{ padding: '9px 11px 10px' }}>
-        <div style={{ fontSize: 10, color: '#8B7355', letterSpacing: '0.08em', marginBottom: 2 }}>
+        <div style={{ fontSize: 10, color: '#7A8A99', letterSpacing: '0.08em', marginBottom: 2 }}>
           {design.id} · {THEME_JP[design.theme] ?? design.theme}
         </div>
         <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.3, marginBottom: 6 }}>
@@ -554,13 +554,13 @@ function navBtnStyle(side: 'left' | 'right'): React.CSSProperties {
     [side]: 10,
     top: '50%',
     transform: 'translateY(-50%)',
-    background: 'rgba(245,239,228,0.88)',
+    background: 'rgba(255,255,255,0.9)',
     border: 'none',
     borderRadius: '50%',
     width: 34, height: 34,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer',
-    color: '#2B2620',
+    color: '#23303A',
     boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
   };
 }

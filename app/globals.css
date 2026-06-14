@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --font-fraunces: 'Fraunces', Georgia, serif;
-  --font-inter: 'Inter', -apple-system, sans-serif;
+  /* ロゴ基調のカラーパレット */
+  --brand: #3DA9F4;        /* ロゴのスカイブルー */
+  --brand-dark: #1E8FE0;
+  --ink: #23303A;          /* 本文（クールな濃色） */
 }
 
 body {
-  font-family: var(--font-inter);
+  font-family: var(--font-rounded), 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', 'Inter', -apple-system, sans-serif;
   background: #FFFFFF;
-  color: #2B2620;
+  color: #23303A;
   margin: 0;
   padding: 0;
 }
