@@ -1,5 +1,12 @@
-import PatternTracker from '@/components/PatternTracker';
+import type { Metadata } from 'next';
+import CatalogClient from './catalog/CatalogClient';
+import { getPos02Designs } from '@/lib/pos02';
+
+export const metadata: Metadata = {
+  title: 'COCOcase Catalog',
+  description: 'AirPods Pro 3 ケース デザインカタログ',
+};
 
 export default function Home() {
-  return <PatternTracker />;
+  return <CatalogClient pos02Designs={getPos02Designs()} />;
 }

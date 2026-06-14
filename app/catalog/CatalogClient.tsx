@@ -118,22 +118,12 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
       }}>
         <div>
           <h1 style={{ margin: 0, lineHeight: 0 }}>
-            <img src="/logo.png" alt="COCO case" style={{ height: 36, width: 'auto', display: 'block' }} />
+            <img src="/logo.png" alt="COCO case" style={{ height: 28, width: 'auto', display: 'block' }} />
           </h1>
           <p style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.12em', marginTop: 3 }}>
             AIRPODS PRO 3 CASE — {DESIGNS.length} DESIGNS
           </p>
         </div>
-        <a href="/review" style={{
-          padding: '7px 14px',
-          background: '#2B2620', color: '#F5EFE4',
-          border: 'none', borderRadius: 999,
-          fontSize: 11, letterSpacing: '0.08em',
-          textDecoration: 'none', whiteSpace: 'nowrap',
-          display: 'flex', alignItems: 'center', gap: 5,
-        }}>
-          ✓✗ REVIEW
-        </a>
       </header>
 
       {/* ── フィルター ── */}
