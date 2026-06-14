@@ -128,6 +128,20 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
         }}>
           <span style={{ letterSpacing: '0.06em' }}>社内レビューモード</span>
           <span style={{ opacity: 0.6 }}>採用/不採用を編集できます（卸先ビューには採用のみ表示）</span>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: 'auto',
+              padding: '3px 12px', borderRadius: 999,
+              border: '1px solid #6B5A44', background: '#3A3530',
+              color: '#F5EFE4', textDecoration: 'none', whiteSpace: 'nowrap',
+              fontSize: 11,
+            }}
+          >
+            卸先ビューをプレビュー ↗
+          </a>
         </div>
       )}
 
