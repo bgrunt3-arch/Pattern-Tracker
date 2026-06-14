@@ -196,9 +196,9 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           ))}
           <div style={{ width: 1, background: '#D4C5A9', margin: '2px 4px', flexShrink: 0 }} />
           {([
-            { id: 1, label: 'POS1' },
-            { id: 2, label: 'POS2' },
-            { id: 3, label: 'TEXTILE' },
+            { id: 1, label: '蓋開き' },
+            { id: 2, label: '蓋閉じ' },
+            { id: 3, label: 'テキスタイル' },
           ] as const).map(p => (
             <button
               key={p.id}
