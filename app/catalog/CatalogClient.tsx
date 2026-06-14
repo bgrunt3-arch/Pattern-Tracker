@@ -120,7 +120,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           <h1 style={{ margin: 0, lineHeight: 0 }}>
             <img src="/logo.png" alt="COCO case" style={{ height: 28, width: 'auto', display: 'block' }} />
           </h1>
-          <p style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.12em', marginTop: 3 }}>
+          <p style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.12em', marginTop: 10 }}>
             AIRPODS PRO 3 CASE — {DESIGNS.length} DESIGNS
           </p>
         </div>
