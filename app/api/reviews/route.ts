@@ -31,14 +31,7 @@ export async function GET() {
 }
 
 // PUT — 採用/不採用データを上書き保存（全マップ）
-// 卸先（読み取り専用）からの書き換えを防ぐため、REVIEW_PASSWORD 設定時は
-// x-review-key ヘッダーの一致を要求する。未設定時は許可（初期セットアップ用）。
 export async function PUT(req: Request) {
-  const pw = process.env.REVIEW_PASSWORD;
-  if (pw && req.headers.get('x-review-key') !== pw) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  }
-
   const redis = getRedis();
   if (!redis) {
     return NextResponse.json(

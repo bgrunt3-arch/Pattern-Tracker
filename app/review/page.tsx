@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// 社内レビュー用：全デザイン表示＋採用/不採用操作（書き込みは REVIEW_PASSWORD で保護）
+// 社内レビュー用：全デザイン表示＋採用/不採用操作
 export default function ReviewPage() {
   return <CatalogClient pos02Designs={getPos02Designs()} reviewMode />;
 }

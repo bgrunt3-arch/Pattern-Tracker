@@ -55,13 +55,10 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
   const [reviews, setReviews] = useState<ReviewMap>({});
   const [reviewFilter, setReviewFilter] = useState<'all' | 'adopted' | 'rejected' | 'pending'>('all');
   const [viewPos, setViewPos] = useState<1 | 2 | 3>(1);
-  // 社内レビューモードの書き込み用パスワード（localStorageに保持）
-  const [reviewKey, setReviewKey] = useState('');
 
   // URLパラメータからフィルター初期値を読む（社内レビューモードのみ）
   useEffect(() => {
     if (!reviewMode) return;
-    setReviewKey(localStorage.getItem('cococase-review-key') ?? '');
     const params = new URLSearchParams(window.location.search);
     const rv = params.get('review');
     if (rv === 'adopted' || rv === 'rejected' || rv === 'pending') {
@@ -100,14 +97,14 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
       else next[id] = decision;
       fetch('/api/reviews', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-review-key': reviewKey },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
       })
-        .then(r => { if (!r.ok) alert('保存に失敗しました（社内パスワードを確認してください）'); })
+        .then(r => { if (!r.ok) alert('保存に失敗しました'); })
         .catch(() => {});
       return next;
     });
-  }, [reviewKey]);
+  }, []);
 
   const openModal = (design: Design) => {
     setModal({ design, pos: 1 });
@@ -129,18 +126,8 @@ export default function CatalogClient({ pos02Designs = [], reviewMode = false }:
           padding: '6px 16px', fontSize: 11,
           display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
         }}>
-          <span style={{ letterSpacing: '0.06em' }}>🔒 社内レビューモード</span>
-          <input
-            type="password"
-            placeholder="社内パスワード"
-            value={reviewKey}
-            onChange={e => { setReviewKey(e.target.value); localStorage.setItem('cococase-review-key', e.target.value); }}
-            style={{
-              padding: '3px 10px', borderRadius: 999, border: '1px solid #6B5A44',
-              background: '#3A3530', color: '#F5EFE4', fontSize: 11, outline: 'none',
-            }}
-          />
-          <span style={{ opacity: 0.6 }}>採用/不採用の保存に必要</span>
+          <span style={{ letterSpacing: '0.06em' }}>社内レビューモード</span>
+          <span style={{ opacity: 0.6 }}>採用/不採用を編集できます（卸先ビューには採用のみ表示）</span>
         </div>
       )}
 
