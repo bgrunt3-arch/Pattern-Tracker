@@ -41,7 +41,8 @@ yarn-error.log*
 next-env.d.ts
 .env*.local
 
-# Mockup images: stored in Vercel Blob, not committed
+# フルサイズmockupはVercel Blob(private)に保存しコミットしない
 public/mockups/
 !public/mockups/.gitkeep
-public/mockup-thumbs/
+# 軽量サムネ(mockup-thumbs)は静的配信のためコミットする
+# （private Blobはコンテンツ取得が403で不可のため静的配信に切替）
