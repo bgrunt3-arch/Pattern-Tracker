@@ -428,7 +428,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: '#FDF8F0',
+        background: '#FFFFFF',
         border: `1px solid ${reviewColor ?? '#D4C5A9'}`,
         borderRadius: 8,
         overflow: 'hidden',

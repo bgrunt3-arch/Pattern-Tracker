@@ -232,7 +232,7 @@ export default function ReviewClient() {
               onTouchEnd={onTouchEnd}
               style={{
                 width: '100%', maxWidth: 420,
-                background: '#FDF8F0', border: '1px solid #D4C5A9',
+                background: '#FFFFFF', border: '1px solid #D4C5A9',
                 borderRadius: 16, overflow: 'hidden',
                 boxShadow: '0 8px 32px rgba(43,38,32,0.12)',
                 transform: swipeDir === 'left'
