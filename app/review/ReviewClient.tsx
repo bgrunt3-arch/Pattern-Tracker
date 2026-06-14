@@ -285,7 +285,7 @@ export default function ReviewClient() {
                   {current.name}
                 </div>
                 <div style={{ fontSize: 11, color: '#8B7355', letterSpacing: '0.06em' }}>
-                  {current.id} · {current.theme} · {current.source}
+                  {current.id} · {current.theme}{current.source !== 'burga' ? ` · ${current.source}` : ''}
                 </div>
               </div>
             </div>

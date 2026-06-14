@@ -310,7 +310,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
             }}>
               <div>
                 <div style={{ fontSize: 10, color: '#8B7355', letterSpacing: '0.1em', marginBottom: 2 }}>
-                  {modal.design.id} · {modal.design.theme.toUpperCase()} · {SOURCE_LABELS[modal.design.source]}
+                  {modal.design.id} · {modal.design.theme.toUpperCase()}{modal.design.source !== 'burga' ? ` · ${SOURCE_LABELS[modal.design.source]}` : ''}
                 </div>
                 <div style={{ fontFamily: 'var(--font-fraunces)', fontSize: 22, fontWeight: 400 }}>
                   {modal.design.name}
@@ -369,7 +369,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
                   ? `${modal.pos} / ${totalPages(modal.design.id)} · パターン`
                   : `${modal.pos} / ${totalPages(modal.design.id)}`}
               </span>
-              {modal.design.sourceUrl && (
+              {modal.design.sourceUrl && modal.design.source !== 'burga' && (
                 <a
                   href={modal.design.sourceUrl}
                   target="_blank"
@@ -488,14 +488,16 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
           {design.name}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{
-            fontSize: 10, color: '#8B7355',
-            background: '#EDE5D8', borderRadius: 4, padding: '1px 6px',
-            letterSpacing: '0.05em',
-          }}>
-            {SOURCE_LABELS[design.source]}
-          </span>
-          {design.sourceUrl && (
+          {design.source !== 'burga' && (
+            <span style={{
+              fontSize: 10, color: '#8B7355',
+              background: '#EDE5D8', borderRadius: 4, padding: '1px 6px',
+              letterSpacing: '0.05em',
+            }}>
+              {SOURCE_LABELS[design.source]}
+            </span>
+          )}
+          {design.sourceUrl && design.source !== 'burga' && (
             <a
               href={design.sourceUrl}
               target="_blank"

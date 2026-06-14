@@ -159,7 +159,7 @@ function buildThemePages(web = false): string {
 
       const namesHTML = chunk.map(d => {
         // グループ化されているなら個別のリンク/refは省略
-        const hasLink = !grouped && !!d.sourceUrl;
+        const hasLink = !grouped && !!d.sourceUrl && d.source !== "burga";
         const brandLabel = SOURCE_LABELS[d.source];
         const nameEl = hasLink
           ? `<a class="name-label name-label-link" href="${d.sourceUrl}" target="_blank" rel="noopener">${d.name}<span class="name-ext">${brandLabel} ↗</span></a>`
@@ -179,11 +179,11 @@ function buildThemePages(web = false): string {
         ? `${designs.length} DESIGNS${pageLabel}`
         : `CONTINUED${pageLabel}`;
 
-      // グループ化チャンクは「ref: 商品名 BURGA ↗」をヘッダー右側に表示
+      // グループ化チャンクは「ref: 商品名」をヘッダー右側に表示
       let headerMeta: string;
       if (grouped && first) {
         const brandLabel = SOURCE_LABELS[first.source];
-        const refLink = first.sourceUrl
+        const refLink = first.sourceUrl && first.source !== "burga"
           ? `<a class="header-ref" href="${first.sourceUrl}" target="_blank" rel="noopener">ref: ${first.sourceRef} <span class="name-ext">${brandLabel} ↗</span></a>`
           : `<span class="header-ref">ref: ${first.sourceRef}</span>`;
         headerMeta = `${refLink}<span class="header-count">${countMeta}</span>`;
@@ -491,12 +491,6 @@ function buildContactPage(pageNum: number): string {
             · Google Gemini 2.5 Flash Image<br>
             · Microsoft Designer<br>
             · Photopea + BetterMockups
-          </div>
-        </div>
-        <div class="contact-section">
-          <div class="contact-label">REFERENCE</div>
-          <div class="contact-value">
-            · BURGA (burga.jp / burga.com)
           </div>
         </div>
       </div>
@@ -933,7 +927,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
       gap: 4pt;
     }
 
-    /* ─── BURGAリンク（名前リスト） ─── */
+    /* ─── 参照リンク（名前リスト） ─── */
     a.name-label-link {
       color: #2B2620;
       text-decoration: none;
@@ -1110,7 +1104,7 @@ function buildHTML(manualSections: ManualSection[], web = false): string {
     </div>
     <div class="note-body">
       <div class="note-text">
-        BURGAを参考に、COCOcase AirPods Pro 3ケースの<br>
+        COCOcase AirPods Pro 3ケースの<br>
         デザイン方向性として200パターン＋オリジナルを<br>
         ご提案いたします。<br><br>
         テキスタイル感を重視し、<br>
