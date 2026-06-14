@@ -503,8 +503,8 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
                   padding: '4px 0',
                   border: '1px solid #B85C5C',
                   borderRadius: 6,
-                  background: 'transparent',
-                  color: '#B85C5C',
+                  background: '#B85C5C',
+                  color: '#fff',
                   fontSize: 13, cursor: 'pointer',
                   transition: 'background 0.12s, color 0.12s',
                 }}
@@ -518,8 +518,8 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
                   padding: '4px 0',
                   border: '1px solid #4A7C59',
                   borderRadius: 6,
-                  background: 'transparent',
-                  color: '#4A7C59',
+                  background: '#4A7C59',
+                  color: '#fff',
                   fontSize: 13, cursor: 'pointer',
                   transition: 'background 0.12s, color 0.12s',
                 }}
