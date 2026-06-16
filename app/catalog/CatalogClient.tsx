@@ -179,7 +179,7 @@ export default function CatalogClient({ pos02Designs = [] }: { pos02Designs?: st
           {/* レビューフィルター */}
           {([
             { id: 'all', label: 'ALL', color: undefined },
-            { id: 'adopted', label: '✓ 採用', color: '#2DBE82' },
+            { id: 'adopted', label: '✓ 採用', color: '#3DA9F4' },
             { id: 'pending', label: '– 未', color: '#7A8A99' },
             { id: 'rejected', label: '✗ 不採用', color: '#F76C6C' },
           ] as const).map(rf => (
@@ -404,7 +404,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
   const [imgStage, setImgStage] = useState<ImgStage>(0);
   const [hovered, setHovered] = useState(false);
 
-  const reviewColor = review === 'adopted' ? '#2DBE82' : review === 'rejected' ? '#F76C6C' : undefined;
+  const reviewColor = review === 'adopted' ? '#3DA9F4' : review === 'rejected' ? '#F76C6C' : undefined;
 
   const isTextile = viewPos === 3;
   const effectivePos = viewPos === 2 ? (pos2Thumb ?? (hasPos02 ? 2 : 1)) : 1;
@@ -466,7 +466,7 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
         {review && (
           <div style={{
             position: 'absolute', top: 7, left: 7,
-            background: review === 'adopted' ? '#2DBE82' : '#F76C6C',
+            background: review === 'adopted' ? '#3DA9F4' : '#F76C6C',
             color: '#fff',
             fontSize: 10, padding: '2px 6px', borderRadius: 8,
           }}>
@@ -495,10 +495,10 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
               style={{
                 flex: 1,
                 padding: '4px 0',
-                border: `1px solid ${review === 'adopted' ? '#2DBE82' : '#F76C6C'}`,
+                border: `1px solid ${review === 'adopted' ? '#3DA9F4' : '#F76C6C'}`,
                 borderRadius: 12,
-                background: review === 'adopted' ? 'rgba(45,190,130,0.14)' : 'rgba(247,108,108,0.14)',
-                color: review === 'adopted' ? '#2DBE82' : '#F76C6C',
+                background: review === 'adopted' ? 'rgba(61,169,244,0.14)' : 'rgba(247,108,108,0.14)',
+                color: review === 'adopted' ? '#3DA9F4' : '#F76C6C',
                 fontSize: 10, letterSpacing: '0.06em', cursor: 'pointer',
                 transition: 'opacity 0.12s',
               }}
@@ -528,9 +528,9 @@ function DesignCard({ design, review, onReview, onClick, viewPos, hasPos02, pos2
                 style={{
                   flex: 1,
                   padding: '4px 0',
-                  border: '1px solid #2DBE82',
+                  border: '1px solid #3DA9F4',
                   borderRadius: 12,
-                  background: '#2DBE82',
+                  background: '#3DA9F4',
                   color: '#fff',
                   fontSize: 13, cursor: 'pointer',
                   transition: 'background 0.12s, color 0.12s',
